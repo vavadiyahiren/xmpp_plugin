@@ -21,7 +21,6 @@ class FlutterXmpp {
     await _channel.invokeMethod('logout');
   }
 
-
   //conversationType: 0 = normal
   //conversationType: 1 = group
   Future<String> sendMessage(String toJid, String body, String id) async {
@@ -30,27 +29,13 @@ class FlutterXmpp {
       "body": body,
       "id": id,
     };
-    printLogForMethodCall('send_message', params);
     final String status = await _channel.invokeMethod('send_message', params);
     return status;
   }
 
   Future<String> sendMessageWithType(
-    String toJid,
-    String body,
-    String id,
-    String? mediaURL,
-    int bubbleType,
-  ) async {
-    final params = {
-      "to_jid": toJid,
-      "body": body,
-      "id": id,
-      "media_url": mediaURL,
-      "bubble_type": bubbleType
-    };
-    print("Image message is:-->> 444 ${mediaURL}, &7 body is:-->>>$body");
-    printLogForMethodCall('send_message', params);
+      String toJid, String body, String id) async {
+    final params = {"to_jid": toJid, "body": body, "id": id};
     final String status = await _channel.invokeMethod('send_message', params);
     return status;
   }
@@ -61,43 +46,17 @@ class FlutterXmpp {
       "body": body,
       "id": id,
     };
-    printLogForMethodCall('send_group_message', params);
     final String status =
         await _channel.invokeMethod('send_group_message', params);
     return status;
   }
 
   Future<String> sendGroupMessageWithType(
-    String toJid,
-    String body,
-    String id,
-    String? mediaURL,
-    int bubbleType,
-  ) async {
-    final params = {
-      "to_jid": toJid,
-      "body": body,
-      "id": id,
-      "media_url": mediaURL,
-      "bubble_type": bubbleType
-    };
-    printLogForMethodCall('send_group_message', params);
+      String toJid, String body, String id) async {
+    final params = {"to_jid": toJid, "body": body, "id": id};
     final String status =
         await _channel.invokeMethod('send_group_message', params);
     return status;
-  }
-
-  Future<String> readMessage(String toJid, String id) async {
-    final params = {"to_jid": toJid, "id": id};
-    printLogForMethodCall('read_message', params);
-    final String status = await _channel.invokeMethod('read_message', params);
-    return status;
-  }
-
-  Future<String> currentState() async {
-    printLogForMethodCall('current_state', {});
-    final String state = await _channel.invokeMethod('current_state');
-    return state;
   }
 
   Future<void> start(void Function(dynamic) _onEvent, Function _onError) async {
@@ -121,7 +80,6 @@ class FlutterXmpp {
   }
 
   void printLogForMethodCall(String methodName, dynamic params) {
-    log(
-        'call method to app from flutter methodName: $methodName: params: $params');
+    log('call method to app from flutter methodName: $methodName: params: $params');
   }
 }
