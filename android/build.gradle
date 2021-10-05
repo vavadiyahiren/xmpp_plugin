@@ -1,0 +1,66 @@
+group 'org.xrstudio.xmpp.flutter_xmpp'
+version '1.0-SNAPSHOT'
+
+buildscript {
+    ext.kotlin_version = '1.3.72'
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+android {
+    compileSdkVersion 29
+
+    defaultConfig {
+        minSdkVersion 19
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+}
+
+ext {
+    smackVersion = '4.3.4'
+}
+
+configurations {
+    all*.exclude group: 'xpp3', module: 'xpp3'
+}
+
+dependencies {
+
+    implementation "org.igniterealtime.smack:smack-tcp:$smackVersion"
+    implementation "org.igniterealtime.smack:smack-experimental:$smackVersion"
+    implementation "org.igniterealtime.smack:smack-android:$smackVersion"
+    implementation "org.igniterealtime.smack:smack-im:$smackVersion"
+    implementation "org.igniterealtime.smack:smack-extensions:$smackVersion"
+    implementation 'com.android.support:support-annotations:28.0.0'
+    implementation 'com.amazonaws:aws-android-sdk-core:2.9.1'
+    implementation 'com.amazonaws:aws-android-sdk-cognito:2.9.1'
+    implementation 'com.amazonaws:aws-android-sdk-s3:2.9.1'
+    implementation 'com.amazonaws:aws-android-sdk-ddb:2.9.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+}
+repositories {
+    mavenCentral()
+}
+
+
+
