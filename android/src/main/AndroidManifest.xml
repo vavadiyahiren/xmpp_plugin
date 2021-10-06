@@ -1,0 +1,12 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+  package="org.xrstudio.xmpp">
+
+    <application>
+
+        <service android:name=".flutter_xmpp.FlutterXmppConnectionService"
+            android:enabled="true"
+            android:exported="false"/>
+
+    </application>
+
+</manifest>
