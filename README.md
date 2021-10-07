@@ -10,17 +10,17 @@ final param = {
       "port": "5222"
 };
 
-FlutterXmpp xmppConnection = FlutterXmpp(param);
+XmppConnection xmppConnection = XmppConnection(param);
 
-await flutterXmpp.start(_onReceiveMessage, _onError);
-await flutterXmpp.login();
+await xmppConnection.start(_onReceiveMessage, _onError);
+await xmppConnection.login();
 
 ```
 
 2. Send message to one-one chat
 
 ```
-await flutterXmpp.sendMessageWithType("xyz@domain", "Hi", "MSGID");
+await xmppConnection.sendMessageWithType("xyz@domain", "Hi", "MSGID");
 ```
 
 3. Receive message from server
@@ -34,10 +34,10 @@ Future _onReceiveMessage(dynamic event) async {
 4. Disconnect the xmppConnection
 
 ```
-flutterXmpp.logout();
+xmppConnection.logout();
 ```
 
-Next things to be added
+# To be Added
 
  - Group chat
  - MAM
