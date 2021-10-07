@@ -1,6 +1,32 @@
 # xmpp_plugin
 
-TODO : Need to add documentations
+1. Connect to the xmpp server
+
+final param = {
+      "user_jid":"jid/resource",
+      "password": "password",
+      "host": "xmpphost",
+      "port": "5222"
+};
+
+FlutterXmpp xmppConnection = FlutterXmpp(param);
+
+await flutterXmpp.start(_onReceiveMessage, _onError);
+await flutterXmpp.login();
+
+2. Send message to one-one chat
+
+await flutterXmpp.sendMessageWithType(toJid, body, msgId);
+
+3. Receive message from server
+
+Future _onReceiveMessage(dynamic event) async {
+       // TODO : Handle the receive event
+}
+
+4. Disconnect the xmppConnection
+
+flutterXmpp.logout();
 
 Next things to be added
 
