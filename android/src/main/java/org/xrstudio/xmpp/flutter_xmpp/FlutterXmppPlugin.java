@@ -167,7 +167,6 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
         }
     }
 
-    // ****************************************
     // Handles the call invocation from the flutter plugin
     @Override
     public void onMethodCall(MethodCall call, Result result) {

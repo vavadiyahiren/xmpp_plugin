@@ -103,9 +103,11 @@ public class FlutterXmppConnection implements ConnectionListener {
         XMPPTCPConnectionConfiguration.Builder conf = XMPPTCPConnectionConfiguration.builder();
         Log.d("loginTest", "connect 0");
         conf.setXmppDomain(mServiceName);
+        // Check if the Host address is the ip then set up host and host address.
         if (validIP(mHost)) {
             InetAddress addr = InetAddress.getByName(mHost);
             conf.setHostAddress(addr);
+            conf.setHost(mHost);
         } else {
             conf.setHost(mHost);
         }
