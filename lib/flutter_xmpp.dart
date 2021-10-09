@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:developer';
 
-class FlutterXmpp {
+class XmppConnection {
   static const MethodChannel _channel = MethodChannel('flutter_xmpp/method');
   static const EventChannel _eventChannel = EventChannel('flutter_xmpp/stream');
   static late StreamSubscription streamGetMsg;
 
   dynamic auth;
 
-  FlutterXmpp(this.auth);
+  XmppConnection(this.auth);
 
   Future<void> login() async {
     print("futurelogin${auth}");

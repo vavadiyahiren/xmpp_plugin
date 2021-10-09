@@ -16,61 +16,15 @@ extension XMPPController {
         return vChatRoomName
     }
     
-    func getStanza_BubbleType(_ BubbleType : String) -> XMLElement {
-        let elements_BUBBLE: XMLElement = XMLElement.init(name: eleBUBBLE.ELEMENT, xmlns: eleBUBBLE.NAMESPACE)
-        elements_BUBBLE.addChild(XMLElement.init(name: eleBUBBLE.Bubble, stringValue: BubbleType))
-        return elements_BUBBLE
-    }
-    
-    func getStanza_Time(_ Time : String) -> XMLElement {
-        let elements_TIME: XMLElement = XMLElement.init(name: eleTIME.ELEMENT, xmlns: eleTIME.NAMESPACE)
-        elements_TIME.addChild(XMLElement.init(name: eleTIME.Time, stringValue: Time))
-        return elements_TIME
-    }
-    
-    //MARK:- Send Message (Singal)
-    func sendMessage( messageBody:String, reciverJID:String, messageId: String, MessageType : String, vBUBBLE : Int16) {
-        let vTIME : String = getTimeStamp().description
+    // This method handles sending the message to one-one chat
+    func sendMessage(messageBody:String, reciverJID:String, messageId: String, withStrem : XMPPStream) {
         let vJid : XMPPJID? = XMPPJID(string: reciverJID)
         
-        var vChatType : String = ""
-        switch MessageType.trim() {
-        case "1":
-            vChatType = xmppChatType.GROUPCHAT
-            break
-            
-        case "0":
-            vChatType = xmppChatType.CHAT
-            break
-            
-        default:
-            break
-        }
-        
-        self.xmppMessage = XMPPMessage.init(type: vChatType, to: vJid)
-        self.xmppMessage.addBody(messageBody)
-        self.xmppMessage.addAttribute(withName: xmppConstants.ID, stringValue: messageId)
-        
-        //BUBBLE
-        self.xmppMessage.addChild(self.getStanza_BubbleType(vBUBBLE.description))
-        
-        //TIME
-        self.xmppMessage.addChild(self.getStanza_Time(vTIME))
-        
-        self.xmppMessage.addReceiptRequest()
-        
-        self.xmppStream.send(self.xmppMessage)
+        let xmppMessage = XMPPMessage.init(type: "chat", to: vJid)
+        xmppMessage.addAttribute(withName: "xmlns", stringValue: "jabber:client")
+        xmppMessage.addAttribute(withName: "id", stringValue: messageId)
+        xmppMessage.addBody(messageBody)
+        xmppMessage.addReceiptRequest()
+        withStrem.send(xmppMessage)
     }
-}
-
-//MARK:- Struct's
-struct eleBUBBLE {
-    static let ELEMENT : String = "BUBBLE"
-    static let NAMESPACE : String = "urn:xmpp:bubble"
-    static let Bubble : String = "Bubble"
-}
-struct eleTIME {
-    static let ELEMENT : String = "TIME"
-    static let NAMESPACE : String = "urn:xmpp:time"
-    static let Time : String = "Time"
 }
