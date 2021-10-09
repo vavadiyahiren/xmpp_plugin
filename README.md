@@ -2,6 +2,7 @@
 
 1. Connect to the xmpp server
 
+```
 final param = {
       "user_jid":"jid/resource",
       "password": "password",
@@ -14,19 +15,27 @@ XmppConnection xmppConnection = XmppConnection(param);
 await xmppConnection.start(_onReceiveMessage, _onError);
 await xmppConnection.login();
 
+```
+
 2. Send message to one-one chat
 
-await xmppConnection.sendMessageWithType(toJid, body, msgId);
+```
+await xmppConnection.sendMessageWithType("xyz@domain", "Hi", "MSGID");
+```
 
 3. Receive message from server
 
+```
 Future _onReceiveMessage(dynamic event) async {
        // TODO : Handle the receive event
 }
+```
 
 4. Disconnect the xmppConnection
 
+```
 xmppConnection.logout();
+```
 
 # To be Added
 
