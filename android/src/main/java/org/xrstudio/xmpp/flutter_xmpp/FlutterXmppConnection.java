@@ -103,13 +103,19 @@ public class FlutterXmppConnection implements ConnectionListener {
         XMPPTCPConnectionConfiguration.Builder conf = XMPPTCPConnectionConfiguration.builder();
         Log.d("loginTest", "connect 0");
         conf.setXmppDomain(mServiceName);
+
         // Check if the Host address is the ip then set up host and host address.
         if (validIP(mHost)) {
+
+            Log.d("validhost", "connecting via ip :"+validIP(mHost));
+
             InetAddress addr = InetAddress.getByName(mHost);
             conf.setHostAddress(addr);
             conf.setHost(mHost);
         } else {
             conf.setHost(mHost);
+
+
         }
         if (mPort != 0) {
             conf.setPort(mPort);
@@ -117,20 +123,8 @@ public class FlutterXmppConnection implements ConnectionListener {
 
         conf.setUsernameAndPassword(mUsername, mPassword);
         conf.setResource(mResource);
-        conf.setKeystoreType(null);
-        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.ifpossible);
         conf.setCompressionEnabled(true);
 
-
-        Log.d("loginTest", "connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + mPort + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource);
-
-//        if (FlutterXmppPlugin.DEBUG) {
-//            Log.d(TAG, "Username : " + mUsername);
-//            Log.d(TAG, "Password : " + mPassword);
-//            Log.d(TAG, "Server : " + mServiceName);
-//            Log.d(TAG, "Port : " + mPort.toString());
-//
-//        }
 
         SSLContext context = null;
         try {
@@ -142,6 +136,12 @@ public class FlutterXmppConnection implements ConnectionListener {
             e.printStackTrace();
         }
         conf.setCustomSSLContext(context);
+
+        conf.setKeystoreType(null);
+        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+
+        Log.d("loginTest", "connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + mPort + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource);
+
 
         //Set up the ui thread broadcast message receiver.
 
