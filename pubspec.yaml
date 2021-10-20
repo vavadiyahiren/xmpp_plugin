@@ -1,5 +1,5 @@
-name: flutter_xmpp
-description: A new Flutter project.
+name: xmpp_plugin
+description: Flutter xmpp plugin developed with help of native channel using smack/xmppframework.
 version: 0.0.1
 homepage:
 
