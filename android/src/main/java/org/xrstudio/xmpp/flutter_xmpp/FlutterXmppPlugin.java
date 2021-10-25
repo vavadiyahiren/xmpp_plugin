@@ -122,7 +122,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
     }
 
     // Sending a message to one-one chat.
-    public static void send_message(String body, String toUser, String msgId) {
+    public static void send_message(String body, String toUser, String msgId, String method) {
 
         if (FlutterXmppConnectionService.getState().equals(FlutterXmppConnection.ConnectionState.CONNECTED)) {
 
