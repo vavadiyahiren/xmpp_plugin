@@ -124,15 +124,23 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
     // Sending a message to one-one chat.
     public static void send_message(String body, String toUser, String msgId) {
 
-
         if (FlutterXmppConnectionService.getState().equals(FlutterXmppConnection.ConnectionState.CONNECTED)) {
 
-            Intent intent = new Intent(FlutterXmppConnectionService.SEND_MESSAGE);
-            intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY, body);
-            intent.putExtra(FlutterXmppConnectionService.BUNDLE_TO, toUser);
-            intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS, msgId);
+            if (method.equals("send_group_message")) {
+                Intent intent = new Intent(FlutterXmppConnectionService.GROUP_SEND_MESSAGE);
+                intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY, body);
+                intent.putExtra(FlutterXmppConnectionService.BUNDLE_TO, toUser);
+                intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS, msgId);
 
-            activity.sendBroadcast(intent);
+                activity.sendBroadcast(intent);
+            } else {
+                Intent intent = new Intent(FlutterXmppConnectionService.SEND_MESSAGE);
+                intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY, body);
+                intent.putExtra(FlutterXmppConnectionService.BUNDLE_TO, toUser);
+                intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS, msgId);
+
+                activity.sendBroadcast(intent);
+            }
         } else {
             //TODO : handle connection failure events.
         }
@@ -182,7 +190,6 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             if (call.hasArgument("port")) {
                 this.port = Integer.parseInt(call.argument("port").toString());
             }
-            Log.d("loginTest", "onMethodCall 0");
             // Start authentication.
             doLogin();
 
@@ -195,7 +202,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
 
             result.success("SUCCESS");
 
-        } else if (call.method.equals("send_message")) {
+        } else if (call.method.equals("send_message") || call.method.equals("send_group_message")) {
 
             // Handle sending message.
 
@@ -207,12 +214,12 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             String body = call.argument("body");
             String id = call.argument("id");
 
-            send_message(body, to_jid, id);
+            send_message(body, to_jid, id, call.method);
 
             result.success("SUCCESS");
 
             // still development for group message
-        }   else if (call.method.equals("current_state")) {
+        } else if (call.method.equals("current_state")) {
             String state = "UNKNOWN";
             switch (FlutterXmppConnectionService.getState()) {
                 case CONNECTED:

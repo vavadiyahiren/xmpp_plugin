@@ -53,7 +53,6 @@ public class FlutterXmppConnection implements ConnectionListener {
     private BroadcastReceiver uiThreadMessageReceiver;//Receives messages from the ui thread.
 
     public FlutterXmppConnection(Context context, String jid_user, String password, String host, Integer port) {
-        Log.d("loginTest", "FlutterXmppConnection");
         if (FlutterXmppPlugin.DEBUG) {
             Log.d(TAG, "Connection Constructor called.");
         }
@@ -101,22 +100,23 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     public void connect() throws IOException, XMPPException, SmackException {
         XMPPTCPConnectionConfiguration.Builder conf = XMPPTCPConnectionConfiguration.builder();
-        Log.d("loginTest", "connect 0");
         conf.setXmppDomain(mServiceName);
 
         // Check if the Host address is the ip then set up host and host address.
         if (validIP(mHost)) {
 
-            Log.d("validhost", "connecting via ip :"+validIP(mHost));
+            Log.d("validhost", "connecting via ip :" + validIP(mHost));
 
             InetAddress addr = InetAddress.getByName(mHost);
             conf.setHostAddress(addr);
             conf.setHost(mHost);
         } else {
+
+            Log.d("validhost", "not valid host");
+
             conf.setHost(mHost);
-
-
         }
+
         if (mPort != 0) {
             conf.setPort(mPort);
         }
@@ -202,8 +202,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                         if (from.toLowerCase().contains("/")) {
                             contactJid = from.split("/")[0];
                             if (FlutterXmppPlugin.DEBUG) {
-                                Log.d(TAG, "The real jid is :" + contactJid);
-                                Log.d(TAG, "The message is from :" + from);
+                                Log.d(TAG, "The real jid is :" + contactJid + " || The message is from :" + from);
                             }
                         } else {
                             contactJid = from;
@@ -253,13 +252,13 @@ public class FlutterXmppConnection implements ConnectionListener {
 
                 //Check if the Intents purpose is to send the message.
                 String action = intent.getAction();
-                Log.d(TAG, "broadcast " + action);
 
-                if (action.equals(FlutterXmppConnectionService.SEND_MESSAGE)) {
+                if (action.equals(FlutterXmppConnectionService.SEND_MESSAGE) || action.equals(FlutterXmppConnectionService.GROUP_SEND_MESSAGE)) {
                     //Send the message.
                     sendMessage(intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY),
                             intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_TO),
-                            intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS));
+                            intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS),
+                            action.equals(FlutterXmppConnectionService.SEND_MESSAGE));
 
                 } else if (action.equals(FlutterXmppConnectionService.JOIN_GROUPS_MESSAGE)) {
 
@@ -279,20 +278,29 @@ public class FlutterXmppConnection implements ConnectionListener {
     }
 
 
-    private void sendMessage(String body, String toJid, String msgId) {
+    private void sendMessage(String body, String toJid, String msgId, boolean isDm) {
 
         try {
 
             Message xmppMessage = new Message();
             xmppMessage.setStanzaId(msgId);
-            xmppMessage.setTo(JidCreate.from(toJid));
 
             xmppMessage.setBody(body);
-            xmppMessage.setType(Message.Type.chat);
+            xmppMessage.setType(isDm ? Message.Type.chat : Message.Type.groupchat);
 
             DeliveryReceiptRequest deliveryReceiptRequest = new DeliveryReceiptRequest();
             xmppMessage.addExtension(deliveryReceiptRequest);
-            mConnection.sendStanza(xmppMessage);
+
+            if (isDm) {
+                xmppMessage.setTo(JidCreate.from(toJid));
+                mConnection.sendStanza(xmppMessage);
+            } else {
+                EntityBareJid jid = JidCreate.entityBareFrom(toJid);
+                xmppMessage.setTo(jid);
+                EntityBareJid mucJid = (EntityBareJid) JidCreate.bareFrom(toJid);
+                MultiUserChat muc = multiUserChatManager.getMultiUserChat(mucJid);
+                muc.sendMessage(xmppMessage);
+            }
 
             if (FlutterXmppPlugin.DEBUG) {
                 Log.d(TAG, "Sent message from :" + xmppMessage.toXML(null) + "  sent.");
@@ -326,8 +334,9 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     @Override
     public void connected(XMPPConnection connection) {
-        FlutterXmppConnectionService.sConnectionState = ConnectionState.CONNECTED;
         Log.d(TAG, "Connected Successfully");
+
+        FlutterXmppConnectionService.sConnectionState = ConnectionState.CONNECTED;
 
         //Bundle up the intent and send the broadcast.
         Intent intent = new Intent(FlutterXmppConnectionService.RECEIVE_MESSAGE);
@@ -342,11 +351,11 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     @Override
     public void authenticated(XMPPConnection connection, boolean resumed) {
+        Log.d(TAG, "Flutter Authenticated Successfully");
 
         multiUserChatManager = MultiUserChatManager.getInstanceFor(connection);
 
         FlutterXmppConnectionService.sConnectionState = ConnectionState.CONNECTED;
-        Log.d(TAG, "Flutter Authenticated Successfully");
 //        showContactListActivityWhenAuthenticated();
 
         //Bundle up the intent and send the broadcast.
@@ -362,8 +371,9 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     @Override
     public void connectionClosed() {
-        FlutterXmppConnectionService.sConnectionState = ConnectionState.DISCONNECTED;
         Log.d(TAG, "Connectionclosed()");
+
+        FlutterXmppConnectionService.sConnectionState = ConnectionState.DISCONNECTED;
 
         //Bundle up the intent and send the broadcast.
         Intent intent = new Intent(FlutterXmppConnectionService.RECEIVE_MESSAGE);
@@ -378,9 +388,9 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     @Override
     public void connectionClosedOnError(Exception e) {
-        e.printStackTrace();
-        FlutterXmppConnectionService.sConnectionState = ConnectionState.DISCONNECTED;
         Log.d(TAG, "ConnectionClosedOnError, error " + e.toString());
+
+        FlutterXmppConnectionService.sConnectionState = ConnectionState.DISCONNECTED;
 
         //Bundle up the intent and send the broadcast.
         Intent intent = new Intent(FlutterXmppConnectionService.RECEIVE_MESSAGE);
@@ -397,7 +407,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 
         try {
 
-            printLog("joinAllGroups: " + allGroupsIds);
+            printLog("joinAllGroups: size : " + allGroupsIds.size());
 
             for (String groupId : allGroupsIds) {
 
