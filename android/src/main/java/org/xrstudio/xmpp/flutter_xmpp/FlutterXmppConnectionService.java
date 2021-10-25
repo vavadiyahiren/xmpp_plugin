@@ -79,7 +79,6 @@ public class FlutterXmppConnectionService extends Service {
 
     private void initConnection() {
         try {
-            Log.d("loginTest", "initConnection");
             if (FlutterXmppPlugin.DEBUG) {
                 Log.d(TAG, "initConnection()");
             }
@@ -91,7 +90,6 @@ public class FlutterXmppConnectionService extends Service {
             mConnection.connect();
 
         } catch (IOException | SmackException | XMPPException e) {
-            Log.d("loginTest", "initConnection exception");
             if (FlutterXmppPlugin.DEBUG) {
                 Log.d(TAG, "Something went wrong while connecting ,make sure the credentials are right and try again");
             }
@@ -101,7 +99,6 @@ public class FlutterXmppConnectionService extends Service {
     }
 
     public void start() {
-        Log.d("loginTest", "start mActive: " + mActive);
         if (FlutterXmppPlugin.DEBUG) {
             Log.d(TAG, " Service Start() function called.");
         }
@@ -143,7 +140,6 @@ public class FlutterXmppConnectionService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("loginTest", "onStartCommand");
         if (FlutterXmppPlugin.DEBUG) {
             Log.d(TAG, "onStartCommand()");
         }
