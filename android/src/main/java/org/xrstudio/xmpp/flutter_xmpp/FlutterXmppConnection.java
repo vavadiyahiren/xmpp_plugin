@@ -138,7 +138,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         conf.setCustomSSLContext(context);
 
         conf.setKeystoreType(null);
-        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.ifpossible);
 
         Log.d("loginTest", "connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + mPort + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource);
 
