@@ -37,9 +37,21 @@ Future _onReceiveMessage(dynamic event) async {
 xmppConnection.logout();
 ```
 
+5. Joining/Creaging the MUC
+
+```
+xmppConnection.joinMucGroups(List<String> allGroupsId)
+
+```
+
+6. Sending group message 
+
+```
+await xmppConnection.sendGroupMessageWithType("xyz@conference.domain", "Hi", "MSGID");
+```
+
 # To be Added
 
- - Group chat
  - MAM
  - Presence
  - Last Activity
