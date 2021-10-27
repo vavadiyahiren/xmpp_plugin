@@ -53,35 +53,45 @@ class _MyAppState extends State<MyApp> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ElevatedButton(
-              onPressed: () async{
+              onPressed: () async {
                 await connect();
               },
               child: Text('Connect'),
             ),
-            SizedBox(height: 10,),
+            SizedBox(
+              height: 10,
+            ),
             ElevatedButton(
-              onPressed: () async{
-                await flutterXmpp.sendMessageWithType("xyz@domain", "Hi", "MSGID");
+              onPressed: () async {
+                await flutterXmpp.sendMessageWithType(
+                    "xyz@domain", "Hi", "MSGID");
               },
               child: Text('Send Message'),
             ),
-            SizedBox(height: 10,),
+            SizedBox(
+              height: 10,
+            ),
             ElevatedButton(
-              onPressed: () async{
+              onPressed: () async {
                 await joinMucGroups(['your groupID']);
               },
               child: Text('Join Group'),
             ),
-            SizedBox(height: 10,),
+            SizedBox(
+              height: 10,
+            ),
             ElevatedButton(
-              onPressed: () async{
-                await flutterXmpp.sendMessageWithType("xyz@domain", "Hi", "MSGID");
+              onPressed: () async {
+                await flutterXmpp.sendMessageWithType(
+                    "xyz@domain", "Hi", "MSGID");
               },
               child: Text('Send Group Message'),
             ),
-            SizedBox(height: 10,),
+            SizedBox(
+              height: 10,
+            ),
             ElevatedButton(
-              onPressed: () async{
+              onPressed: () async {
                 await disconnectXMPP();
               },
               child: Text('Log Out'),

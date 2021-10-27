@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:developer';
@@ -20,6 +19,7 @@ class XmppConnection {
   Future<void> logout() async {
     await _channel.invokeMethod('logout');
   }
+
   //conversationType: 0 = normal
   //conversationType: 1 = group
   Future<String> sendMessage(String toJid, String body, String id) async {
@@ -34,10 +34,10 @@ class XmppConnection {
   }
 
   Future<String> sendMessageWithType(
-      String toJid,
-      String body,
-      String id,
-      ) async {
+    String toJid,
+    String body,
+    String id,
+  ) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -56,15 +56,15 @@ class XmppConnection {
     };
     printLogForMethodCall('send_group_message', params);
     final String status =
-    await _channel.invokeMethod('send_group_message', params);
+        await _channel.invokeMethod('send_group_message', params);
     return status;
   }
 
   Future<String> sendGroupMessageWithType(
-      String toJid,
-      String body,
-      String id,
-      ) async {
+    String toJid,
+    String body,
+    String id,
+  ) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -72,7 +72,7 @@ class XmppConnection {
     };
     printLogForMethodCall('send_group_message', params);
     final String status =
-    await _channel.invokeMethod('send_group_message', params);
+        await _channel.invokeMethod('send_group_message', params);
     return status;
   }
 
@@ -110,7 +110,6 @@ class XmppConnection {
   }
 
   void printLogForMethodCall(String methodName, dynamic params) {
-    log(
-        'call method to app from flutter methodName: $methodName: params: $params');
+    log('call method to app from flutter methodName: $methodName: params: $params');
   }
 }
