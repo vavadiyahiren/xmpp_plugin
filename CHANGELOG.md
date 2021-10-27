@@ -16,4 +16,9 @@
 
 # 1.1.2
 
-* Filename Change under lib 
+* Filename Change under lib
+
+# 1.1.3
+
+* Added Group chat for ios
+* Updated example file
