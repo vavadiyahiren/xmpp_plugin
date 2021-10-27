@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-
-import 'package:flutter/services.dart';
+import 'package:flutter_xmpp/xmpp_plugin.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,33 +12,33 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  static late XmppConnection flutterXmpp;
 
-  @override
-  void initState() {
-    super.initState();
-    initPlatformState();
+  Future<void> connect() async {
+    final auth = {
+      "user_jid": "jid/resource",
+      "password": "password",
+      "host": "xmpphost",
+      "port": "5222"
+    };
+
+    flutterXmpp = XmppConnection(auth);
+    await flutterXmpp.start(_onReceiveMessage, _onError);
+    await flutterXmpp.login();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion =  'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
+  Future<void> _onReceiveMessage(dynamic event) async {
+    // TODO : Handle the receive event
+  }
 
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
+  void _onError(Object error) {
+    // TODO : Handle the Error event
+  }
 
-    setState(() {
-      _platformVersion = platformVersion;
-    });
+  Future<void> disconnectXMPP() async => await flutterXmpp.logout();
+
+  Future<void> joinMucGroups(List<String> allGroupsId) async {
+    await flutterXmpp.joinMucGroups(allGroupsId);
   }
 
   @override
@@ -47,10 +46,47 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('XMPP Plugin'),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () async{
+                await connect();
+              },
+              child: Text('Connect'),
+            ),
+            SizedBox(height: 10,),
+            ElevatedButton(
+              onPressed: () async{
+                await flutterXmpp.sendMessageWithType("xyz@domain", "Hi", "MSGID");
+              },
+              child: Text('Send Message'),
+            ),
+            SizedBox(height: 10,),
+            ElevatedButton(
+              onPressed: () async{
+                await joinMucGroups(['your groupID']);
+              },
+              child: Text('Join Group'),
+            ),
+            SizedBox(height: 10,),
+            ElevatedButton(
+              onPressed: () async{
+                await flutterXmpp.sendMessageWithType("xyz@domain", "Hi", "MSGID");
+              },
+              child: Text('Send Group Message'),
+            ),
+            SizedBox(height: 10,),
+            ElevatedButton(
+              onPressed: () async{
+                await disconnectXMPP();
+              },
+              child: Text('Log Out'),
+            ),
+          ],
         ),
       ),
     );
