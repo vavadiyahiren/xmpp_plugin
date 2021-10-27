@@ -65,8 +65,11 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
                 let toJid : String = (vData["to_jid"] as? String ?? "").trim()
                 let body : String = vData["body"] as? String ?? ""
                 let id : String = (vData["id"] as? String ?? "").trim()
-                
-                APP_DELEGATE.objXMPP.sendMessage(messageBody: body, reciverJID: toJid, messageId: id, withStrem: self.objXMPP.xmppStream)
+                self.objXMPP.sendMessage(messageBody: body,
+                                                 reciverJID: toJid,
+                                                 messageId: id,
+                                                 isGroup: false,
+                                                 withStrem: self.objXMPP.xmppStream)
                 result("SUCCESS")
             } else {
                 result("ERROR")
@@ -74,12 +77,15 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             break
             
         case "send_group_message":
-            
             if let vData = call.arguments as? [String : Any] {
                 let toJid : String = (vData["to_jid"] as? String ?? "").trim()
                 let body : String = vData["body"] as? String ?? ""
                 let id : String = (vData["id"] as? String ?? "").trim()
-                APP_DELEGATE.objXMPP.sendMessage(messageBody: body, reciverJID: toJid, messageId: id, withStrem: self.objXMPP.xmppStream)
+                self.objXMPP.sendMessage(messageBody: body,
+                                                 reciverJID: toJid,
+                                                 messageId: id,
+                                                 isGroup: true,
+                                                 withStrem: self.objXMPP.xmppStream)
                 result("SUCCESS")
             } else {
                 result("ERROR")
@@ -87,11 +93,10 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             break
             
         case "join_muc_groups":
-            
             if let vData = call.arguments as? [String : Any] {
                 let arrRooms = vData["all_groups_ids"] as? [String] ?? []
                 for vRoom  in arrRooms {
-                    APP_DELEGATE.objXMPP.createRoom(roomName: vRoom)
+                    APP_DELEGATE.objXMPP.createRoom(roomName: vRoom, withXMPP: self.objXMPP, withStrem: self.objXMPP.xmppStream)
                 }
                 result("SUCCESS")
             } else {
@@ -138,8 +143,6 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
     }
     
     @objc func notiObs_XMPPConnectionStatus(notfication: NSNotification) {
-        print("\(#function) | objXMPPConnStatus : \(objXMPPConnStatus)")
-        
         var dicDate : [String : Any] = [:]
         switch objXMPPConnStatus {
         case .Processing:
@@ -168,7 +171,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         if APP_DELEGATE.objEventData != nil {
             APP_DELEGATE.objEventData!(dicDate)
         } else {
-            print("Nil data of APP_DELEGATE.objEventData", dicDate)
+            print("\(#function) | Nil data of APP_DELEGATE.objEventData", dicDate)
         }
     }
     

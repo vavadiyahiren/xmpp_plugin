@@ -64,11 +64,11 @@ class XMPPController : NSObject {
                 try self.xmppStream.connect(withTimeout: vTimeout)
                 APP_DELEGATE.objXMPPConnStatus = .Processing
             } catch let error{
-                print("Error: connect() | error: \(error.localizedDescription)")
+                print("\(#function) | Error: connect() | error: \(error.localizedDescription)")
                 APP_DELEGATE.objXMPPConnStatus = .Failed
             }
         } else {
-            print("XMPPController | \(#function) | XMPPConnected - Yes")
+            print("\(#function) | XMPPConnected - Yes")
         }
     }
     
@@ -115,7 +115,8 @@ class XMPPController : NSObject {
 extension XMPPController: XMPPStreamDelegate, XMPPMUCLightDelegate, XMPPHTPPFileUploadDelegate  {
     //MARK:- stream Connect
     func xmppStreamDidConnect(_ stream: XMPPStream) {
-        if self.password.count == 0 {
+        if self.password.isEmpty {
+            print("\(#function) | XMPP User password is empty/nil.")
             return
         }
         do {
@@ -157,9 +158,10 @@ extension XMPPController : XMPPRoomDelegate {
         var vRoom : String = ""
         if let value = sender.myRoomJID?.bareJID.user {
             vRoom = "\(value)"
+            print("\(#function) | XMPPRoom Created | XMPPRoom-Name: \(vRoom)")
             self.joinRoom(roomName: vRoom, time: 0)
         } else {
-            print("\(#function) | roomName: \(vRoom) | Error")
+            print("\(#function) | XMPPRoom Creating Error | XMPPRoom-Name: \(vRoom)")
         }
     }
     
@@ -167,41 +169,65 @@ extension XMPPController : XMPPRoomDelegate {
         var vRoom : String = ""
         if let value = sender.myRoomJID?.bareJID.user {
             vRoom = "\(value)"
+            print("\(#function) | XMPPRoom Joined | XMPPRoom-Name: \(vRoom)")
         } else {
-            print("XMPPController | \(#function) | roomName: \(vRoom) | Error")
+            print("\(#function) | XMPPRoom Joining Error | XMPPRoom-Name: \(vRoom)")
         }
     }
     
-    func createRoom(roomName: String) {
-        if roomName.trim().count == 0 { return }
-        
-        let roomMS : XMPPRoomMemoryStorage = XMPPRoomMemoryStorage.init()
-        if let roomJID = XMPPJID(string: roomName) {
-            
-            self.xmppRoom = XMPPRoom.init(roomStorage: roomMS, jid: roomJID)
-            self.xmppRoom!.activate(self.xmppStream)
-            self.xmppRoom!.addDelegate(self, delegateQueue: DispatchQueue.main)
-            
-            let history = XMLElement.init(name: "history")
-            history.addAttribute(withName: "maxstanzas", stringValue: "0") //Set Value to return Value-Of-No-Messsage in Chat room
-            self.xmppRoom?.join(usingNickname: self.userId, history: history)
+    func createRoom(roomName: String, withXMPP objXMPP : XMPPController, withStrem : XMPPStream) {
+        if roomName.trim().isEmpty {
+            print("\(#function) | roomName nil/empty")
+            return
         }
+        guard let roomJID = XMPPJID(string: get_RoomName(roomName: roomName, withStrem: withStrem)) else {
+            print("\(#function) | Invalid XMPPRoom Jid: \(roomName)")
+            return
+        }
+        
+        var vUserId : String = ""
+        if let value = withStrem.myJID?.description { vUserId = (value.components(separatedBy: "@").first ?? "").trim() }
+        if vUserId.isEmpty {
+            print("\(#function) | XMPP UserId is nil/empty")
+            return
+        }
+        let roomMS : XMPPRoomMemoryStorage = XMPPRoomMemoryStorage.init()
+        let xmppRoom = XMPPRoom.init(roomStorage: roomMS, jid: roomJID)
+        xmppRoom.activate(withStrem)
+        xmppRoom.addDelegate(self, delegateQueue: DispatchQueue.main)
+        
+        let history = XMLElement.init(name: "history")
+        history.addAttribute(withName: "maxstanzas", stringValue: "0") //Set Value to return Value-Of-No-Messsage in Chat room
+        xmppRoom.join(usingNickname: vUserId, history: history)
     }
     
     func joinRoom(roomName: String, time : Int64) {
-        if roomName.trim().count == 0 { return }
+        if roomName.trim().isEmpty {
+            print("\(#function) | roomName nil/empty")
+            return
+        }
         
         let xmppJID = XMPPJID(string: roomName)
-        if let roomMemory = XMPPRoomMemoryStorage.init() {
-            let room : XMPPRoom = XMPPRoom.init(roomStorage: roomMemory, jid: xmppJID!)
-            room.activate(self.xmppStream)
-            room.fetchConfigurationForm()
-            room.addDelegate(self, delegateQueue: DispatchQueue.main)
-            
-            //Get Message History. set value to return message.
-            let history = XMLElement.init(name: "history")
-            history.addAttribute(withName: "maxstanzas", stringValue: "1") //Set Value to return
+        guard let roomMemory = XMPPRoomMemoryStorage.init() else {
+            print("\(#function) | XMPPRoomMemoryStorage is nil/empty")
+            return
         }
+        let room : XMPPRoom = XMPPRoom.init(roomStorage: roomMemory, jid: xmppJID!)
+        room.activate(self.xmppStream)
+        room.fetchConfigurationForm()
+        room.addDelegate(self, delegateQueue: DispatchQueue.main)
+        
+        //Get Message History. set value to return message.
+        let history = XMLElement.init(name: "history")
+        history.addAttribute(withName: "maxstanzas", stringValue: "1") //Set Value to return
+        
+        room.join(usingNickname: self.userId, history: history)
+    }
+
+    func get_RoomName(roomName : String, withStrem : XMPPStream) -> String {
+        var vHost : String = ""
+        if let value = withStrem.hostName { vHost = value.trim() }
+        return [roomName, "@conference.", vHost].joined(separator: "")
     }
 }
 
@@ -213,8 +239,6 @@ extension XMPPController {
     }
     
     func xmppStream(_ sender: XMPPStream, didReceive message: XMPPMessage) {
-        print("\(#function) | Message: \(message)")
-        
         let vMessType : String = (message.type ?? "").trim()
         switch vMessType {
         case xmppChatType.CHAT:
@@ -231,7 +255,6 @@ extension XMPPController {
         }
     }
     
-    //Source: https://stackoverflow.com/a/53531672/5593725
     func xmppStream(_ sender: XMPPStream, didFailToSend message: XMPPMessage, error: Error) {
         print("didFailToSend message : \(error.localizedDescription)")
     }
@@ -260,7 +283,6 @@ extension XMPPController : XMPPStreamManagementDelegate {
             print("\(#function) | Nil data of APP_DELEGATE.objEventData")
             return
         }
-        
         for value in stanzaIds {
             if let vMessId = value as? String {
                 let vFrom : String = ""
@@ -270,7 +292,6 @@ extension XMPPController : XMPPStreamManagementDelegate {
                                "from" : vFrom,
                                "body" : vBody,
                                "msgtype" : "normal"]
-                print("\(#function) | dicDate: \(dicDate)")
                 APP_DELEGATE.objEventData!(dicDate)
             }
         }

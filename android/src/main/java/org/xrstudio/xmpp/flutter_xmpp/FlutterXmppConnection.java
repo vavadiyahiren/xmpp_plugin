@@ -40,6 +40,7 @@ import javax.net.ssl.TrustManager;
 public class FlutterXmppConnection implements ConnectionListener {
 
     private static final String TAG = "flutter_xmpp";
+    private static final String conferenceDomainName = "@conference.test.chat.fish";
 
     private static XMPPTCPConnection mConnection;
     private static MultiUserChatManager multiUserChatManager;
@@ -411,19 +412,26 @@ public class FlutterXmppConnection implements ConnectionListener {
 
             for (String groupId : allGroupsIds) {
 
-                printLog("joinAllGroups: join groupId: " + groupId);
+                String roomId = groupId + conferenceDomainName;
+                printLog("joinAllGroups: join groupId: " + roomId);
 
-                MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(groupId));
+                MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(roomId));
                 Resourcepart resourcepart = Resourcepart.from(mUsername);
 
                 MucEnterConfiguration mucEnterConfiguration = multiUserChat.getEnterConfigurationBuilder(resourcepart)
                         .requestHistorySince(5000)
                         .build();
 
-                if (!multiUserChat.isJoined()) {
-                    printLog("joinAllGroups: join for " + groupId);
-                    multiUserChat.createOrJoin(mucEnterConfiguration);
-                }
+                // Join function is Working on Android to iOS messaging
+
+                printLog("joinAllGroups: join for 1 " + groupId);
+                multiUserChat.join(mucEnterConfiguration);
+                printLog("joinAllGroups: join for 2 " + groupId);
+
+//                if (!multiUserChat.isJoined()) {
+//                    printLog("joinAllGroups: join for " + roomId);
+//                    multiUserChat.createOrJoin(mucEnterConfiguration);
+//                }
 
             }
 

@@ -17,10 +17,12 @@ extension XMPPController {
     }
     
     // This method handles sending the message to one-one chat
-    func sendMessage(messageBody:String, reciverJID:String, messageId: String, withStrem : XMPPStream) {
+    func sendMessage(messageBody:String, reciverJID:String, messageId: String, isGroup : Bool = false, withStrem : XMPPStream) {
         let vJid : XMPPJID? = XMPPJID(string: reciverJID)
         
-        let xmppMessage = XMPPMessage.init(type: "chat", to: vJid)
+        let vChatType : String = isGroup ? "groupchat" : "chat"
+        
+        let xmppMessage = XMPPMessage.init(type: vChatType, to: vJid)
         xmppMessage.addAttribute(withName: "xmlns", stringValue: "jabber:client")
         xmppMessage.addAttribute(withName: "id", stringValue: messageId)
         xmppMessage.addBody(messageBody)

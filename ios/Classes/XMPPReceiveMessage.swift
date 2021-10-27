@@ -32,9 +32,7 @@ extension XMPPController {
                        "from" : objMess.senderJid,
                        "body" : objMess.message,
                        "msgtype" : vMessType,
-                       "senderJid": objMess.senderJid
-        ] as [String : Any]
-        print("\(#function) | dicDate: \(dicDate)")
+                       "senderJid": objMess.senderJid] as [String : Any]
         APP_DELEGATE.objEventData!(dicDate)
     }
 }
