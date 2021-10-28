@@ -1,6 +1,7 @@
 import 'dart:async';
-import 'package:flutter/services.dart';
 import 'dart:developer';
+
+import 'package:flutter/services.dart';
 
 class XmppConnection {
   static const MethodChannel _channel = MethodChannel('flutter_xmpp/method');
@@ -20,8 +21,6 @@ class XmppConnection {
     await _channel.invokeMethod('logout');
   }
 
-  //conversationType: 0 = normal
-  //conversationType: 1 = group
   Future<String> sendMessage(String toJid, String body, String id) async {
     final params = {
       "to_jid": toJid,

@@ -247,6 +247,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                 result.error("MISSING", "Missing argument all_groups_ids.", null);
             }
             ArrayList<String> allGroupsIds = call.argument("all_groups_ids");
+
             if (!allGroupsIds.isEmpty()) {
                 joinAllGroups(allGroupsIds);
             }
