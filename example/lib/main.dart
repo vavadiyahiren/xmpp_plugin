@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_xmpp/xmpp_plugin.dart';
+import 'package:flutter_xmpp_example/event.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,6 +16,8 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   static late XmppConnection flutterXmpp;
+  List<Event> events = [];
+  String connectionStatus = "Disconnected";
 
   Future<void> connect() async {
     final auth = {
@@ -32,14 +35,23 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _onReceiveMessage(dynamic event) async {
     // TODO : Handle the receive event
+    print("Event $event");
+    events.add(Event.fromJson(event));
+
+    Event e = Event.fromJson(event);
+
+    if (e.msgtype == "connected") {
+      connectionStatus = "connected";
+    }
+    if (e.msgtype == "Authenticated") {
+      connectionStatus = "Authenticated";
+    }
+    if (e.msgtype == "disconnected") {
+      connectionStatus = "disconnected";
+    }
+
     setState(
-      () {
-        status = event;
-        verification = event['body'];
-        if (event['msgtype'] == "normal") {
-          verification = "Authenticated";
-        }
-      },
+      () {},
     );
   }
 
@@ -53,8 +65,6 @@ class _MyAppState extends State<MyApp> {
     await flutterXmpp.joinMucGroups(allGroupsId);
   }
 
-  Map status = {};
-  String verification = '';
   String dropdownvalue = 'Chat';
   var items = ['Chat', 'Group Chat'];
 
@@ -116,16 +126,15 @@ class _MyAppState extends State<MyApp> {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
-                        if (verification == 'Authenticated') {
+                        if (connectionStatus == 'Authenticated') {
                           await disconnectXMPP();
                         } else {
                           await connect();
                         }
                       },
-                      child: (verification == 'Authenticated' ||
-                              status['msgtype'] == "normal")
-                          ? Text('Disconnect')
-                          : Text("Connect"),
+                      child: Text(connectionStatus == 'Authenticated'
+                          ? "Disconnect"
+                          : "Connect"),
                       style: ElevatedButton.styleFrom(
                         primary: Colors.black,
                       ),
@@ -133,7 +142,7 @@ class _MyAppState extends State<MyApp> {
                     SizedBox(
                       width: 20,
                     ),
-                    Text('$verification'),
+                    Text('$connectionStatus'),
                   ],
                 ),
                 SizedBox(
@@ -219,25 +228,12 @@ class _MyAppState extends State<MyApp> {
                 SizedBox(
                   height: 15,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "from: ${status['from'] == null ? "" : status['from']}",
-                    ),
-                    Text(
-                      "id: ${status['id'] == null ? "" : status['id']}",
-                    ),
-                    Text(
-                      "Type: ${status['type'] == null ? "" : status['type']}",
-                    ),
-                    Text(
-                      "message: ${status['body'] == null ? "" : status['body']}",
-                    ),
-                    Text(
-                      "msgtype: ${status['msgtype'] == null ? "" : status['msgtype']}",
-                    ),
-                  ],
+                Container(
+                  height: 500,
+                  child: ListView.builder(
+                    itemCount: events.length,
+                    itemBuilder: (context, index) => _buildMessage(index),
+                  ),
                 ),
                 SizedBox(
                   height: 20,
@@ -246,6 +242,36 @@ class _MyAppState extends State<MyApp> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  _buildMessage(int index) {
+    Event event = events[index];
+
+    return Container(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "from: ${event.from}",
+          ),
+          Text(
+            "id: ${event.id}",
+          ),
+          Text(
+            "Type: ${event.type}",
+          ),
+          Text(
+            "message: ${event.body}",
+          ),
+          Text(
+            "msgtype: ${event.msgtype}",
+          ),
+          Divider(
+            color: Colors.black,
+          ),
+        ],
       ),
     );
   }
