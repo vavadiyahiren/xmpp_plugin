@@ -72,6 +72,7 @@ class _MyAppState extends State<MyApp> {
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _hostController = TextEditingController();
   TextEditingController _join1Controller = TextEditingController();
+  TextEditingController _joinTimeController = TextEditingController();
   TextEditingController _messageController = TextEditingController();
   TextEditingController _toNameController = TextEditingController();
 
@@ -155,9 +156,18 @@ class _MyAppState extends State<MyApp> {
                 SizedBox(
                   height: 10,
                 ),
+                customTextField(
+                  hintText: 'Enter Last Messag Timestamp',
+                  textEditController: _joinTimeController,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
                 ElevatedButton(
                   onPressed: () async {
-                    await joinMucGroups([_join1Controller.text]);
+                    await joinMucGroups([
+                      "${_join1Controller.text},${_joinTimeController.text}"
+                    ]);
                   },
                   child: Text('Join Group'),
                   style: ElevatedButton.styleFrom(

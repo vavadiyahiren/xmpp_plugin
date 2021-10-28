@@ -33,6 +33,7 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -40,7 +41,7 @@ import javax.net.ssl.TrustManager;
 public class FlutterXmppConnection implements ConnectionListener {
 
     private static final String TAG = "flutter_xmpp";
-    private static final String conferenceDomainName = "@conference.test.chat.fish";
+    private static final String conferenceDomainName = "@conference";
 
     private static XMPPTCPConnection mConnection;
     private static MultiUserChatManager multiUserChatManager;
@@ -262,7 +263,6 @@ public class FlutterXmppConnection implements ConnectionListener {
                             action.equals(FlutterXmppConnectionService.SEND_MESSAGE));
 
                 } else if (action.equals(FlutterXmppConnectionService.JOIN_GROUPS_MESSAGE)) {
-
                     // Join all group
                     joinAllGroups(intent.getStringArrayListExtra(FlutterXmppConnectionService.GROUP_IDS));
                 }
@@ -412,26 +412,34 @@ public class FlutterXmppConnection implements ConnectionListener {
 
             for (String groupId : allGroupsIds) {
 
-                String roomId = groupId + conferenceDomainName;
+                String[] groupData = groupId.split(",");
+                String groupName = groupData[0];
+                String lastMsgTime = groupData[1];
+
+                String roomId = groupName + conferenceDomainName+"." + mHost;
                 printLog("joinAllGroups: join groupId: " + roomId);
 
                 MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(roomId));
                 Resourcepart resourcepart = Resourcepart.from(mUsername);
 
+                long currentTime = new Date().getTime();
+                long lastMessageTime = Long.valueOf(lastMsgTime);
+                long diff = currentTime - lastMessageTime;
+
                 MucEnterConfiguration mucEnterConfiguration = multiUserChat.getEnterConfigurationBuilder(resourcepart)
-                        .requestHistorySince(5000)
+                        .requestHistorySince((int) diff)
                         .build();
 
                 // Join function is Working on Android to iOS messaging
 
-                printLog("joinAllGroups: join for 1 " + groupId);
-                multiUserChat.join(mucEnterConfiguration);
-                printLog("joinAllGroups: join for 2 " + groupId);
+                printLog("joinAllGroups diff " + diff);
+//                multiUserChat.createOrJoin(mucEnterConfiguration);
+                printLog("joinAllGroups: join for 2 " + groupName);
 
-//                if (!multiUserChat.isJoined()) {
-//                    printLog("joinAllGroups: join for " + roomId);
-//                    multiUserChat.createOrJoin(mucEnterConfiguration);
-//                }
+                if (!multiUserChat.isJoined()) {
+                    printLog("joinAllGroups: join for " + roomId);
+                    multiUserChat.createOrJoin(mucEnterConfiguration);
+                }
 
             }
 
