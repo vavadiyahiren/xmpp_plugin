@@ -11,7 +11,7 @@ import XMPPFramework
 
 extension XMPPController {
     
-    func handel_ChatMessage(_ message: XMPPMessage) {
+    func handel_ChatMessage(_ message: XMPPMessage, withType type : String) {
         if APP_DELEGATE.objEventData == nil {
             print("\(#function) | Nil data of APP_DELEGATE.objEventData")
             return
@@ -26,7 +26,7 @@ extension XMPPController {
             return
         }
         
-        let vMessType : String = "chat"
+        let vMessType : String = type
         let dicDate = ["type" : "incoming",
                        "id" : objMess.id,
                        "from" : objMess.senderJid,
