@@ -155,7 +155,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                 Log.d(TAG, "Calling connect() ");
             }
             mConnection.connect();
-            mConnection.login(mUsername, mPassword);
+            mConnection.login(/*mUsername, mPassword*/);
 
         } catch (InterruptedException e) {
             e.printStackTrace();

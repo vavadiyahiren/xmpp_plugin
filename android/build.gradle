@@ -26,6 +26,8 @@ android {
 
     defaultConfig {
         minSdkVersion 16
+
+        multiDexEnabled true
     }
 }
 
@@ -44,4 +46,5 @@ dependencies {
     implementation 'com.amazonaws:aws-android-sdk-cognito:2.9.1'
     implementation 'com.amazonaws:aws-android-sdk-s3:2.9.1'
     implementation 'com.amazonaws:aws-android-sdk-ddb:2.9.1'
+    implementation 'com.android.support:multidex:1.0.3'
 }

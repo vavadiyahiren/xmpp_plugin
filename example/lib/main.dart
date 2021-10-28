@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
 import 'dart:async';
+import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_xmpp/xmpp_plugin.dart';
 
 void main() {
@@ -16,10 +18,11 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> connect() async {
     final auth = {
-      "user_jid": "jid/resource",
-      "password": "password",
-      "host": "xmpphost",
-      "port": "5222"
+      "user_jid":
+          "${_userNameController.text}@${_hostController.text}/${Platform.isAndroid ? "Android" : "iOS"}",
+      "password": "${_passwordController.text}",
+      "host": "${_hostController.text}",
+      "port": '5222'
     };
 
     flutterXmpp = XmppConnection(auth);
@@ -29,6 +32,15 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _onReceiveMessage(dynamic event) async {
     // TODO : Handle the receive event
+    setState(
+      () {
+        status = event;
+        verification = event['body'];
+        if (event['msgtype'] == "normal") {
+          verification = "Authenticated";
+        }
+      },
+    );
   }
 
   void _onError(Object error) {
@@ -41,64 +53,232 @@ class _MyAppState extends State<MyApp> {
     await flutterXmpp.joinMucGroups(allGroupsId);
   }
 
+  Map status = {};
+  String verification = '';
+  String dropdownvalue = 'Chat';
+  var items = ['Chat', 'Group Chat'];
+
+  TextEditingController _userNameController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _hostController = TextEditingController();
+  TextEditingController _join1Controller = TextEditingController();
+  TextEditingController _messageController = TextEditingController();
+  TextEditingController _toNameController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: const Text('XMPP Plugin'),
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            ElevatedButton(
-              onPressed: () async {
-                await connect();
-              },
-              child: Text('Connect'),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await flutterXmpp.sendMessageWithType(
-                    "xyz@domain", "Hi", "MSGID");
-              },
-              child: Text('Send Message'),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await joinMucGroups(['your groupID']);
-              },
-              child: Text('Join Group'),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                await flutterXmpp.sendMessageWithType(
-                    "xyz@domain", "Hi", "MSGID");
-              },
-              child: Text('Send Group Message'),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            ElevatedButton(
+          backgroundColor: Colors.black,
+          actions: [
+            IconButton(
               onPressed: () async {
                 await disconnectXMPP();
               },
-              child: Text('Log Out'),
+              icon: Icon(Icons.power_settings_new),
             ),
           ],
+        ),
+        body: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 15),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 10,
+                ),
+                customTextField(
+                  hintText: 'User Name',
+                  textEditController: _userNameController,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                customTextField(
+                  hintText: 'Password',
+                  textEditController: _passwordController,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                customTextField(
+                  hintText: 'Host',
+                  textEditController: _hostController,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (verification == 'Authenticated') {
+                          await disconnectXMPP();
+                        } else {
+                          await connect();
+                        }
+                      },
+                      child: (verification == 'Authenticated' ||
+                              status['msgtype'] == "normal")
+                          ? Text('Disconnect')
+                          : Text("Connect"),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.black,
+                      ),
+                    ),
+                    SizedBox(
+                      width: 20,
+                    ),
+                    Text('$verification'),
+                  ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                customTextField(
+                  hintText: 'Enter Group',
+                  textEditController: _join1Controller,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await joinMucGroups([_join1Controller.text]);
+                  },
+                  child: Text('Join Group'),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.black,
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                customTextField(
+                  hintText: "To...",
+                  textEditController: _toNameController,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                customTextField(
+                  hintText: "Enter Message",
+                  textEditController: _messageController,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                DropdownButton(
+                  value: dropdownvalue,
+                  icon: Icon(Icons.keyboard_arrow_down),
+                  items: items.map((String items) {
+                    return DropdownMenuItem(
+                      value: items,
+                      child: Text(items),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    setState(() {
+                      dropdownvalue = val.toString();
+                    });
+                  },
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    int id = DateTime.now().millisecondsSinceEpoch;
+
+                    (dropdownvalue == "Chat")
+                        ? await flutterXmpp.sendMessageWithType(
+                            "${_toNameController.text}",
+                            "${_messageController.text}",
+                            "$id",
+                          )
+                        : await flutterXmpp.sendGroupMessageWithType(
+                            "${_toNameController.text}",
+                            "${_messageController.text}",
+                            "$id",
+                          );
+                  },
+                  child: Text(" Send "),
+                  style: ElevatedButton.styleFrom(
+                    primary: (dropdownvalue == "Chat")
+                        ? Colors.black
+                        : Colors.deepPurple,
+                  ),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "from: ${status['from'] == null ? "" : status['from']}",
+                    ),
+                    Text(
+                      "id: ${status['id'] == null ? "" : status['id']}",
+                    ),
+                    Text(
+                      "Type: ${status['type'] == null ? "" : status['type']}",
+                    ),
+                    Text(
+                      "message: ${status['body'] == null ? "" : status['body']}",
+                    ),
+                    Text(
+                      "msgtype: ${status['msgtype'] == null ? "" : status['msgtype']}",
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 20,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
+}
+
+Widget customTextField({
+  TextEditingController? textEditController,
+  String? hintText,
+}) {
+  return TextField(
+    controller: textEditController,
+    cursorColor: Colors.black,
+    decoration: InputDecoration(
+      hintText: hintText,
+      hintStyle: TextStyle(
+        fontSize: 16,
+        color: Colors.grey.withOpacity(0.8),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: const BorderSide(color: Colors.black),
+        borderRadius: BorderRadius.circular(5.0),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(5.0),
+        borderSide: BorderSide(
+          color: Colors.grey,
+        ),
+      ),
+    ),
+    style: TextStyle(
+      fontSize: 16,
+      color: Colors.black,
+      fontWeight: FontWeight.w500,
+    ),
+  );
 }
