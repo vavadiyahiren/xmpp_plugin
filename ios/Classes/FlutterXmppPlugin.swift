@@ -103,9 +103,8 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
                     if vRoomName.isEmpty { continue }
                     let vRoomTSLongFormat : Int64 = Int64(vRoomTS) ?? 0
                     
-                    //APP_DELEGATE.objXMPP.createRoom(roomName: vRoom, withXMPP: self.objXMPP, withStrem: self.objXMPP.xmppStream)
-                    APP_DELEGATE.objXMPP.joinRoom(roomName: vRoomName, time: vRoomTSLongFormat, withStrem: self.objXMPP.xmppStream)
-
+                    APP_DELEGATE.objXMPP.createRoom(roomName: vRoomName, withXMPP: self.objXMPP, withStrem: self.objXMPP.xmppStream)
+                    //APP_DELEGATE.objXMPP.joinRoom(roomName: vRoomName, time: vRoomTSLongFormat, withStrem: self.objXMPP.xmppStream)
                 }
                 result("SUCCESS")
             } else {

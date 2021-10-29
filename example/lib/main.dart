@@ -40,14 +40,14 @@ class _MyAppState extends State<MyApp> {
 
     Event e = Event.fromJson(event);
 
-    if (e.msgtype == "connected") {
-      connectionStatus = "connected";
+    if (e.msgtype == "Connected") {
+      connectionStatus = "Connected";
     }
     if (e.msgtype == "Authenticated") {
       connectionStatus = "Authenticated";
     }
-    if (e.msgtype == "disconnected") {
-      connectionStatus = "disconnected";
+    if (e.msgtype == "Disconnected") {
+      connectionStatus = "Disconnected";
     }
 
     setState(
