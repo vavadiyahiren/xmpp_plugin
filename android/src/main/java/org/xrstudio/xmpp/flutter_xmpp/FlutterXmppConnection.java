@@ -23,6 +23,7 @@ import org.jivesoftware.smackx.muc.MucEnterConfiguration;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.jivesoftware.smackx.muc.MultiUserChatManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptRequest;
+import org.jivesoftware.smackx.xdata.Form;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.jid.parts.Resourcepart;
@@ -265,6 +266,8 @@ public class FlutterXmppConnection implements ConnectionListener {
                 } else if (action.equals(FlutterXmppConnectionService.JOIN_GROUPS_MESSAGE)) {
                     // Join all group
                     joinAllGroups(intent.getStringArrayListExtra(FlutterXmppConnectionService.GROUP_IDS));
+                } else if (action.equals(Constants.CREATE_MUC)) {
+                    createMUC(intent.getStringExtra(Constants.GROUP_NAME), intent.getStringExtra(Constants.PERSISTENT));
                 }
             }
         };
@@ -404,6 +407,35 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     }
 
+    private void createMUC(String groupName, String persistent) {
+
+        printLog("Creating a Group with Name " + groupName + ", persistent " + persistent);
+
+        try {
+
+            String roomId = groupName;
+            if (!groupName.contains(Constants.CONFERENCE)) {
+                roomId = groupName + "@" + Constants.CONFERENCE + "." + mHost;
+            }
+
+            MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(roomId));
+            multiUserChat.create(Resourcepart.from(mUsername));
+
+            if (persistent.equals(Constants.TRUE)) {
+
+                Form form = multiUserChat.getConfigurationForm();
+                Form answerForm = form.createAnswerForm();
+                answerForm.setAnswer("muc#roomconfig_persistentroom", true);
+                multiUserChat.sendConfigurationForm(answerForm);
+            }
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
     private void joinAllGroups(ArrayList<String> allGroupsIds) {
 
         try {
@@ -416,7 +448,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                 String groupName = groupData[0];
                 String lastMsgTime = groupData[1];
 
-                String roomId = groupName + conferenceDomainName+"." + mHost;
+                String roomId = groupName + conferenceDomainName + "." + mHost;
                 printLog("joinAllGroups: join groupId: " + roomId);
 
                 MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(roomId));

@@ -71,7 +71,8 @@ class _MyAppState extends State<MyApp> {
   TextEditingController _userNameController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _hostController = TextEditingController();
-  TextEditingController _join1Controller = TextEditingController();
+  TextEditingController _createMUCNamecontroller = TextEditingController();
+  TextEditingController _joinMUCTextController = TextEditingController();
   TextEditingController _joinTimeController = TextEditingController();
   TextEditingController _messageController = TextEditingController();
   TextEditingController _toNameController = TextEditingController();
@@ -151,7 +152,26 @@ class _MyAppState extends State<MyApp> {
                 ),
                 customTextField(
                   hintText: 'Enter Group',
-                  textEditController: _join1Controller,
+                  textEditController: _createMUCNamecontroller,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await createMUC("${_createMUCNamecontroller.text}", true);
+                  },
+                  child: Text('Create Group'),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.black,
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                customTextField(
+                  hintText: 'Enter Group',
+                  textEditController: _joinMUCTextController,
                 ),
                 SizedBox(
                   height: 10,
@@ -166,7 +186,7 @@ class _MyAppState extends State<MyApp> {
                 ElevatedButton(
                   onPressed: () async {
                     await joinMucGroups([
-                      "${_join1Controller.text},${_joinTimeController.text}"
+                      "${_joinMUCTextController.text},${_joinTimeController.text}"
                     ]);
                   },
                   child: Text('Join Group'),
@@ -284,6 +304,10 @@ class _MyAppState extends State<MyApp> {
         ],
       ),
     );
+  }
+
+  createMUC(String groupName, bool persistent) async {
+    await flutterXmpp.createMUC(groupName, persistent);
   }
 }
 

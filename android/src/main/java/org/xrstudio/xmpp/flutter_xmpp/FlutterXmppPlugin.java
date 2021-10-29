@@ -254,9 +254,29 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
 
             result.success("SUCCESS");
 
+        } else if (call.method.equals(Constants.CREATE_MUC)) {
+
+            System.out.println("Creating a MUC ");
+
+            String group_name = call.argument("group_name");
+            String persistent = call.argument("persistent");
+
+            createMUC(group_name, persistent);
+
         } else {
             result.notImplemented();
         }
+    }
+
+    private void createMUC(String group_name, String persistent) {
+
+        if (FlutterXmppConnectionService.getState().equals(FlutterXmppConnection.ConnectionState.CONNECTED)) {
+            Intent intent = new Intent(Constants.CREATE_MUC);
+            intent.putExtra(Constants.GROUP_NAME, group_name);
+            intent.putExtra(Constants.PERSISTENT, persistent);
+            activity.sendBroadcast(intent);
+        }
+
     }
 
     // login
@@ -264,7 +284,6 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
 
         // Check if the user is already connected or not ? if not then start login process.
         if (FlutterXmppConnectionService.getState().equals(FlutterXmppConnection.ConnectionState.DISCONNECTED)) {
-            Log.d("loginTest", "doLogin");
             Intent i = new Intent(activity, FlutterXmppConnectionService.class);
             i.putExtra("jid_user", jid_user);
             i.putExtra("password", password);
