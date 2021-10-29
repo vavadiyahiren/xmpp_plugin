@@ -61,7 +61,8 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             break
             
         case "send_message",
-             "send_group_message":
+             "send_group_message",
+             "send_custom_message", "send_customgroup_message":
             guard let vData = call.arguments as? [String : Any] else {
                 result("ERROR")
                 return
@@ -71,8 +72,12 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             let toJid : String = (vData["to_jid"] as? String ?? "").trim()
             let body : String = vData["body"] as? String ?? ""
             let id : String = (vData["id"] as? String ?? "").trim()
-            let customElement : String = (vData["customText"] as? String ?? "").trim()
-            let isGroupMess : Bool = (vMethod == "send_group_message")
+            
+            var customElement : String = ""
+            if ["send_custom_message", "send_customgroup_message"].contains(vMethod) {
+                customElement = (vData["customText"] as? String ?? "").trim()
+            }
+            let isGroupMess : Bool = ["send_group_message", "send_customgroup_message"].contains(vMethod)
             self.objXMPP.sendMessage(messageBody: body,
                                      reciverJID: toJid,
                                      messageId: id,

@@ -316,6 +316,10 @@ extension XMPPController : XMPPRoomDelegate {
     func get_RoomName(roomName : String, withStrem : XMPPStream) -> String {
         var vHost : String = ""
         if let value = withStrem.hostName { vHost = value.trim() }
+        
+        if roomName.contains("conference") {
+            return roomName
+        }
         return [roomName, "@conference.", vHost].joined(separator: "")
     }
 
