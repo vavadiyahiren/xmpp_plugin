@@ -21,6 +21,7 @@ class XMPPController : NSObject {
     internal var userId: String = ""
     internal var userJID = XMPPJID()
     private var password: String = ""
+    private var arrGroups : [groupInfo] = []
     
     //MARK:-
     override init() {
@@ -53,6 +54,9 @@ class XMPPController : NSObject {
         self.xmppReconnect.manualStart()
         self.xmppReconnect.activate(self.xmppStream)
         self.xmppReconnect.addDelegate(self, delegateQueue: DispatchQueue.main)
+        
+        /// XMPP Room
+        
     }
     
     
@@ -68,7 +72,7 @@ class XMPPController : NSObject {
                 APP_DELEGATE.objXMPPConnStatus = .Failed
             }
         } else {
-            print("\(#function) | XMPPConnected - Yes")
+            printLog("\(#function) | XMPPConnected - Yes")
         }
     }
     
@@ -120,7 +124,7 @@ class XMPPController : NSObject {
     }
 }
 
-extension XMPPController: XMPPStreamDelegate, XMPPMUCLightDelegate, XMPPHTPPFileUploadDelegate  {
+extension XMPPController: XMPPStreamDelegate, XMPPMUCLightDelegate  {
     //MARK:- stream Connect
     func xmppStreamDidConnect(_ stream: XMPPStream) {
         if self.password.isEmpty {
@@ -166,8 +170,10 @@ extension XMPPController : XMPPRoomDelegate {
         var vRoom : String = ""
         if let value = sender.myRoomJID?.bareJID.user {
             vRoom = "\(value)"
-            print("\(#function) | XMPPRoom Created | XMPPRoom-Name: \(vRoom)")
+            printLog("\(#function) | XMPPRoom Created | XMPPRoom-Name: \(vRoom)")
             //self.joinRoom(roomName: vRoom, time: 0, withStrem: XMPPStream)
+            
+            //sender.fetchConfigurationForm()
         } else {
             print("\(#function) | XMPPRoom Creating Error | XMPPRoom-Name: \(vRoom)")
         }
@@ -177,22 +183,72 @@ extension XMPPController : XMPPRoomDelegate {
         var vRoom : String = ""
         if let value = sender.myRoomJID?.bareJID.user {
             vRoom = "\(value)"
-            print("\(#function) | XMPPRoom Joined | XMPPRoom-Name: \(vRoom)")
+            printLog("\(#function) | XMPPRoom Joined | XMPPRoom-Name: \(vRoom)")
         } else {
             print("\(#function) | XMPPRoom Joining Error | XMPPRoom-Name: \(vRoom)")
         }
     }
     func xmppRoom(_ sender: XMPPRoom, didFetchConfigurationForm configForm: DDXMLElement) {
-        print("\(#function) | configForm: \(configForm)")
+        printLog("\(#function) | arrGroups: \(arrGroups.count) | \(arrGroups)")
         
+        var vRoomName : String = ""
+        if let value = sender.myRoomJID?.bareJID.user { vRoomName = value.trim() }
         
-//        for field in newForm.elements(forName: "field")
-//        {
-//        }
+        var newConfiguration = configForm.copy() as? DDXMLElement
         
+        let vKey : String = "field"
+        //guard let arrRoomConfig = configForm.elements(forName: vKey) as? [DDXMLElement] else {
+        guard let arrRoomConfig = newConfiguration?.elements(forName: vKey) as? [DDXMLElement] else {
+            print("\(#function) | Not getting XMPPRoom Configuration | XMPPRoom: \(vRoomName)")
+            return
+        }
+        for field in arrRoomConfig {
+            guard let roomProparty = field.attribute(forName: "var")?.stringValue else {
+                print("\(#function) | Not getting XMPPRoom Configuration-var")
+                continue
+            }
+            //printLog("\(#function) | XMPPRoom Configuration-var | \(roomProparty)")
+                        
+            switch roomProparty {
+            case "muc#roomconfig_persistentroom":
+                var defaultConfig : String = ""
+                if let ele = field.getElements(withKey: "value").first,
+                   let value = ele.getValue(withKey: "value") {
+                    defaultConfig = value
+                }
+                printLog("\(#function) | XMPPRoom Configuration | \(roomProparty) | defaultConfig: \(defaultConfig)")
+                
+                var isPersistentroom : Bool = default_isPersistent
+                if let objRoomInfo = self.arrGroups.first(where: { (obj) -> Bool in
+                    return obj.name == vRoomName
+                }) {
+                    isPersistentroom = objRoomInfo.isPersistent
+                    
+                    field.removeChild(at: 0)
+                    field.addChild(DDXMLElement(name: "value", stringValue: isPersistentroom ? "1" : "0"))
+                    printLog("\(#function) | XMPPRoom Configuration | \(roomProparty) | update-Config: \(field)")
+                }
+                
+            default:
+                printLog("\(#function) | XMPPRoom Configuration-var | \(roomProparty)")
+                break
+            }
+        }
+        sender.configureRoom(usingOptions: newConfiguration)
     }
-    func createRoom(roomName: String, withXMPP objXMPP : XMPPController, withStrem : XMPPStream) {
-        if roomName.trim().isEmpty {
+    
+    func xmppRoom(_ sender: XMPPRoom, didConfigure iqResult: XMPPIQ) {
+        printLog("\(#function) | XMPPRoom: \(sender) | iqResult: \(iqResult)")
+    }
+    
+    func xmppRoom(_ sender: XMPPRoom, didNotConfigure iqResult: XMPPIQ) {
+        printLog("\(#function) | XMPPRoom: \(sender) | iqResult: \(iqResult)")
+    }
+    
+    func createRoom(withRooms arrRooms: [groupInfo], withStrem : XMPPStream) {
+        for objRoom in arrRooms {
+        let roomName = objRoom.name.trim()
+        if roomName.isEmpty {
             print("\(#function) | roomName nil/empty")
             return
         }
@@ -211,9 +267,13 @@ extension XMPPController : XMPPRoomDelegate {
         xmppRoom.activate(withStrem)
         xmppRoom.addDelegate(self, delegateQueue: DispatchQueue.main)
         
-        let history = XMLElement.init(name: "history")
-        history.addAttribute(withName: "maxstanzas", stringValue: "0") //Set Value to return Value-Of-No-Messsage in Chat room
+        let history = getXMPPRoomHistiry(withTime: 0)
         xmppRoom.join(usingNickname: vUserId, history: history)
+            
+        xmppRoom.fetchConfigurationForm()
+        self.arrGroups.append(objRoom)
+        printLog("\(#function) | perform activity of create XMPPRoom | \(roomName)")
+        }
     }
     
     func joinRoom(roomName: String, time : Int64, withStrem : XMPPStream){
@@ -237,19 +297,20 @@ extension XMPPController : XMPPRoomDelegate {
             print("\(#function) | XMPPRoomMemoryStorage is nil/empty")
             return
         }
+        
+        //Reset Old XMPPRoom/Group info
+        self.arrGroups = []
 
-        let room : XMPPRoom = XMPPRoom.init(roomStorage: roomMemory, jid: xmppJID)
-        room.activate(self.xmppStream)
-
-        room.fetchConfigurationForm()
-        room.addDelegate(self, delegateQueue: DispatchQueue.main)
+        let xmppRoom : XMPPRoom = XMPPRoom.init(roomStorage: roomMemory, jid: xmppJID)
+        xmppRoom.activate(withStrem)
+        xmppRoom.addDelegate(self, delegateQueue: DispatchQueue.main)
         
         //Get Message History. set value to return message.
         let history = getXMPPRoomHistiry(withTime: time)
-        room.join(usingNickname: vUserId, history: history)
+        xmppRoom.join(usingNickname: vUserId, history: history)
         
-        print("\(#function) | history: \(history) | self.userId: \(vUserId) | jid: \(xmppJID)")
-
+        xmppRoom.fetchConfigurationForm()
+        printLog("\(#function) | perform activity of Join XMPPRoom | \(roomName) | userId: \(vUserId) | history: \(history)")
     }
 
     func get_RoomName(roomName : String, withStrem : XMPPStream) -> String {
@@ -280,11 +341,11 @@ extension XMPPController : XMPPRoomDelegate {
 extension XMPPController {
     //MARK: XMPPMessage delegate methods
     func xmppStream(_ sender: XMPPStream, didSend message: XMPPMessage) {
-        print("\(#function) | didSend message: \(message)")
+        printLog("\(#function) | didSend message: \(message)")
     }
     
     func xmppStream(_ sender: XMPPStream, didReceive message: XMPPMessage) {
-        print("\(#function) | didReceive message: \(message)")
+        printLog("\(#function) | didReceive message: \(message)")
         
         let vMessType : String = (message.type ?? "").trim()
         /*switch vMessType {
@@ -304,7 +365,7 @@ extension XMPPController {
     }
     
     func xmppStream(_ sender: XMPPStream, didFailToSend message: XMPPMessage, error: Error) {
-        print("didFailToSend message : \(error.localizedDescription)")
+        printLog("didFailToSend message : \(error.localizedDescription)")
     }
 }
 
@@ -332,16 +393,28 @@ extension XMPPController : XMPPStreamManagementDelegate {
             return
         }
         for value in stanzaIds {
-            if let vMessId = value as? String {
-                let vFrom : String = ""
-                let vBody : String = ""
-                let dicDate = ["type" : "incoming",
-                               "id" : vMessId,
-                               "from" : vFrom,
-                               "body" : vBody,
-                               "msgtype" : "normal"]
-                APP_DELEGATE.objEventData!(dicDate)
+            guard let vMessId = value as? String  else {
+                print("\(#function) | getting Invalid Message Id | \(value)")
+                continue
             }
+            var vMsgType : String = "normal"
+            if vMessId.contains("ack") {
+                vMsgType = "ack"
+            }
+            else if vMessId.contains("read") {
+                vMsgType = "ack_read"
+            }
+            else if vMessId.contains("delhivery") {
+                vMsgType = "ack_delhivery"
+            }
+            let vFrom : String = ""
+            let vBody : String = ""
+            let dicDate = ["type" : "incoming",
+                           "id" : vMessId,
+                           "from" : vFrom,
+                           "body" : vBody,
+                           "msgtype" : vMsgType]
+            APP_DELEGATE.objEventData!(dicDate)
         }
     }    
 }
@@ -365,9 +438,51 @@ extension XMPPMessage {
     public func getElementValue(_ elementKey : String) -> String? {
         return self.elements(forName: elementKey).first?.children?.first?.stringValue
     }
+    
+    /**
+     <CUSTOM
+         xmlns="urn:xmpp:custom">
+         <custom>test</custom>
+     </CUSTOM>
+     */
+    func getCustomElementInfo(withKey vKey : String) -> String {
+        var value : String = ""
+        let arrMI = self.elements(forName: eleCustom.Name)
+        guard let eleMI = arrMI.first else {
+            //printLog("\(#function) | \(eleCustom.Name) element not get")
+            return value
+        }
+        
+        let arrMInfo = eleMI.elements(forName: vKey)
+        guard let vInfo = arrMInfo.first?.stringValue else {
+            //printLog("\(#function) | \(vKey) element not get")
+            return value
+        }
+        value = vInfo.trim()
+        return value
+    }
 }
 
-
+extension DDXMLElement {
+    /**
+     <field var="muc#roomconfig_persistentroom" type="boolean" label="Room is Persistent">
+         <value>0</value>
+     </field>
+     */
+    func getElements(withKey vKey : String) -> [DDXMLElement] {
+        return self.elements(forName: vKey)
+    }
+    
+    func getValue(withKey vKey : String) -> String? {
+        var value : String = ""
+        guard let vInfo = self.stringValue else {
+            //printLog("\(#function) | \(vKey) key element not getting")
+            return value
+        }
+        value = vInfo.trim()
+        return value
+    }
+}
 //MARK:- Enum's
 enum XMPPControllerError: Error {
     case wrongUserJID
@@ -403,3 +518,15 @@ struct xmppConstants {
     static let FROM : String = "from"
 }
 
+
+let default_isPersistent : Bool = false
+struct groupInfo {
+    var name : String = ""
+    var isPersistent : Bool = default_isPersistent
+}
+
+struct eleCustom {
+    static let Name : String = "CUSTOM"
+    static let Namespace : String = "urn:xmpp:custom"
+    static let Kay : String = "custom"
+}

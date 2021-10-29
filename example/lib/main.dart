@@ -68,10 +68,16 @@ class _MyAppState extends State<MyApp> {
   String dropdownvalue = 'Chat';
   var items = ['Chat', 'Group Chat'];
 
-  TextEditingController _userNameController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _hostController = TextEditingController();
-  TextEditingController _createMUCNamecontroller = TextEditingController();
+  // TextEditingController _userNameController = TextEditingController();
+  // TextEditingController _passwordController = TextEditingController();
+  // TextEditingController _hostController = TextEditingController();
+  // TextEditingController _createMUCNamecontroller = TextEditingController();
+  ///Testing purpose only | Piyush | 29-Oct-2021
+  TextEditingController _userNameController = TextEditingController(text:"917574072348");
+  TextEditingController _passwordController = TextEditingController(text:"917574072348");
+  TextEditingController _hostController = TextEditingController(text:"test.chat.fish");
+  TextEditingController _createMUCNamecontroller = TextEditingController(text:"abc");
+
   TextEditingController _joinMUCTextController = TextEditingController();
   TextEditingController _joinTimeController = TextEditingController();
   TextEditingController _messageController = TextEditingController();

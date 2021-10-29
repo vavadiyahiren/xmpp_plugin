@@ -60,56 +60,64 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             }
             break
             
-        case "send_message":
-            if let vData = call.arguments as? [String : Any] {
-                let toJid : String = (vData["to_jid"] as? String ?? "").trim()
-                let body : String = vData["body"] as? String ?? ""
-                let id : String = (vData["id"] as? String ?? "").trim()
-                self.objXMPP.sendMessage(messageBody: body,
-                                                 reciverJID: toJid,
-                                                 messageId: id,
-                                                 isGroup: false,
-                                                 withStrem: self.objXMPP.xmppStream)
-                result("SUCCESS")
-            } else {
+        case "send_message",
+             "send_group_message":
+            guard let vData = call.arguments as? [String : Any] else {
                 result("ERROR")
+                return
             }
+            printLog("\(#function) | \(vMethod) | arguments: \(vData)")
+            
+            let toJid : String = (vData["to_jid"] as? String ?? "").trim()
+            let body : String = vData["body"] as? String ?? ""
+            let id : String = (vData["id"] as? String ?? "").trim()
+            let customElement : String = (vData["customText"] as? String ?? "").trim()
+            let isGroupMess : Bool = (vMethod == "send_group_message")
+            self.objXMPP.sendMessage(messageBody: body,
+                                     reciverJID: toJid,
+                                     messageId: id,
+                                     isGroup: isGroupMess,
+                                     customElement: customElement,
+                                     withStrem: self.objXMPP.xmppStream)
+            result("SUCCESS")
             break
             
-        case "send_group_message":
-            if let vData = call.arguments as? [String : Any] {
-                let toJid : String = (vData["to_jid"] as? String ?? "").trim()
-                let body : String = vData["body"] as? String ?? ""
-                let id : String = (vData["id"] as? String ?? "").trim()
-                self.objXMPP.sendMessage(messageBody: body,
-                                                 reciverJID: toJid,
-                                                 messageId: id,
-                                                 isGroup: true,
-                                                 withStrem: self.objXMPP.xmppStream)
-                result("SUCCESS")
-            } else {
+        case "create_muc":
+            guard let vData = call.arguments as? [String : Any] else {
                 result("ERROR")
+                return
             }
-            break
+            printLog("\(#function) | \(vMethod) | arguments: \(vData)")
+            
+            let vGroupName : String = (vData["group_name"] as? String ?? "").trim()
+            var isPersistent : Bool = default_isPersistent
+            if let value = vData["persistent"] as? Bool {
+                isPersistent = value
+            }
+            else if let value = vData["persistent"] as? String {
+                isPersistent = value.boolValue
+            }
+            let objGroupInfo : groupInfo = groupInfo.init(name: vGroupName, isPersistent: isPersistent)
+            APP_DELEGATE.objXMPP.createRoom(withRooms: [objGroupInfo], withStrem: self.objXMPP.xmppStream)
+            result("SUCCESS")
             
         case "join_muc_groups":
-            if let vData = call.arguments as? [String : Any] {
-                let arrRooms = vData["all_groups_ids"] as? [String] ?? []
-                for vRoom  in arrRooms {
-
-                    let arrRoomCompo : [String] = vRoom.components(separatedBy: ",")
-                    let vRoomName : String = arrRoomCompo.first ?? ""
-                    let vRoomTS : String = arrRoomCompo.last ?? "0"
-                    if vRoomName.isEmpty { continue }
-                    let vRoomTSLongFormat : Int64 = Int64(vRoomTS) ?? 0
-                    
-                    APP_DELEGATE.objXMPP.createRoom(roomName: vRoomName, withXMPP: self.objXMPP, withStrem: self.objXMPP.xmppStream)
-                    //APP_DELEGATE.objXMPP.joinRoom(roomName: vRoomName, time: vRoomTSLongFormat, withStrem: self.objXMPP.xmppStream)
-                }
-                result("SUCCESS")
-            } else {
+            guard let vData = call.arguments as? [String : Any] else {
                 result("ERROR")
+                return
             }
+            printLog("\(#function) | \(vMethod) | arguments: \(vData)")
+            
+            let arrRooms = vData["all_groups_ids"] as? [String] ?? []
+            for vRoom  in arrRooms {
+                let arrRoomCompo : [String] = vRoom.components(separatedBy: ",")
+                let vRoomName : String = arrRoomCompo.first ?? ""
+                let vRoomTS : String = arrRoomCompo.last ?? "0"
+                if vRoomName.isEmpty { continue }
+                let vRoomTSLongFormat : Int64 = Int64(vRoomTS) ?? 0
+                APP_DELEGATE.objXMPP.joinRoom(roomName: vRoomName, time: vRoomTSLongFormat, withStrem: self.objXMPP.xmppStream)
+            }
+            result("SUCCESS")
             break
             
         default:
@@ -196,7 +204,11 @@ public func postNotification(Name:Notification.Name, withObject: Any? = nil, use
     NotificationCenter.default.post(name: Name, object: withObject, userInfo: userInfo)
 }
 
-
+extension String {
+    var boolValue: Bool {
+        return (self as NSString).boolValue
+    }
+}
 
 class SwiftStreamHandler: NSObject, FlutterStreamHandler {
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
@@ -207,4 +219,8 @@ class SwiftStreamHandler: NSObject, FlutterStreamHandler {
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
         return nil
     }
+}
+
+func printLog(_ message : String) {
+    print(message)
 }

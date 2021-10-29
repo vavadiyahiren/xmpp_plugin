@@ -26,11 +26,13 @@ extension XMPPController {
             return
         }
         
+        let customElement : String = message.getCustomElementInfo(withKey: eleCustom.Kay)
         let vMessType : String = type
         let dicDate = ["type" : "incoming",
                        "id" : objMess.id,
                        "from" : objMess.senderJid,
                        "body" : objMess.message,
+                       "customText" : customElement,
                        "msgtype" : vMessType,
                        "senderJid": objMess.senderJid] as [String : Any]
         APP_DELEGATE.objEventData!(dicDate)
