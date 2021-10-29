@@ -4,6 +4,7 @@ public class Constants {
 
     public static final String CREATE_MUC = "create_muc";
     public static final String CONFERENCE = "conference";
+    public static final String CUSTOM_MESSAGE = "send_custom_message";
 
     // Broadcast Commands
     public static final String GROUP_NAME = "group_name";

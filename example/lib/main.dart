@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_xmpp/custom_element.dart';
 import 'package:flutter_xmpp/xmpp_plugin.dart';
 import 'package:flutter_xmpp_example/event.dart';
 
@@ -76,6 +77,14 @@ class _MyAppState extends State<MyApp> {
   TextEditingController _joinTimeController = TextEditingController();
   TextEditingController _messageController = TextEditingController();
   TextEditingController _toNameController = TextEditingController();
+
+  List<CustomElement> customElements = [
+    CustomElement(
+        childBody: "test",
+        childElement: "elem",
+        elementName: "Name",
+        elementNameSpace: "space")
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +168,7 @@ class _MyAppState extends State<MyApp> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    await createMUC("${_createMUCNamecontroller.text}", false);
+                    await createMUC("${_createMUCNamecontroller.text}", true);
                   },
                   child: Text('Create Group'),
                   style: ElevatedButton.styleFrom(
@@ -249,6 +258,22 @@ class _MyAppState extends State<MyApp> {
                           );
                   },
                   child: Text(" Send "),
+                  style: ElevatedButton.styleFrom(
+                    primary: (dropdownvalue == "Chat")
+                        ? Colors.black
+                        : Colors.deepPurple,
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    int id = DateTime.now().millisecondsSinceEpoch;
+                    await flutterXmpp.sendCustomMessage(
+                        "${_toNameController.text}",
+                        "${_messageController.text}",
+                        "$id",
+                        "test");
+                  },
+                  child: Text(" Send Custom"),
                   style: ElevatedButton.styleFrom(
                     primary: (dropdownvalue == "Chat")
                         ? Colors.black

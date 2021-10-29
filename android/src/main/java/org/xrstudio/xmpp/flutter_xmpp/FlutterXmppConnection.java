@@ -23,6 +23,7 @@ import org.jivesoftware.smackx.muc.MucEnterConfiguration;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.jivesoftware.smackx.muc.MultiUserChatManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptRequest;
+import org.jivesoftware.smack.packet.StandardExtensionElement;
 import org.jivesoftware.smackx.xdata.Form;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.impl.JidCreate;
@@ -47,12 +48,12 @@ public class FlutterXmppConnection implements ConnectionListener {
     private static XMPPTCPConnection mConnection;
     private static MultiUserChatManager multiUserChatManager;
     private Context mApplicationContext;
-    private String mUsername = "";
-    private String mPassword;
-    private String mServiceName = "";
-    private String mResource = "";
-    private String mHost;
-    private Integer mPort = 5222;
+    private static String mUsername = "";
+    private static String mPassword;
+    private static String mServiceName = "";
+    private static String mResource = "";
+    private static String mHost;
+    private static Integer mPort = 5222;
     private BroadcastReceiver uiThreadMessageReceiver;//Receives messages from the ui thread.
 
     public FlutterXmppConnection(Context context, String jid_user, String password, String host, Integer port) {
@@ -210,6 +211,12 @@ public class FlutterXmppConnection implements ConnectionListener {
                         } else {
                             contactJid = from;
                         }
+                        String customText = "";
+                        StandardExtensionElement customElement = (StandardExtensionElement) message
+                                .getExtension("urn:xmpp:custom");
+                        if (customElement != null && customElement.getFirstElement("custom") != null) {
+                            customText = customElement.getFirstElement("custom").getText();
+                        }
 
                         String msgId = message.getStanzaId();
                         String mediaURL = "";
@@ -224,7 +231,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                             intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_TYPE, message.getType().toString());
                             intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_JID, from);
                             intent.putExtra(FlutterXmppConnectionService.MEDIA_URL, mediaURL);
-
+                            intent.putExtra(FlutterXmppConnectionService.CUSTOM_TEXT, customText);
                             mApplicationContext.sendBroadcast(intent);
                         }
 
@@ -267,8 +274,6 @@ public class FlutterXmppConnection implements ConnectionListener {
                 } else if (action.equals(FlutterXmppConnectionService.JOIN_GROUPS_MESSAGE)) {
                     // Join all group
                     joinAllGroups(intent.getStringArrayListExtra(FlutterXmppConnectionService.GROUP_IDS));
-                } else if (action.equals(FlutterXmppConnectionService.CREATE_MUC)) {
-                    createMUC(intent.getStringExtra(Constants.GROUP_NAME), intent.getStringExtra(Constants.PERSISTENT));
                 }
             }
         };
@@ -278,7 +283,6 @@ public class FlutterXmppConnection implements ConnectionListener {
         filter.addAction(FlutterXmppConnectionService.READ_MESSAGE);
         filter.addAction(FlutterXmppConnectionService.GROUP_SEND_MESSAGE);
         filter.addAction(FlutterXmppConnectionService.JOIN_GROUPS_MESSAGE);
-        filter.addAction(FlutterXmppConnectionService.CREATE_MUC);
         mApplicationContext.registerReceiver(uiThreadMessageReceiver, filter);
 
     }
@@ -296,6 +300,47 @@ public class FlutterXmppConnection implements ConnectionListener {
 
             DeliveryReceiptRequest deliveryReceiptRequest = new DeliveryReceiptRequest();
             xmppMessage.addExtension(deliveryReceiptRequest);
+
+            if (isDm) {
+                xmppMessage.setTo(JidCreate.from(toJid));
+                mConnection.sendStanza(xmppMessage);
+            } else {
+                EntityBareJid jid = JidCreate.entityBareFrom(toJid);
+                xmppMessage.setTo(jid);
+                EntityBareJid mucJid = (EntityBareJid) JidCreate.bareFrom(toJid);
+                MultiUserChat muc = multiUserChatManager.getMultiUserChat(mucJid);
+                muc.sendMessage(xmppMessage);
+            }
+
+            if (FlutterXmppPlugin.DEBUG) {
+                Log.d(TAG, "Sent message from :" + xmppMessage.toXML(null) + "  sent.");
+            }
+
+        } catch (SmackException.NotConnectedException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void sendCustomMessage(String body, String toJid, String msgId, String customText, boolean isDm) {
+
+        try {
+
+            Message xmppMessage = new Message();
+            xmppMessage.setStanzaId(msgId);
+
+            xmppMessage.setBody(body);
+            xmppMessage.setType(isDm ? Message.Type.chat : Message.Type.groupchat);
+
+            DeliveryReceiptRequest deliveryReceiptRequest = new DeliveryReceiptRequest();
+            xmppMessage.addExtension(deliveryReceiptRequest);
+
+            StandardExtensionElement element = StandardExtensionElement.builder("CUSTOM", "urn:xmpp:custom")
+                    .addElement("custom", customText).build();
+            xmppMessage.addExtension(element);
 
             if (isDm) {
                 xmppMessage.setTo(JidCreate.from(toJid));
@@ -409,10 +454,9 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     }
 
-    private void createMUC(String groupName, String persistent) {
+    public static String createMUC(String groupName, String persistent) {
 
-        printLog("Creating a Group with Name " + groupName + ", persistent " + persistent);
-
+        String response = "FAIL";
         try {
 
             String roomId = groupName;
@@ -424,25 +468,24 @@ public class FlutterXmppConnection implements ConnectionListener {
             multiUserChat.create(Resourcepart.from(mUsername));
 
             if (persistent.equals(Constants.TRUE)) {
-                printLog("Creating a persistent room ");
                 Form form = multiUserChat.getConfigurationForm();
                 Form answerForm = form.createAnswerForm();
                 answerForm.setAnswer("muc#roomconfig_persistentroom", true);
                 multiUserChat.sendConfigurationForm(answerForm);
             }
 
+            response = "SUCCESS";
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return response;
 
     }
 
     private void joinAllGroups(ArrayList<String> allGroupsIds) {
 
         try {
-
-            printLog("joinAllGroups: size : " + allGroupsIds.size());
 
             for (String groupId : allGroupsIds) {
 
@@ -451,8 +494,6 @@ public class FlutterXmppConnection implements ConnectionListener {
                 String lastMsgTime = groupData[1];
 
                 String roomId = groupName + conferenceDomainName + "." + mHost;
-                printLog("joinAllGroups: join groupId: " + roomId);
-
                 MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(roomId));
                 Resourcepart resourcepart = Resourcepart.from(mUsername);
 

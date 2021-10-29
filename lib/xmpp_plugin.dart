@@ -1,7 +1,10 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/services.dart';
+
+import 'custom_element.dart';
 
 class XmppConnection {
   static const MethodChannel _channel = MethodChannel('flutter_xmpp/method');
@@ -100,7 +103,8 @@ class XmppConnection {
 
   Future<void> createMUC(String name, bool persistent) async {
     final params = {"group_name": name, "persistent": "$persistent"};
-    await _channel.invokeMethod('create_muc', params);
+    String response = await _channel.invokeMethod('create_muc', params);
+    print("response $response");
   }
 
   Future<void> joinMucGroups(List<String> allGroupsId) async {
@@ -111,6 +115,17 @@ class XmppConnection {
       printLogForMethodCall('join_muc_groups', params);
       await _channel.invokeMethod('join_muc_groups', params);
     }
+  }
+
+  Future<void> sendCustomMessage(
+      String toJid, String body, String id, String customString) async {
+    final params = {
+      "to_jid": toJid,
+      "body": body,
+      "id": id,
+      "customText": customString,
+    };
+    await _channel.invokeMethod('send_custom_message', params);
   }
 
   void printLogForMethodCall(String methodName, dynamic params) {
