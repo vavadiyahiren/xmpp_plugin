@@ -159,7 +159,7 @@ class _MyAppState extends State<MyApp> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    await createMUC("${_createMUCNamecontroller.text}", true);
+                    await createMUC("${_createMUCNamecontroller.text}", false);
                   },
                   child: Text('Create Group'),
                   style: ElevatedButton.styleFrom(
@@ -177,7 +177,7 @@ class _MyAppState extends State<MyApp> {
                   height: 10,
                 ),
                 customTextField(
-                  hintText: 'Enter Last Messag Timestamp',
+                  hintText: 'Enter Last Message Timestamp',
                   textEditController: _joinTimeController,
                 ),
                 SizedBox(

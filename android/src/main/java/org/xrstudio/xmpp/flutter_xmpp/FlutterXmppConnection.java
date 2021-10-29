@@ -255,8 +255,9 @@ public class FlutterXmppConnection implements ConnectionListener {
 
                 //Check if the Intents purpose is to send the message.
                 String action = intent.getAction();
-
-                if (action.equals(FlutterXmppConnectionService.SEND_MESSAGE) || action.equals(FlutterXmppConnectionService.GROUP_SEND_MESSAGE)) {
+                Log.d(TAG, " action " + action);
+                if (action.equals(FlutterXmppConnectionService.SEND_MESSAGE)
+                        || action.equals(FlutterXmppConnectionService.GROUP_SEND_MESSAGE)) {
                     //Send the message.
                     sendMessage(intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY),
                             intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_TO),
@@ -266,7 +267,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                 } else if (action.equals(FlutterXmppConnectionService.JOIN_GROUPS_MESSAGE)) {
                     // Join all group
                     joinAllGroups(intent.getStringArrayListExtra(FlutterXmppConnectionService.GROUP_IDS));
-                } else if (action.equals(Constants.CREATE_MUC)) {
+                } else if (action.equals(FlutterXmppConnectionService.CREATE_MUC)) {
                     createMUC(intent.getStringExtra(Constants.GROUP_NAME), intent.getStringExtra(Constants.PERSISTENT));
                 }
             }
@@ -277,6 +278,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         filter.addAction(FlutterXmppConnectionService.READ_MESSAGE);
         filter.addAction(FlutterXmppConnectionService.GROUP_SEND_MESSAGE);
         filter.addAction(FlutterXmppConnectionService.JOIN_GROUPS_MESSAGE);
+        filter.addAction(FlutterXmppConnectionService.CREATE_MUC);
         mApplicationContext.registerReceiver(uiThreadMessageReceiver, filter);
 
     }
@@ -422,7 +424,7 @@ public class FlutterXmppConnection implements ConnectionListener {
             multiUserChat.create(Resourcepart.from(mUsername));
 
             if (persistent.equals(Constants.TRUE)) {
-
+                printLog("Creating a persistent room ");
                 Form form = multiUserChat.getConfigurationForm();
                 Form answerForm = form.createAnswerForm();
                 answerForm.setAnswer("muc#roomconfig_persistentroom", true);
@@ -462,15 +464,8 @@ public class FlutterXmppConnection implements ConnectionListener {
                         .requestHistorySince((int) diff)
                         .build();
 
-                // Join function is Working on Android to iOS messaging
-
-                printLog("joinAllGroups diff " + diff);
-//                multiUserChat.createOrJoin(mucEnterConfiguration);
-                printLog("joinAllGroups: join for 2 " + groupName);
-
                 if (!multiUserChat.isJoined()) {
-                    printLog("joinAllGroups: join for " + roomId);
-                    multiUserChat.createOrJoin(mucEnterConfiguration);
+                    multiUserChat.join(mucEnterConfiguration);
                 }
 
             }

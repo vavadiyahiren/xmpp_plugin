@@ -271,7 +271,8 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
     private void createMUC(String group_name, String persistent) {
 
         if (FlutterXmppConnectionService.getState().equals(FlutterXmppConnection.ConnectionState.CONNECTED)) {
-            Intent intent = new Intent(Constants.CREATE_MUC);
+            System.out.println("Creating with  " + group_name + " , persistent " + persistent);
+            Intent intent = new Intent(FlutterXmppConnectionService.CREATE_MUC);
             intent.putExtra(Constants.GROUP_NAME, group_name);
             intent.putExtra(Constants.PERSISTENT, persistent);
             activity.sendBroadcast(intent);
