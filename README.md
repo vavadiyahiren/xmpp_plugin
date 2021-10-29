@@ -37,17 +37,31 @@ Future _onReceiveMessage(dynamic event) async {
 xmppConnection.logout();
 ```
 
-5. Joining/Creaging the MUC
+5. Creating a MUC
+
+```
+xmppConnection.createMUC("groupName", true);
+```
+
+6. Joining  MUC
 
 ```
 xmppConnection.joinMucGroups(List<String> allGroupsId)
 
 ```
 
-6. Sending group message 
+7. Sending group message 
 
 ```
 await xmppConnection.sendGroupMessageWithType("xyz@conference.domain", "Hi", "MSGID");
+```
+
+8. Sending Custom Message
+
+```
+await xmppConnection.sendCustomMessage("xyz@conference.domain", "Hi", "MSGID","customTest");
+await xmppConnection.sendCustomGroupMessage("xyz@conference.domain", "Hi", "MSGID","customText");
+
 ```
 
 # To be Added

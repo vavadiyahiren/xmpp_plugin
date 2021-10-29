@@ -22,3 +22,9 @@
 
 * Added Group chat for ios
 * Updated example file
+
+# 1.1.4
+
+* Added custom text message support for chat/groupchat
+* Seperated the group creation and join group methods
+
