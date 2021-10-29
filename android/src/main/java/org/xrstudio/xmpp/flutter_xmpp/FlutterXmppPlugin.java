@@ -81,6 +81,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                         String body = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY);
                         String idIncoming = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS);
                         String type = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_TYPE);
+                        String customText = intent.getStringExtra(FlutterXmppConnectionService.CUSTOM_TEXT);
 
                         String senderJid = intent.hasExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_JID)
                                 ? intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_JID) : "";
@@ -92,6 +93,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                         build.put("body", body);
                         build.put("msgtype", type);
                         build.put("senderJid", senderJid);
+                        build.put("customText", customText);
 
                         events.success(build);
 
@@ -144,6 +146,14 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
         } else {
             //TODO : handle connection failure events.
         }
+    }
+
+    public static void send_custom_message(String body, String toUser, String msgId, String customText) {
+        FlutterXmppConnection.sendCustomMessage(body, toUser, msgId, customText, true);
+    }
+
+    public static void send_customgroup_message(String body, String toUser, String msgId, String customText) {
+        FlutterXmppConnection.sendCustomMessage(body, toUser, msgId, customText, false);
     }
 
     // ****************************************
@@ -205,7 +215,6 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
         } else if (call.method.equals("send_message") || call.method.equals("send_group_message")) {
 
             // Handle sending message.
-
             if (!call.hasArgument("to_jid") || !call.hasArgument("body") || !call.hasArgument("id")) {
                 result.error("MISSING", "Missing argument to_jid / body / id chat.", null);
             }
@@ -261,22 +270,48 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             String group_name = call.argument("group_name");
             String persistent = call.argument("persistent");
 
-            createMUC(group_name, persistent);
+            String response = createMUC(group_name, persistent);
+            result.success(response);
+
+        } else if (call.method.equals(Constants.CUSTOM_MESSAGE)) {
+
+            // Handle sending message.
+            if (!call.hasArgument("to_jid") || !call.hasArgument("body") || !call.hasArgument("id")) {
+                result.error("MISSING", "Missing argument to_jid / body / id chat.", null);
+            }
+
+            String to_jid = call.argument("to_jid");
+            String body = call.argument("body");
+            String id = call.argument("id");
+            String customString = call.argument("customText");
+
+            send_custom_message(body, to_jid, id, customString);
+
+            result.success("SUCCESS");
+
+        } else if (call.method.equals(Constants.CUSTOM_GROUP_MESSAGE)) {
+
+            // Handle sending message.
+            if (!call.hasArgument("to_jid") || !call.hasArgument("body") || !call.hasArgument("id")) {
+                result.error("MISSING", "Missing argument to_jid / body / id chat.", null);
+            }
+
+            String to_jid = call.argument("to_jid");
+            String body = call.argument("body");
+            String id = call.argument("id");
+            String customString = call.argument("customText");
+
+            send_customgroup_message(body, to_jid, id, customString);
+
+            result.success("SUCCESS");
 
         } else {
             result.notImplemented();
         }
     }
 
-    private void createMUC(String group_name, String persistent) {
-
-        if (FlutterXmppConnectionService.getState().equals(FlutterXmppConnection.ConnectionState.CONNECTED)) {
-            Intent intent = new Intent(Constants.CREATE_MUC);
-            intent.putExtra(Constants.GROUP_NAME, group_name);
-            intent.putExtra(Constants.PERSISTENT, persistent);
-            activity.sendBroadcast(intent);
-        }
-
+    private String createMUC(String group_name, String persistent) {
+        return FlutterXmppConnection.createMUC(group_name, persistent);
     }
 
     // login
