@@ -96,7 +96,16 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             if let vData = call.arguments as? [String : Any] {
                 let arrRooms = vData["all_groups_ids"] as? [String] ?? []
                 for vRoom  in arrRooms {
-                    APP_DELEGATE.objXMPP.createRoom(roomName: vRoom, withXMPP: self.objXMPP, withStrem: self.objXMPP.xmppStream)
+
+                    let arrRoomCompo : [String] = vRoom.components(separatedBy: ",")
+                    let vRoomName : String = arrRoomCompo.first ?? ""
+                    let vRoomTS : String = arrRoomCompo.last ?? "0"
+                    if vRoomName.isEmpty { continue }
+                    let vRoomTSLongFormat : Int64 = Int64(vRoomTS) ?? 0
+                    
+                    //APP_DELEGATE.objXMPP.createRoom(roomName: vRoom, withXMPP: self.objXMPP, withStrem: self.objXMPP.xmppStream)
+                    APP_DELEGATE.objXMPP.joinRoom(roomName: vRoomName, time: vRoomTSLongFormat, withStrem: self.objXMPP.xmppStream)
+
                 }
                 result("SUCCESS")
             } else {
