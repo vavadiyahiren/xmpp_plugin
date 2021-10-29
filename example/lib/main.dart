@@ -76,6 +76,7 @@ class _MyAppState extends State<MyApp> {
   TextEditingController _joinMUCTextController = TextEditingController();
   TextEditingController _joinTimeController = TextEditingController();
   TextEditingController _messageController = TextEditingController();
+  TextEditingController _custommessageController = TextEditingController();
   TextEditingController _toNameController = TextEditingController();
 
   List<CustomElement> customElements = [
@@ -223,6 +224,13 @@ class _MyAppState extends State<MyApp> {
                 SizedBox(
                   height: 10,
                 ),
+                customTextField(
+                  hintText: "Enter Custom Message",
+                  textEditController: _custommessageController,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
                 DropdownButton(
                   value: dropdownvalue,
                   icon: Icon(Icons.keyboard_arrow_down),
@@ -244,7 +252,6 @@ class _MyAppState extends State<MyApp> {
                 ElevatedButton(
                   onPressed: () async {
                     int id = DateTime.now().millisecondsSinceEpoch;
-
                     (dropdownvalue == "Chat")
                         ? await flutterXmpp.sendMessageWithType(
                             "${_toNameController.text}",
@@ -267,11 +274,17 @@ class _MyAppState extends State<MyApp> {
                 ElevatedButton(
                   onPressed: () async {
                     int id = DateTime.now().millisecondsSinceEpoch;
-                    await flutterXmpp.sendCustomMessage(
-                        "${_toNameController.text}",
-                        "${_messageController.text}",
-                        "$id",
-                        "test");
+                    (dropdownvalue == "Chat")
+                        ? await flutterXmpp.sendCustomMessage(
+                            "${_toNameController.text}",
+                            "${_messageController.text}",
+                            "$id",
+                            "${_custommessageController.text}")
+                        : await flutterXmpp.sendCustomGroupMessage(
+                            "${_toNameController.text}",
+                            "${_messageController.text}",
+                            "$id",
+                            "${_custommessageController.text}");
                   },
                   child: Text(" Send Custom"),
                   style: ElevatedButton.styleFrom(
@@ -322,6 +335,9 @@ class _MyAppState extends State<MyApp> {
           ),
           Text(
             "msgtype: ${event.msgtype}",
+          ),
+          Text(
+            "customText: ${event.customText}",
           ),
           Divider(
             color: Colors.black,

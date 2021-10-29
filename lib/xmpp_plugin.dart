@@ -131,4 +131,15 @@ class XmppConnection {
   void printLogForMethodCall(String methodName, dynamic params) {
     log('call method to app from flutter methodName: $methodName: params: $params');
   }
+
+  Future<void> sendCustomGroupMessage(
+      String toJid, String body, String id, String customString) async {
+    final params = {
+      "to_jid": toJid,
+      "body": body,
+      "id": id,
+      "customText": customString,
+    };
+    await _channel.invokeMethod('send_customgroup_message', params);
+  }
 }

@@ -152,6 +152,10 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
         FlutterXmppConnection.sendCustomMessage(body, toUser, msgId, customText, true);
     }
 
+    public static void send_customgroup_message(String body, String toUser, String msgId, String customText) {
+        FlutterXmppConnection.sendCustomMessage(body, toUser, msgId, customText, false);
+    }
+
     // ****************************************
     // stream
     @Override
@@ -282,6 +286,22 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             String customString = call.argument("customText");
 
             send_custom_message(body, to_jid, id, customString);
+
+            result.success("SUCCESS");
+
+        } else if (call.method.equals(Constants.CUSTOM_GROUP_MESSAGE)) {
+
+            // Handle sending message.
+            if (!call.hasArgument("to_jid") || !call.hasArgument("body") || !call.hasArgument("id")) {
+                result.error("MISSING", "Missing argument to_jid / body / id chat.", null);
+            }
+
+            String to_jid = call.argument("to_jid");
+            String body = call.argument("body");
+            String id = call.argument("id");
+            String customString = call.argument("customText");
+
+            send_customgroup_message(body, to_jid, id, customString);
 
             result.success("SUCCESS");
 
