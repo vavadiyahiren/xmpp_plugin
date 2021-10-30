@@ -351,21 +351,7 @@ extension XMPPController {
     func xmppStream(_ sender: XMPPStream, didReceive message: XMPPMessage) {
         printLog("\(#function) | didReceive message: \(message)")
         
-        let vMessType : String = (message.type ?? "").trim()
-        /*switch vMessType {
-        case xmppChatType.CHAT:
-            self.handel_ChatMessage(message)
-            break
-            
-        case xmppChatType.NORMAL:
-            self.handel_ChatMessage(message)
-            break
-            
-        default:
-            self.handel_ChatMessage(message)
-            break
-        }*/
-        //self.handel_ChatMessage(message, withType: vMessType, withStrem: sender)
+        let vMessType : String = (message.type ?? xmppChatType.NORMAL).trim()
         switch vMessType {
         case xmppChatType.NORMAL:
             self.handelNormalChatMessage(message, withStrem: sender)

@@ -93,5 +93,5 @@ extension String {
 }
 
 func printLog(_ message : String) {
-    print(message)
+    //print(message)
 }
