@@ -69,9 +69,12 @@ class _MyAppState extends State<MyApp> {
   String dropdownvalue = 'Chat';
   var items = ['Chat', 'Group Chat'];
 
-  TextEditingController _userNameController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _hostController = TextEditingController();
+  // TextEditingController _userNameController = TextEditingController();
+  // TextEditingController _passwordController = TextEditingController();
+  // TextEditingController _hostController = TextEditingController();
+  TextEditingController _userNameController = TextEditingController(text: "test");
+  TextEditingController _passwordController = TextEditingController(text: "test");
+  TextEditingController _hostController = TextEditingController(text: "test.chat.fish");
   TextEditingController _createMUCNamecontroller = TextEditingController();
   TextEditingController _toReceiptController = TextEditingController();
   TextEditingController _msgIdController = TextEditingController();
@@ -253,6 +256,7 @@ class _MyAppState extends State<MyApp> {
                   height: 10,
                 ),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     ElevatedButton(
                       onPressed: () async {

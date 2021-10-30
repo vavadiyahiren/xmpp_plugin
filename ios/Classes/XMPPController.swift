@@ -365,7 +365,14 @@ extension XMPPController {
             self.handel_ChatMessage(message)
             break
         }*/
-        self.handel_ChatMessage(message, withType: vMessType)
+        //self.handel_ChatMessage(message, withType: vMessType, withStrem: sender)
+        switch vMessType {
+        case xmppChatType.NORMAL:
+            self.handelNormalChatMessage(message, withStrem: sender)
+            
+        default:
+            self.handel_ChatMessage(message, withType: vMessType, withStrem: sender)
+        }
     }
     
     func xmppStream(_ sender: XMPPStream, didFailToSend message: XMPPMessage, error: Error) {
@@ -400,29 +407,13 @@ extension XMPPController : XMPPStreamManagementDelegate {
             guard let vMessId = value as? String  else {
                 print("\(#function) | getting Invalid Message Id | \(value)")
                 continue
-            }
-            var vMsgType : String = "normal"
-            if vMessId.contains("ack") {
-                vMsgType = "ack"
-            }
-            else if vMessId.contains("read") {
-                vMsgType = "ack_read"
-            }
-            else if vMessId.contains("delhivery") {
-                vMsgType = "ack_delhivery"
-            }
-            let vFrom : String = ""
-            let vBody : String = ""
-            let dicDate = ["type" : "incoming",
-                           "id" : vMessId,
-                           "from" : vFrom,
-                           "body" : vBody,
-                           "msgtype" : vMsgType]
-            APP_DELEGATE.objEventData!(dicDate)
+            }            
+            self.sendAck(vMessId)
         }
     }    
 }
 
+//MARK: - Extension
 extension XMPPMessage {
     public func getMessageType() -> String? {
         return self.type
@@ -486,51 +477,4 @@ extension DDXMLElement {
         value = vInfo.trim()
         return value
     }
-}
-//MARK:- Enum's
-enum XMPPControllerError: Error {
-    case wrongUserJID
-}
-enum xmppConnectionStatus : Int {
-    case None
-    case Processing
-    case Sucess
-    case Disconnect
-    case Failed
-    
-    var value: Int {
-        return rawValue
-    }
-}
-enum Status {
-    case Online
-    case Offline
-}
-
-
-//MARK:- Struct's
-struct xmppChatType {
-    static let GROUPCHAT : String = "groupchat"
-    static let CHAT : String = "chat"
-    static let NORMAL : String = "normal"
-}
-struct xmppConstants {
-    static let Resource : String = "iOS"
-    static let BODY : String = "body"
-    static let ID : String = "id"
-    static let TO : String = "to"
-    static let FROM : String = "from"
-}
-
-
-let default_isPersistent : Bool = false
-struct groupInfo {
-    var name : String = ""
-    var isPersistent : Bool = default_isPersistent
-}
-
-struct eleCustom {
-    static let Name : String = "CUSTOM"
-    static let Namespace : String = "urn:xmpp:custom"
-    static let Kay : String = "custom"
 }

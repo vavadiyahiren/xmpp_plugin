@@ -11,7 +11,7 @@ import XMPPFramework
 
 extension XMPPController {
     
-    func handel_ChatMessage(_ message: XMPPMessage, withType type : String) {
+    func handel_ChatMessage(_ message: XMPPMessage, withType type : String, withStrem : XMPPStream) {
         if APP_DELEGATE.objEventData == nil {
             print("\(#function) | Nil data of APP_DELEGATE.objEventData")
             return
@@ -36,5 +36,21 @@ extension XMPPController {
                        "msgtype" : vMessType,
                        "senderJid": objMess.senderJid] as [String : Any]
         APP_DELEGATE.objEventData!(dicDate)
+        
+//        ///Send Delivery Ack
+//        if (type == xmppChatType.CHAT){
+//            self.senMessDeliveryReceipt(withMessage: objMess, withStrem: withStrem /*APP_DELEGATE.objXMPP.xmppStream*/)
+//        }
+    }
+    
+    func handelNormalChatMessage(_ message: XMPPMessage, withStrem : XMPPStream) {
+        if message.hasReceiptResponse {
+            guard let messId = message.receiptResponseID else {
+                print("\(#function) | ReceiptResponseId is empty/nil.")
+                return
+            }
+            self.senAckDeliveryReceipt(withMessageId: messId)
+            return
+        }
     }
 }
