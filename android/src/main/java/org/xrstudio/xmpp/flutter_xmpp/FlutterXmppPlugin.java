@@ -79,16 +79,16 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
 
                         String from = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_FROM_JID);
                         String body = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY);
-                        String idIncoming = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS);
+                        String msgId = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS);
                         String type = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_TYPE);
                         String customText = intent.getStringExtra(FlutterXmppConnectionService.CUSTOM_TEXT);
-
+                        String metaInfo = intent.getStringExtra(FlutterXmppConnectionService.META_TEXT);
                         String senderJid = intent.hasExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_JID)
                                 ? intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_JID) : "";
 
                         Map<String, Object> build = new HashMap<>();
-                        build.put("type", "incoming");
-                        build.put("id", idIncoming);
+                        build.put("type", metaInfo);
+                        build.put("id", msgId);
                         build.put("from", from);
                         build.put("body", body);
                         build.put("msgtype", type);
@@ -156,6 +156,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
         FlutterXmppConnection.sendCustomMessage(body, toUser, msgId, customText, false);
     }
 
+
     // ****************************************
     // stream
     @Override
@@ -209,7 +210,6 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
 
             // Doing logout from xmpp.
             logout();
-
             result.success("SUCCESS");
 
         } else if (call.method.equals("send_message") || call.method.equals("send_group_message")) {
@@ -302,6 +302,16 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             String customString = call.argument("customText");
 
             send_customgroup_message(body, to_jid, id, customString);
+
+            result.success("SUCCESS");
+
+        } else if (call.method.equals(Constants.SEND_DELIVERY_ACK)) {
+
+            String toJid = call.argument("toJid");
+            String msgId = call.argument("msgId");
+            String receiptId = call.argument("receiptId");
+
+            FlutterXmppConnection.send_delivery_receipt(toJid, msgId,receiptId);
 
             result.success("SUCCESS");
 

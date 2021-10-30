@@ -142,4 +142,10 @@ class XmppConnection {
     };
     await _channel.invokeMethod('send_customgroup_message', params);
   }
+
+  Future<void> sendDelieveryReceipt(
+      String toJid, String msgId, String receiptID) async {
+    final params = {"toJid": toJid, "msgId": msgId, "receiptId": receiptID};
+    await _channel.invokeMethod('send_delivery_receipt', params);
+  }
 }

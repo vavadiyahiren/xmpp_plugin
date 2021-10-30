@@ -37,6 +37,12 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.jivesoftware.smackx.receipts.DeliveryReceipt;
+import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
+import org.jivesoftware.smackx.receipts.ReceiptReceivedListener;
+import org.jivesoftware.smackx.receipts.DeliveryReceiptManager.AutoReceiptMode;
+import org.jivesoftware.smackx.receipts.DeliveryReceiptRequest;
+
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 
@@ -179,7 +185,8 @@ public class FlutterXmppConnection implements ConnectionListener {
                         intent.putExtra(FlutterXmppConnectionService.BUNDLE_FROM_JID, ackMessage.getTo().toString());
                         intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY, ackMessage.getBody());
                         intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS, ackMessage.getStanzaId());
-                        intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_TYPE, "normal");
+                        intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_TYPE, ackMessage.getType().toString());
+                        intent.putExtra(FlutterXmppConnectionService.META_TEXT, Constants.ACK);
                         mApplicationContext.sendBroadcast(intent);
                     }
 
@@ -196,46 +203,42 @@ public class FlutterXmppConnection implements ConnectionListener {
                 try {
 
                     Message message = (Message) packet;
+                    String META_TEXT = "Message";
                     String body = message.getBody();
-
-                    if (!body.isEmpty()) {
-
-                        String from = message.getFrom().toString();
-                        String contactJid = "";
-
-                        if (from.toLowerCase().contains("/")) {
-                            contactJid = from.split("/")[0];
-                            if (FlutterXmppPlugin.DEBUG) {
-                                Log.d(TAG, "The real jid is :" + contactJid + " || The message is from :" + from);
-                            }
-                        } else {
-                            contactJid = from;
-                        }
-                        String customText = "";
-                        StandardExtensionElement customElement = (StandardExtensionElement) message
-                                .getExtension("urn:xmpp:custom");
-                        if (customElement != null && customElement.getFirstElement("custom") != null) {
-                            customText = customElement.getFirstElement("custom").getText();
-                        }
-
-                        String msgId = message.getStanzaId();
-                        String mediaURL = "";
-
-                        if (!from.equals(mUsername)) {
-                            //Bundle up the intent and send the broadcast.
-                            Intent intent = new Intent(FlutterXmppConnectionService.RECEIVE_MESSAGE);
-                            intent.setPackage(mApplicationContext.getPackageName());
-                            intent.putExtra(FlutterXmppConnectionService.BUNDLE_FROM_JID, contactJid);
-                            intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY, body);
-                            intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS, msgId);
-                            intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_TYPE, message.getType().toString());
-                            intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_JID, from);
-                            intent.putExtra(FlutterXmppConnectionService.MEDIA_URL, mediaURL);
-                            intent.putExtra(FlutterXmppConnectionService.CUSTOM_TEXT, customText);
-                            mApplicationContext.sendBroadcast(intent);
-                        }
-
+                    String from = message.getFrom().getLocalpartOrNull().toString();
+                    String msgId = message.getStanzaId();
+                    String customText = "";
+                    StandardExtensionElement customElement = (StandardExtensionElement) message
+                            .getExtension("urn:xmpp:custom");
+                    if (customElement != null && customElement.getFirstElement("custom") != null) {
+                        customText = customElement.getFirstElement("custom").getText();
                     }
+
+                    if (message.hasExtension(DeliveryReceipt.ELEMENT, DeliveryReceipt.NAMESPACE)) {
+                        DeliveryReceipt dr = DeliveryReceipt.from((Message) message);
+                        msgId = dr.getId();
+                        META_TEXT = Constants.DELIVERY_ACK;
+                        System.out.println("Delivery receipt received" + dr.getId());
+                    }
+
+                    String mediaURL = "";
+
+                    if (!from.equals(mUsername)) {
+                        //Bundle up the intent and send the broadcast.
+                        Intent intent = new Intent(FlutterXmppConnectionService.RECEIVE_MESSAGE);
+                        intent.setPackage(mApplicationContext.getPackageName());
+                        intent.putExtra(FlutterXmppConnectionService.BUNDLE_FROM_JID, from);
+                        intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY, body);
+                        intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS, msgId);
+                        intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_TYPE, message.getType().toString());
+                        intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_JID, from);
+                        intent.putExtra(FlutterXmppConnectionService.MEDIA_URL, mediaURL);
+                        intent.putExtra(FlutterXmppConnectionService.CUSTOM_TEXT, customText);
+                        intent.putExtra(FlutterXmppConnectionService.META_TEXT, META_TEXT);
+
+                        mApplicationContext.sendBroadcast(intent);
+                    }
+
                 } catch (Exception e) {
                     Log.d(TAG, "Main Exception : " + e.getLocalizedMessage());
                 }
@@ -298,8 +301,7 @@ public class FlutterXmppConnection implements ConnectionListener {
             xmppMessage.setBody(body);
             xmppMessage.setType(isDm ? Message.Type.chat : Message.Type.groupchat);
 
-            DeliveryReceiptRequest deliveryReceiptRequest = new DeliveryReceiptRequest();
-            xmppMessage.addExtension(deliveryReceiptRequest);
+            DeliveryReceiptRequest.addTo(xmppMessage);
 
             if (isDm) {
                 xmppMessage.setTo(JidCreate.from(toJid));
@@ -334,9 +336,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 
             xmppMessage.setBody(body);
             xmppMessage.setType(isDm ? Message.Type.chat : Message.Type.groupchat);
-
-            DeliveryReceiptRequest deliveryReceiptRequest = new DeliveryReceiptRequest();
-            xmppMessage.addExtension(deliveryReceiptRequest);
+            DeliveryReceiptRequest.addTo(xmppMessage);
 
             StandardExtensionElement element = StandardExtensionElement.builder("CUSTOM", "urn:xmpp:custom")
                     .addElement("custom", customText).build();
@@ -366,6 +366,27 @@ public class FlutterXmppConnection implements ConnectionListener {
         }
     }
 
+    public static void send_delivery_receipt(String toJid, String msgId,String receiptId) {
+
+        try {
+
+            if (!toJid.contains(mHost)) {
+                toJid = toJid + "@" + mHost;
+            }
+
+            Message deliveryMessage = new Message();
+            deliveryMessage.setStanzaId(receiptId);
+            deliveryMessage.setTo(JidCreate.from(toJid));
+
+            DeliveryReceipt deliveryReceipt = new DeliveryReceipt(msgId);
+            deliveryMessage.addExtension(deliveryReceipt);
+
+            mConnection.sendStanza(deliveryMessage);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public void disconnect() {
         if (FlutterXmppPlugin.DEBUG) {
@@ -405,7 +426,6 @@ public class FlutterXmppConnection implements ConnectionListener {
         Log.d(TAG, "Flutter Authenticated Successfully");
 
         multiUserChatManager = MultiUserChatManager.getInstanceFor(connection);
-
         FlutterXmppConnectionService.sConnectionState = ConnectionState.CONNECTED;
 //        showContactListActivityWhenAuthenticated();
 

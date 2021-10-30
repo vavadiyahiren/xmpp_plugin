@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_xmpp/custom_element.dart';
-import 'package:flutter_xmpp/xmpp_plugin.dart';
+import 'package:xmpp_plugin/custom_element.dart';
+import 'package:xmpp_plugin/xmpp_plugin.dart';
 import 'package:flutter_xmpp_example/event.dart';
 
 void main() {
@@ -73,7 +73,9 @@ class _MyAppState extends State<MyApp> {
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _hostController = TextEditingController();
   TextEditingController _createMUCNamecontroller = TextEditingController();
-
+  TextEditingController _toReceiptController = TextEditingController();
+  TextEditingController _msgIdController = TextEditingController();
+  TextEditingController _receiptIdController = TextEditingController();
   TextEditingController _joinMUCTextController = TextEditingController();
   TextEditingController _joinTimeController = TextEditingController();
   TextEditingController _messageController = TextEditingController();
@@ -250,52 +252,91 @@ class _MyAppState extends State<MyApp> {
                 SizedBox(
                   height: 10,
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    int id = DateTime.now().millisecondsSinceEpoch;
-                    (dropdownvalue == "Chat")
-                        ? await flutterXmpp.sendMessageWithType(
-                            "${_toNameController.text}",
-                            "${_messageController.text}",
-                            "$id",
-                          )
-                        : await flutterXmpp.sendGroupMessageWithType(
-                            "${_toNameController.text}",
-                            "${_messageController.text}",
-                            "$id",
-                          );
-                  },
-                  child: Text(" Send "),
-                  style: ElevatedButton.styleFrom(
-                    primary: (dropdownvalue == "Chat")
-                        ? Colors.black
-                        : Colors.deepPurple,
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    int id = DateTime.now().millisecondsSinceEpoch;
-                    (dropdownvalue == "Chat")
-                        ? await flutterXmpp.sendCustomMessage(
-                            "${_toNameController.text}",
-                            "${_messageController.text}",
-                            "$id",
-                            "${_custommessageController.text}")
-                        : await flutterXmpp.sendCustomGroupMessage(
-                            "${_toNameController.text}",
-                            "${_messageController.text}",
-                            "$id",
-                            "${_custommessageController.text}");
-                  },
-                  child: Text(" Send Custom"),
-                  style: ElevatedButton.styleFrom(
-                    primary: (dropdownvalue == "Chat")
-                        ? Colors.black
-                        : Colors.deepPurple,
-                  ),
+                Row(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        int id = DateTime.now().millisecondsSinceEpoch;
+                        (dropdownvalue == "Chat")
+                            ? await flutterXmpp.sendMessageWithType(
+                                "${_toNameController.text}",
+                                "${_messageController.text}",
+                                "$id",
+                              )
+                            : await flutterXmpp.sendGroupMessageWithType(
+                                "${_toNameController.text}",
+                                "${_messageController.text}",
+                                "$id",
+                              );
+                      },
+                      child: Text(" Send "),
+                      style: ElevatedButton.styleFrom(
+                        primary: (dropdownvalue == "Chat")
+                            ? Colors.black
+                            : Colors.deepPurple,
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        int id = DateTime.now().millisecondsSinceEpoch;
+                        (dropdownvalue == "Chat")
+                            ? await flutterXmpp.sendCustomMessage(
+                                "${_toNameController.text}",
+                                "${_messageController.text}",
+                                "$id",
+                                "${_custommessageController.text}")
+                            : await flutterXmpp.sendCustomGroupMessage(
+                                "${_toNameController.text}",
+                                "${_messageController.text}",
+                                "$id",
+                                "${_custommessageController.text}");
+                      },
+                      child: Text(" Send Custom Message "),
+                      style: ElevatedButton.styleFrom(
+                        primary: (dropdownvalue == "Chat")
+                            ? Colors.black
+                            : Colors.deepPurple,
+                      ),
+                    ),
+                  ],
                 ),
                 SizedBox(
                   height: 15,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                customTextField(
+                  hintText: "To",
+                  textEditController: _toReceiptController,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                customTextField(
+                  hintText: "Enter Message Id",
+                  textEditController: _msgIdController,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                customTextField(
+                  hintText: "Enter Receipt Id",
+                  textEditController: _receiptIdController,
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await flutterXmpp.sendDelieveryReceipt(
+                      "${_toReceiptController.text}",
+                      "${_msgIdController.text}",
+                      "${_receiptIdController.text}",
+                    );
+                  },
+                  child: Text(" Send Receipt "),
+                  style: ElevatedButton.styleFrom(primary: Colors.black),
                 ),
                 Container(
                   height: 500,

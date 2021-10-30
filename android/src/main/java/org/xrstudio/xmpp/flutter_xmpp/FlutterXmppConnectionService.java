@@ -24,6 +24,7 @@ public class FlutterXmppConnectionService extends Service {
     public static final String BUNDLE_TO = "b_to";
     public static final String MEDIA_URL = "media_url";
     public static final String CUSTOM_TEXT = "custom_text";
+    public static final String META_TEXT = "meta_text";
     public static final String OUTGOING_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.outgoinmessage";
     public static final String BUNDLE_TO_JID = "c_from";
     public static final String GROUP_SEND_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.sendGroupMessage";
