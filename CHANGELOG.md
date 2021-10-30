@@ -14,17 +14,21 @@
 
 * Added home page
 
-# 1.1.2
+## 1.1.2
 
 * Filename Change under lib
 
-# 1.1.3
+## 1.1.3
 
 * Added Group chat for ios
 * Updated example file
 
-# 1.1.4
+## 1.1.4
 
 * Added custom text message support for chat/groupchat
 * Seperated the group creation and join group methods
+
+## 1.1.5
+
+* Added Delivery Receipt support
 

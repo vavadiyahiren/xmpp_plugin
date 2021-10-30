@@ -21,6 +21,7 @@ await xmppConnection.login();
 
 ```
 await xmppConnection.sendMessageWithType("xyz@domain", "Hi", "MSGID");
+await xmppConnection.sendGroupMessageWithType("xyz@conference.domain", "Hi", "MSGID");
 ```
 
 3. Receive message from server
@@ -50,18 +51,18 @@ xmppConnection.joinMucGroups(List<String> allGroupsId)
 
 ```
 
-7. Sending group message 
+7. Sending Custom Message
 
 ```
-await xmppConnection.sendGroupMessageWithType("xyz@conference.domain", "Hi", "MSGID");
-```
-
-8. Sending Custom Message
-
-```
-await xmppConnection.sendCustomMessage("xyz@conference.domain", "Hi", "MSGID","customTest");
+await xmppConnection.sendCustomMessage("xyz@domain", "Hi", "MSGID","customTest");
 await xmppConnection.sendCustomGroupMessage("xyz@conference.domain", "Hi", "MSGID","customText");
 
+```
+
+9. Sending Delivery Receipt
+
+```
+await flutterXmpp.sendDelieveryReceipt("xyz@domain", "Received-Message-Id", "Receipt-Id");
 ```
 
 # To be Added

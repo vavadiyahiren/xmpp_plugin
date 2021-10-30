@@ -205,7 +205,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                     Message message = (Message) packet;
                     String META_TEXT = "Message";
                     String body = message.getBody();
-                    String from = message.getFrom().getLocalpartOrNull().toString();
+                    String from = message.getFrom().toString();
                     String msgId = message.getStanzaId();
                     String customText = "";
                     StandardExtensionElement customElement = (StandardExtensionElement) message
