@@ -15,7 +15,7 @@ PODS:
     - KissXML/Core
   - KissXML/Core (5.3.1)
   - libidn (1.35)
-  - xmpp_plugin (1.1.4):
+  - xmpp_plugin (1.1.5):
     - Flutter
     - XMPPFramework/Swift
   - XMPPFramework/default (4.0.0):
@@ -51,7 +51,7 @@ SPEC CHECKSUMS:
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   KissXML: 5c8e0f2e8b9f071d3e1ae123dec3eb5da615c10c
   libidn: e4576a956b797c584c77aaedfc6e3dd639b61bdc
-  xmpp_plugin: 2fff3af24f24795e11e1b0d1ee989b420c31724f
+  xmpp_plugin: 158545316e2fca26911f06e1baefba9754f814f7
   XMPPFramework: 5d31ff9f73dce031b24bc49bcf88093627a3a86e
 
 PODFILE CHECKSUM: 9be9b641a35438b4176d8396dbc76c709ae823ae
