@@ -171,9 +171,6 @@ extension XMPPController : XMPPRoomDelegate {
         if let value = sender.myRoomJID?.bareJID.user {
             vRoom = "\(value)"
             printLog("\(#function) | XMPPRoom Created | XMPPRoom-Name: \(vRoom)")
-            //self.joinRoom(roomName: vRoom, time: 0, withStrem: XMPPStream)
-            
-            //sender.fetchConfigurationForm()
         } else {
             print("\(#function) | XMPPRoom Creating Error | XMPPRoom-Name: \(vRoom)")
         }
@@ -287,8 +284,6 @@ extension XMPPController : XMPPRoomDelegate {
             print("\(#function) | XMPP UserId is nil/empty")
             return
         }
-        
-        //let xmppJID = XMPPJID(string: roomName)
         guard let xmppJID = XMPPJID(string: get_RoomName(roomName: roomName, withStrem: withStrem)) else {
             print("\(#function) | Invalid XMPPRoom Jid: \(roomName)")
             return
@@ -317,17 +312,18 @@ extension XMPPController : XMPPRoomDelegate {
         var vHost : String = ""
         if let value = withStrem.hostName { vHost = value.trim() }
         
-        if roomName.contains("conference") {
+        let valueConference : String = "conference"
+        if roomName.contains(valueConference) {
             return roomName
         }
-        return [roomName, "@conference.", vHost].joined(separator: "")
+        return [roomName, "@", valueConference, ".", vHost].joined(separator: "")
     }
 
     
     func getXMPPRoomHistiry(withTime time : Int64) -> XMLElement {
         //Get Message History. set value to return message.
         let history = XMLElement.init(name: "history")
-        //history.addAttribute(withName: "maxstanzas", stringValue: "1000") //Set Value to return
+        //history.addAttribute(withName: "maxstanzas", stringValue: "1000") //Set Value to return number of message
         
         //Time send in Second | Source:
         let currentTime : Int64 = Int64(NSDate().timeIntervalSince1970 * 1000)

@@ -25,9 +25,9 @@ extension XMPPController {
                      withStrem : XMPPStream) {
         let vJid : XMPPJID? = XMPPJID(string: reciverJID)
         
-        let vChatType : String = isGroup ? "groupchat" : "chat"
+        let vChatType : String = isGroup ? xmppChatType.GROUPCHAT : xmppChatType.CHAT
         
-        let xmppMessage = XMPPMessage.init(type: vChatType, to: vJid)
+        let xmppMessage = XMPPMessage.init(type: vChatType.lowercased(), to: vJid)
         xmppMessage.addAttribute(withName: "xmlns", stringValue: "jabber:client")
         xmppMessage.addAttribute(withName: "id", stringValue: messageId)
         xmppMessage.addBody(messageBody)
@@ -74,7 +74,7 @@ extension XMPPController {
         }
         let vFrom : String = ""
         let vBody : String = ""
-        let dicDate = ["type" : xmppConstants.ACK,
+        let dicDate = ["type" : pluginMessType.ACK,
                        "id" : vMessId,
                        "from" : vFrom,
                        "body" : vBody,
@@ -89,7 +89,7 @@ extension XMPPController {
         let vMessId = withMessageId.trim()
         let vFrom : String = ""
         let vBody : String = ""
-        let dicDate = ["type" : xmppConstants.ACK_DELIVERY,
+        let dicDate = ["type" : pluginMessType.ACK_DELIVERY,
                        "id" : vMessId,
                        "from" : vFrom,
                        "body" : vBody,
@@ -104,7 +104,7 @@ extension XMPPController {
     //MARK: -
     private func getCustomELE(withElementName name :String) -> XMLElement? {
         if name.trim().isEmpty {
-            print("\(#function) | custom element name is empty/nil.")
+            //print("\(#function) | custom element '\(name)' is empty/nil.")
             return nil
         }
         let ele: XMLElement = XMLElement.init(name: eleCustom.Name, xmlns: eleCustom.Namespace)

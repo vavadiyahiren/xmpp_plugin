@@ -28,7 +28,7 @@ extension XMPPController {
         
         let customElement : String = message.getCustomElementInfo(withKey: eleCustom.Kay)
         let vMessType : String = type
-        let dicDate = ["type" : "incoming",
+        let dicDate = ["type" : pluginMessType.Message,
                        "id" : objMess.id,
                        "from" : objMess.senderJid,
                        "body" : objMess.message,
@@ -36,11 +36,6 @@ extension XMPPController {
                        "msgtype" : vMessType,
                        "senderJid": objMess.senderJid] as [String : Any]
         APP_DELEGATE.objEventData!(dicDate)
-        
-//        ///Send Delivery Ack
-//        if (type == xmppChatType.CHAT){
-//            self.senMessDeliveryReceipt(withMessage: objMess, withStrem: withStrem /*APP_DELEGATE.objXMPP.xmppStream*/)
-//        }
     }
     
     func handelNormalChatMessage(_ message: XMPPMessage, withStrem : XMPPStream) {

@@ -29,6 +29,13 @@ struct pluginMethod {
     static let joinMUC : String                     = "join_muc_groups"
     static let sendReceiptDelivery : String         = "send_delivery_receipt"
 }
+struct pluginMessType {
+    static let Incoming : String = "incoming"
+    static let Message : String = "Message"
+    static let ACK : String = "Ack";
+    static let ACK_DELIVERY : String = "Delivery-Ack";
+    static let ACK_READ : String = "Read-Ack";
+}
 
 struct xmppChatType {
     static let GROUPCHAT : String = "groupchat"
@@ -45,11 +52,14 @@ struct xmppConstants {
     static let TO : String = "to"
     static let FROM : String = "from"
     
-    static let ACK : String = "Ack";
-    static let ACK_DELIVERY : String = "Delivery-Ack";
-    static let ACK_READ : String = "Read-Ack";
+    static let DataNil : String = "Data nil"
 }
-
+struct xmppConnStatus {
+    static let Processing : String = "Processing"
+    static let Authenticated : String = "Authenticated"
+    static let Failed : String = "Failed"
+    static let Disconnect : String = "Disconnect"
+}
 struct groupInfo {
     var name : String = ""
     var isPersistent : Bool = default_isPersistent
@@ -82,6 +92,15 @@ enum Status {
 }
 
 //MARK:- Extension
+extension Notification.Name {
+    static let xmpp_ConnectionReq = Notification.Name(rawValue: "xmpp_ConnectionReq")
+    static let xmpp_ConnectionStatus = Notification.Name(rawValue: "xmpp_ConnectionStatus")
+}
+
+//MARK:- Notifcation Observers
+public func postNotification(Name:Notification.Name, withObject: Any? = nil, userInfo:[AnyHashable : Any]? = nil){
+    NotificationCenter.default.post(name: Name, object: withObject, userInfo: userInfo)
+}
 extension String {
     var boolValue: Bool {
         return (self as NSString).boolValue
@@ -93,5 +112,5 @@ extension String {
 }
 
 func printLog(_ message : String) {
-    //print(message)
+//    print(message)
 }

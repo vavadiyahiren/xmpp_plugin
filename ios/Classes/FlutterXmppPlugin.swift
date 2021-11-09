@@ -69,7 +69,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         let vPassword : String = (vData["password"] as? String ?? "").trim()
         
         if [vHost.count, vUserId.count, vPassword.count].contains(0) {
-            result("Data nil")
+            result(xmppConstants.DataNil)
             return
         }
         if APP_DELEGATE.objXMPP.isSendMessage() {
@@ -208,29 +208,32 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
     }
     
     @objc func notiObs_XMPPConnectionStatus(notfication: NSNotification) {
-        var dicDate : [String : Any] = [:]
+        var valueStatus : String = ""
         switch objXMPPConnStatus {
         case .Processing:
-            //dicDate["type"] = "incoming"
-            //dicDate["msgtype"] = "Processing"
+            //valueStatus = xmppConnStatus.Processing
             break
             
         case .Sucess:
-            dicDate["type"] = "incoming"
-            dicDate["msgtype"] = "Authenticated"
-            break
+            valueStatus = xmppConnStatus.Authenticated
             
         case .Failed:
-            dicDate["type"] = "incoming"
-            dicDate["msgtype"] = "Failed"
-            break
+            valueStatus = xmppConnStatus.Failed
+            
             
         case .Disconnect,
              .None:
-            dicDate["type"] = "incoming"
-            dicDate["msgtype"] = "Disconnect"
-            break
+            valueStatus = xmppConnStatus.Disconnect
         }
+        if valueStatus.isEmpty {
+            print("\(#function) | XMPPConnetion status nil/empty.")
+            return
+        }
+        
+        var dicDate : [String : Any] = [:]
+        dicDate["id"] = valueStatus
+        dicDate["message"] = valueStatus
+        dicDate["msgtype"] = valueStatus
         
         //TODO: Send data back to flutter event handler.
         if APP_DELEGATE.objEventData != nil {
@@ -239,20 +242,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             print("\(#function) | Nil data of APP_DELEGATE.objEventData", dicDate)
         }
     }
-    
 }
-
-extension Notification.Name {
-    static let xmpp_ConnectionReq = Notification.Name(rawValue: "xmpp_ConnectionReq")
-    static let xmpp_ConnectionStatus = Notification.Name(rawValue: "xmpp_ConnectionStatus")
-}
-
-//MARK:- Notifcation Observers
-public func postNotification(Name:Notification.Name, withObject: Any? = nil, userInfo:[AnyHashable : Any]? = nil){
-    NotificationCenter.default.post(name: Name, object: withObject, userInfo: userInfo)
-}
-
-
 
 class SwiftStreamHandler: NSObject, FlutterStreamHandler {
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
