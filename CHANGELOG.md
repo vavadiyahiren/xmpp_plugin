@@ -35,3 +35,7 @@
 ## 1.1.6
 
 * Fixed Message type & type parameters for IOS
+
+## 1.1.7
+
+* Added full Jid for message from IOS
