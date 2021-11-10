@@ -32,3 +32,6 @@
 
 * Added Delivery Receipt support
 
+## 1.1.6
+
+* Fixed Message type & type parameters for IOS
