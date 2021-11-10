@@ -57,11 +57,11 @@ struct Message {
         let vMessType : String = message.type ?? ""
         switch vMessType {
         case xmppChatType.GROUPCHAT:
-            vSender_ID = (message.from?.resource ?? "").trim()
-            vJID = ((message.from?.bare ?? "").components(separatedBy: "@").first ?? "").trim()
+            vSender_ID = (message.fromStr ?? "").trim()
+            vJID = (message.toStr ?? "").trim()
         case xmppChatType.CHAT:
-            vSender_ID = (message.from?.user ?? "").trim()
-            vJID = ((message.to?.bare ?? "").components(separatedBy: "@").first ?? "").trim()
+            vSender_ID = (message.fromStr ?? "").trim()
+            vJID = (message.toStr ?? "").trim()
         default:
             vSender_ID = ""
         }
