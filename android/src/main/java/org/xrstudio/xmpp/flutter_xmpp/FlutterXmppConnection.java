@@ -151,7 +151,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         conf.setCustomSSLContext(context);
 
         conf.setKeystoreType(null);
-        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.ifpossible);
 
         Log.d("loginTest", "connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + mPort + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource);
 
@@ -390,6 +390,7 @@ public class FlutterXmppConnection implements ConnectionListener {
             e.printStackTrace();
         }
     }
+
 
     public static void addMemberOrAdminInGroup(GROUP_ROLE groupRole, String groupName, ArrayList<String> membersJid) {
 

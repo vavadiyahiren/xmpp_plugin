@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+
 import 'package:flutter_xmpp_example/homepage.dart';
 import 'package:xmpp_plugin/custom_element.dart';
 import 'package:xmpp_plugin/xmpp_plugin.dart';
@@ -91,6 +92,7 @@ class _MyAppState extends State<MyApp> {
   TextEditingController _passwordController = TextEditingController(text: 'test');
   TextEditingController _hostController = TextEditingController(text:'test.chat.fish');
   TextEditingController _createMUCNamecontroller = TextEditingController(text: 'abc');
+
   TextEditingController _toReceiptController = TextEditingController();
   TextEditingController _msgIdController = TextEditingController();
   TextEditingController _receiptIdController = TextEditingController();
