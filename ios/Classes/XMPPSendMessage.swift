@@ -9,13 +9,21 @@ import Foundation
 import XMPPFramework
 
 extension XMPPController {
-    func get_JidName_User(_ Jid : String) -> String {
+    /*func get_JidName_User(_ Jid : String) -> String {
         if Jid.trim().isEmpty { return Jid }
         if Jid.contains(self.hostName) == true { return Jid }
         let vChatRoomName : String = [Jid, "@", self.hostName].joined(separator: "")
         return vChatRoomName
+    }*/
+    func get_JidName_User(_ jid : String, withStrem: XMPPStream) -> String {
+        var vHost : String = ""
+        if let value = withStrem.hostName { vHost = value.trim() }
+        if jid.contains(vHost) {
+            return jid
+        }
+        return [jid, "@", vHost].joined(separator: "")
     }
-    
+
     // This method handles sending the message to one-one chat
     func sendMessage(messageBody:String,
                      reciverJID:String,
@@ -53,7 +61,7 @@ extension XMPPController {
             return
         }
         
-        let vJid : XMPPJID? = XMPPJID(string: get_JidName_User(jid))
+        let vJid : XMPPJID? = XMPPJID(string: get_JidName_User(jid, withStrem: withStrem))
         let xmppMessage = XMPPMessage.init(type: xmppChatType.NORMAL, to: vJid)
         xmppMessage.addAttribute(withName: "id", stringValue: receiptId)
         
@@ -98,6 +106,13 @@ extension XMPPController {
         
         if let obj = APP_DELEGATE.objEventData {
             obj(dicDate)
+        }
+    }
+    
+    func sendMemberList(withUsers arrUsers: [String]) {
+        printLog("\(#function) | arrUsers: \(arrUsers)")
+        if let obj = APP_DELEGATE.objEventData {
+            obj(arrUsers)
         }
     }
     

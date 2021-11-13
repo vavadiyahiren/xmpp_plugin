@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import XMPPFramework
 
 //let APP_DELEGATE = UIApplication.shared.delegate as! FlutterXmppPlugin
 var APP_DELEGATE = FlutterXmppPlugin() as! FlutterXmppPlugin
@@ -28,6 +29,10 @@ struct pluginMethod {
     static let createMUC : String                   = "create_muc"
     static let joinMUC : String                     = "join_muc_groups"
     static let sendReceiptDelivery : String         = "send_delivery_receipt"
+    static let addMembersInGroup : String           = "add_members_in_group"
+    static let addAdminsInGroup : String            = "add_admins_in_group"
+    static let getMembers : String                  = "get_members"
+    static let getAdmins : String                   = "get_admins"
 }
 struct pluginMessType {
     static let Incoming : String = "incoming"
@@ -60,9 +65,36 @@ struct xmppConnStatus {
     static let Failed : String = "Failed"
     static let Disconnect : String = "Disconnect"
 }
-struct groupInfo {
+struct xmppMUCRole {
+    /*
+     https://github.com/robbiehanson/XMPPFramework/issues/521#issuecomment-155471382
+     moderator
+     participant
+     visitor
+     moderator
+     participant
+     visitor
+     */
+    static let Owner : String = "owner"
+    static let Admin : String = "admin"
+    static let Member : String = "member"
+}
+
+class groupInfo {
     var name : String = ""
     var isPersistent : Bool = default_isPersistent
+    var objRoomXMPP : XMPPRoom?
+    
+    func `init`() {
+    }
+    func initWith(name: String, isPersistent: Bool) {
+        self.name = name
+        self.isPersistent = isPersistent
+    }
+    func initWith(name: String, isPersistent: Bool, objRoomXMPP : XMPPRoom?) {
+        self.initWith(name: name, isPersistent: isPersistent)
+        self.objRoomXMPP = objRoomXMPP
+    }
 }
 
 struct eleCustom {
@@ -85,6 +117,12 @@ enum xmppConnectionStatus : Int {
     var value: Int {
         return rawValue
     }
+}
+enum xmppMUCUserType {
+    case Owner
+    case Admin
+    case Member
+    
 }
 enum Status {
     case Online
@@ -112,5 +150,5 @@ extension String {
 }
 
 func printLog(_ message : String) {
-//    print(message)
+    print(message)
 }

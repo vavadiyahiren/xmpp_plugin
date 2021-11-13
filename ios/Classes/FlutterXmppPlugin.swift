@@ -48,6 +48,18 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         case pluginMethod.sendReceiptDelivery:
             self.hadleReceiptDeliveryActivity(call, result)
             
+        case pluginMethod.addMembersInGroup:
+            self.hadleAddMembersInGroupActivity(call, result)
+            
+        case pluginMethod.addAdminsInGroup:
+            self.hadleAddAdminsInGroupActivity(call, result)
+            
+        case pluginMethod.getMembers:
+            self.hadleGetMembersInGroupActivity(call, result)
+            
+        case pluginMethod.getAdmins:
+            self.hadleGetAdminsInGroupActivity(call, result)
+            
         default:
             break
         }
@@ -129,7 +141,9 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         else if let value = vData["persistent"] as? String {
             isPersistent = value.boolValue
         }
-        let objGroupInfo : groupInfo = groupInfo.init(name: vGroupName, isPersistent: isPersistent)
+        let objGroupInfo : groupInfo = groupInfo.init()
+        objGroupInfo.name = vGroupName
+        objGroupInfo.isPersistent = isPersistent
         APP_DELEGATE.objXMPP.createRoom(withRooms: [objGroupInfo], withStrem: self.objXMPP.xmppStream)
         result(xmppConstants.SUCCESS)
     }
@@ -160,13 +174,11 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             return
         }
         let vMethod : String = call.method.trim()
-        printLog("\(#function) | \(vMethod) | arguments: \(vData)")
-        
         let toJid : String = (vData["toJid"] as? String ?? "").trim()
         let msgId : String = vData["msgId"] as? String ?? ""
         let receiptId : String = (vData["receiptId"] as? String ?? "").trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(vData) | toJid: \(toJid) | msgId : \(msgId) | receiptId: \(receiptId)")
         
-        printLog("\(toJid), \(msgId),\(receiptId)")
         self.objXMPP.sentMessageDeliveryReceipt(withReceiptId: receiptId,
                                                 jid: toJid,
                                                 messageId: msgId,
@@ -174,6 +186,70 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         result(xmppConstants.SUCCESS)
     }
         
+    func hadleAddMembersInGroupActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let vData = call.arguments as? [String : Any] else {
+            result(xmppConstants.ERROR)
+            return
+        }
+        let vMethod : String = call.method.trim()
+        let vGroupName : String = (vData["group_name"] as? String ?? "").trim()
+        let membersJids : [String] = vData["members_jid"] as? [String] ?? []
+        printLog("\(#function) | \(vMethod) | arguments: \(vData) | vGroupName: \(vGroupName) | membersJids : \(membersJids)")
+        
+        APP_DELEGATE.objXMPP.addMemberInRoom(withUserRole: .Member,
+                                             withRoomName: vGroupName,
+                                             withUsers: membersJids,
+                                             withStrem: self.objXMPP.xmppStream)
+        result(xmppConstants.SUCCESS)
+    }
+    
+    func hadleAddAdminsInGroupActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let vData = call.arguments as? [String : Any] else {
+            result(xmppConstants.ERROR)
+            return
+        }
+        let vMethod : String = call.method.trim()
+        let vGroupName : String = (vData["group_name"] as? String ?? "").trim()
+        let membersJids : [String] = vData["members_jid"] as? [String] ?? []
+        printLog("\(#function) | \(vMethod) | arguments: \(vData) | vGroupName: \(vGroupName) | membersJids : \(membersJids)")
+        
+        APP_DELEGATE.objXMPP.addMemberInRoom(withUserRole: .Admin,
+                                             withRoomName: vGroupName,
+                                             withUsers: membersJids,
+                                             withStrem: self.objXMPP.xmppStream)
+        result(xmppConstants.SUCCESS)
+    }
+    
+    func hadleGetMembersInGroupActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let vData = call.arguments as? [String : Any] else {
+            result(xmppConstants.ERROR)
+            return
+        }
+        let vMethod : String = call.method.trim()
+        let vGroupName : String = (vData["group_name"] as? String ?? "").trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(vData) | vGroupName: \(vGroupName)")
+        
+        APP_DELEGATE.objXMPP.getRoomMember(withUserType: .Member,
+                                           forRoomName: vGroupName,
+                                           withStrem: self.objXMPP.xmppStream)
+        result(xmppConstants.SUCCESS)
+    }
+    
+    func hadleGetAdminsInGroupActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let vData = call.arguments as? [String : Any] else {
+            result(xmppConstants.ERROR)
+            return
+        }
+        let vMethod : String = call.method.trim()
+        let vGroupName : String = (vData["group_name"] as? String ?? "").trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(vData) | vGroupName: \(vGroupName)")
+        
+        APP_DELEGATE.objXMPP.getRoomMember(withUserType: .Admin,
+                                           forRoomName: vGroupName,
+                                           withStrem: self.objXMPP.xmppStream)
+        result(xmppConstants.SUCCESS)
+    }
+    
     //MARK: - perform XMPP Connection
     func performXMPPConnectionActivity() {
         switch APP_DELEGATE.objXMPPConnStatus {
@@ -235,12 +311,12 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         dicDate["message"] = valueStatus
         dicDate["msgtype"] = valueStatus
         
-        //TODO: Send data back to flutter event handler.
-        if APP_DELEGATE.objEventData != nil {
-            APP_DELEGATE.objEventData!(dicDate)
-        } else {
-            print("\(#function) | Nil data of APP_DELEGATE.objEventData", dicDate)
+        /// Send data back to flutter event handler.
+        guard let objEventData = APP_DELEGATE.objEventData else {
+            printLog("\(#function) | Nil/Empty of APP_DELEGATE.objEventData | \(dicDate)")
+            return
         }
+        objEventData(dicDate)
     }
 }
 
