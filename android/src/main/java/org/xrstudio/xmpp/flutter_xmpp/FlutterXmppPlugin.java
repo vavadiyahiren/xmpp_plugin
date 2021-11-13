@@ -313,7 +313,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             String msgId = call.argument("msgId");
             String receiptId = call.argument("receiptId");
 
-            FlutterXmppConnection.send_delivery_receipt(toJid, msgId,receiptId);
+            FlutterXmppConnection.send_delivery_receipt(toJid, msgId, receiptId);
 
             result.success("SUCCESS");
 
@@ -322,7 +322,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             String groupName = call.argument("group_name");
             ArrayList<String> membersJid = call.argument("members_jid");
 
-            FlutterXmppConnection.addMemberOrAdminInGroup(GROUP_ROLE.MEMBER, groupName, membersJid);
+            FlutterXmppConnection.manageAddMembersInGroup(GROUP_ROLE.MEMBER, groupName, membersJid);
 
             result.success("SUCCESS");
 
@@ -331,15 +331,59 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             String groupName = call.argument("group_name");
             ArrayList<String> membersJid = call.argument("members_jid");
 
-            FlutterXmppConnection.addMemberOrAdminInGroup(GROUP_ROLE.ADMIN, groupName, membersJid);
+            FlutterXmppConnection.manageAddMembersInGroup(GROUP_ROLE.ADMIN, groupName, membersJid);
 
             result.success("SUCCESS");
+
+        } else if (call.method.equals(Constants.REMOVE_MEMBERS_FROM_GROUP)) {
+
+            String groupName = call.argument("group_name");
+            ArrayList<String> membersJid = call.argument("members_jid");
+
+            FlutterXmppConnection.manageRemoveFromGroup(GROUP_ROLE.MEMBER, groupName, membersJid);
+
+            result.success("SUCCESS");
+
+        } else if (call.method.equals(Constants.REMOVE_ADMINS_FROM_GROUP)) {
+
+            String groupName = call.argument("group_name");
+            ArrayList<String> membersJid = call.argument("members_jid");
+
+            FlutterXmppConnection.manageRemoveFromGroup(GROUP_ROLE.ADMIN, groupName, membersJid);
+
+            result.success("SUCCESS");
+
+        } else if (call.method.equals(Constants.ADD_OWNERS_IN_GROUP)) {
+
+            String groupName = call.argument("group_name");
+            ArrayList<String> membersJid = call.argument("members_jid");
+
+            FlutterXmppConnection.manageAddMembersInGroup(GROUP_ROLE.OWNER, groupName, membersJid);
+
+            result.success("SUCCESS");
+
+        } else if (call.method.equals(Constants.REMOVE_OWNERS_FROM_GROUP)) {
+
+            String groupName = call.argument("group_name");
+            ArrayList<String> membersJid = call.argument("members_jid");
+
+            FlutterXmppConnection.manageRemoveFromGroup(GROUP_ROLE.OWNER, groupName, membersJid);
+
+            result.success("SUCCESS");
+
+        } else if (call.method.equals(Constants.GET_OWNERS)) {
+
+            String groupName = call.argument("group_name");
+
+            List<String> jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.OWNER, groupName);
+
+            result.success(jidList);
 
         } else if (call.method.equals(Constants.GET_ADMINS)) {
 
             String groupName = call.argument("group_name");
 
-            List<String> jidList = FlutterXmppConnection.getMembersOrAdmins(GROUP_ROLE.ADMIN, groupName);
+            List<String> jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.ADMIN, groupName);
 
             result.success(jidList);
 
@@ -347,7 +391,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
 
             String groupName = call.argument("group_name");
 
-            List<String> jidList = FlutterXmppConnection.getMembersOrAdmins(GROUP_ROLE.MEMBER, groupName);
+            List<String> jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.MEMBER, groupName);
 
             result.success(jidList);
 

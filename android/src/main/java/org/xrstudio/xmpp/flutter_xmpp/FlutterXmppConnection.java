@@ -369,7 +369,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         }
     }
 
-    public static void send_delivery_receipt(String toJid, String msgId,String receiptId) {
+    public static void send_delivery_receipt(String toJid, String msgId, String receiptId) {
 
         try {
 
@@ -392,7 +392,7 @@ public class FlutterXmppConnection implements ConnectionListener {
     }
 
 
-    public static void addMemberOrAdminInGroup(GROUP_ROLE groupRole, String groupName, ArrayList<String> membersJid) {
+    public static void manageAddMembersInGroup(GROUP_ROLE groupRole, String groupName, ArrayList<String> membersJid) {
 
         try {
 
@@ -411,17 +411,54 @@ public class FlutterXmppConnection implements ConnectionListener {
             }
 
             MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(roomId));
-            if(groupRole == GROUP_ROLE.ADMIN) {
+            if (groupRole == GROUP_ROLE.ADMIN) {
                 muc.grantAdmin(jidList);
-            } else {
+            } else if (groupRole == GROUP_ROLE.MEMBER) {
                 muc.grantMembership(jidList);
+            } else {
+
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static List<String> getMembersOrAdmins(GROUP_ROLE groupRole, String groupName) {
+    public static void manageRemoveFromGroup(GROUP_ROLE groupRole, String groupName, ArrayList<String> membersJid) {
+
+        try {
+
+            List<Jid> jidList = new ArrayList<>();
+            for (String memberJid : membersJid) {
+                if (!memberJid.contains(mHost)) {
+                    memberJid = memberJid + "@" + mHost;
+                }
+                Jid jid = JidCreate.from(memberJid);
+                jidList.add(jid);
+            }
+
+            String roomId = groupName;
+            if (!groupName.contains(Constants.CONFERENCE)) {
+                roomId = groupName + "@" + Constants.CONFERENCE + "." + mHost;
+            }
+
+            MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(roomId));
+            if (groupRole == GROUP_ROLE.ADMIN) {
+
+                for (Jid jid : jidList) {
+                    muc.revokeAdmin(jid.asEntityJidOrThrow());
+                }
+
+            } else if (groupRole == GROUP_ROLE.MEMBER) {
+                muc.revokeMembership(jidList);
+            } else {
+                // OWNERS
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> getMembersOrAdminsOrOwners(GROUP_ROLE groupRole, String groupName) {
         List<String> jidList = new ArrayList<>();
 
         try {
@@ -432,12 +469,16 @@ public class FlutterXmppConnection implements ConnectionListener {
             }
 
             MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(roomId));
-            if(groupRole == GROUP_ROLE.ADMIN) {
+            if (groupRole == GROUP_ROLE.ADMIN) {
                 affiliates = muc.getAdmins();
-            } else {
+            } else if (groupRole == GROUP_ROLE.MEMBER) {
                 affiliates = muc.getMembers();
+            } else if (groupRole == GROUP_ROLE.OWNER) {
+                affiliates = muc.getOwners();
+            } else {
+                affiliates = new ArrayList<>();
             }
-            if(affiliates.size() > 0) {
+            if (affiliates.size() > 0) {
                 for (Affiliate affiliate : affiliates) {
                     String jid = affiliate.getJid().toString();
                     jidList.add(jid);

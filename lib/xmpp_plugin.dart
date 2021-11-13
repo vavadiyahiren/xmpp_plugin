@@ -154,21 +154,54 @@ class XmppConnection {
     await _channel.invokeMethod('add_members_in_group', params);
   }
 
-  Future<void> addAdminsInGroup(String groupName, List<String> adminMembers) async {
+  Future<void> addAdminsInGroup(
+      String groupName, List<String> adminMembers) async {
     final params = {"group_name": groupName, "members_jid": adminMembers};
     await _channel.invokeMethod('add_admins_in_group', params);
+  }
+
+  Future<void> removeMember(String groupName, List<String> membersJid) async {
+    final params = {"group_name": groupName, "members_jid": membersJid};
+    print('checkGroups removeMember params: $params');
+    await _channel.invokeMethod('remove_members_from_group', params);
+  }
+
+  Future<void> removeAdmin(String groupName, List<String> membersJid) async {
+    final params = {"group_name": groupName, "members_jid": membersJid};
+    print('checkGroups removeAdmin params: $params');
+    await _channel.invokeMethod('remove_admins_from_group', params);
+  }
+
+  Future<void> addOwner(String groupName, List<String> membersJid) async {
+    final params = {"group_name": groupName, "members_jid": membersJid};
+    print('checkGroups addOwner params: $params');
+    await _channel.invokeMethod('add_owners_in_group', params);
+  }
+
+  Future<void> removeOwner(String groupName, List<String> membersJid) async {
+    final params = {"group_name": groupName, "members_jid": membersJid};
+    print('checkGroups removeOwner params: $params');
+    await _channel.invokeMethod('remove_owners_from_group', params);
+  }
+
+  Future<List<dynamic>> getOwners(String groupName) async {
+    final params = {"group_name": groupName};
+    List<dynamic> owners = await _channel.invokeMethod('get_owners', params);
+    print('checkGroups getOwners owners: $owners');
+    return owners;
   }
 
   Future<List<dynamic>> getMembers(String groupName) async {
     final params = {"group_name": groupName};
     List<dynamic> members = await _channel.invokeMethod('get_members', params);
+    print('checkGroups getMembers members: $members');
     return members;
   }
 
   Future<List<dynamic>> getAdmins(String groupName) async {
     final params = {"group_name": groupName};
     List<dynamic> admins = await _channel.invokeMethod('get_admins', params);
+    print('checkGroups getAdmins admins: $admins');
     return admins;
   }
-
 }

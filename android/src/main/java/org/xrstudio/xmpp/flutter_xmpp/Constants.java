@@ -9,6 +9,11 @@ public class Constants {
     public static final String SEND_DELIVERY_ACK = "send_delivery_receipt";
     public static final String ADD_MEMBERS_IN_GROUP = "add_members_in_group";
     public static final String ADD_ADMINS_IN_GROUP = "add_admins_in_group";
+    public static final String REMOVE_MEMBERS_FROM_GROUP = "remove_members_from_group";
+    public static final String REMOVE_ADMINS_FROM_GROUP= "remove_admins_from_group";
+    public static final String ADD_OWNERS_IN_GROUP = "add_owners_in_group";
+    public static final String REMOVE_OWNERS_FROM_GROUP = "remove_owners_from_group";
+    public static final String GET_OWNERS = "get_owners";
     public static final String GET_ADMINS = "get_admins";
     public static final String GET_MEMBERS = "get_members";
 

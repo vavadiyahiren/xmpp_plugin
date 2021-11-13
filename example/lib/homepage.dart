@@ -6,14 +6,24 @@ class HomePage extends StatefulWidget {
   final String groupName;
   Function(String, List<String>) addMembersInGroup;
   Function(String, List<String>) addAdminsInGroup;
+  Function(String, List<String>) removeMember;
+  Function(String, List<String>) removeAdmin;
+  Function(String, List<String>) addOwner;
+  Function(String, List<String>) removeOwner;
   Function(String) getMembers;
   Function(String) getAdmins;
+  Function(String) getOwners;
 
   HomePage(
       {required this.groupName,
       required this.addMembersInGroup,
       required this.addAdminsInGroup,
+      required this.removeMember,
+      required this.removeAdmin,
+      required this.addOwner,
+      required this.removeOwner,
       required this.getMembers,
+      required this.getOwners,
       required this.getAdmins});
 
   @override
@@ -21,8 +31,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  TextEditingController _addmemberController = TextEditingController();
-  TextEditingController _addadminController = TextEditingController();
+  TextEditingController _memberController = TextEditingController();
   List<String?> addMemberList = [];
   List<String?> addAdminList = [];
 
@@ -42,16 +51,16 @@ class _HomePageState extends State<HomePage> {
                   height: 10,
                 ),
                 customTextField(
-                  hintText: 'Add Member',
-                  textEditController: _addmemberController,
+                  hintText: 'Member Id',
+                  textEditController: _memberController,
                 ),
                 SizedBox(
                   height: 10,
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    await widget.addMembersInGroup(
-                        widget.groupName, ["${_addmemberController.text}"]);
+                    widget.addMembersInGroup(
+                        widget.groupName, ["${_memberController.text}"]);
                   },
                   child: Text('Add Member'),
                   style: ElevatedButton.styleFrom(
@@ -61,17 +70,13 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(
                   height: 10,
                 ),
-                customTextField(
-                  hintText: 'Add Admin',
-                  textEditController: _addadminController,
-                ),
                 SizedBox(
                   height: 10,
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    await widget.addAdminsInGroup(
-                        widget.groupName, ["${_addadminController.text}"]);
+                    widget.addAdminsInGroup(
+                        widget.groupName, ["${_memberController.text}"]);
                   },
                   child: Text('Add Admin'),
                   style: ElevatedButton.styleFrom(
@@ -98,6 +103,79 @@ class _HomePageState extends State<HomePage> {
                         widget.getAdmins(widget.groupName);
                       },
                       child: Text('Get Admin'),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(
+                  color: Colors.black,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                         widget.removeMember(
+                            widget.groupName, ["${_memberController.text}"]);
+                      },
+                      child: Text('Remove Member'),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.black,
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                         widget.removeAdmin(
+                            widget.groupName, ["${_memberController.text}"]);
+                      },
+                      child: Text('Remove admin'),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(
+                  color: Colors.black,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                         widget.addOwner(
+                            widget.groupName, ["${_memberController.text}"]);
+                      },
+                      child: Text('Add owner'),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.black,
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                         widget.removeOwner(
+                            widget.groupName, ["${_memberController.text}"]);
+                      },
+                      child: Text('Remove owner'),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                Divider(
+                  color: Colors.black,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        widget.getOwners(widget.groupName);
+                      },
+                      child: Text('List owner'),
                       style: ElevatedButton.styleFrom(
                         primary: Colors.black,
                       ),

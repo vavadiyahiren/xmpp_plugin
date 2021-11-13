@@ -65,6 +65,45 @@ await xmppConnection.sendCustomGroupMessage("xyz@conference.domain", "Hi", "MSGI
 await flutterXmpp.sendDelieveryReceipt("xyz@domain", "Received-Message-Id", "Receipt-Id");
 ```
 
+10. Add members in group
+```
+await flutterXmpp.addMembersInGroup("groupName", List<String> allMembersId);
+```
+
+11. Add Admins in group
+```
+await flutterXmpp.addAdminsInGroup("groupName", List<String> allMembersId);
+```
+
+12. getMembers
+```
+await flutterXmpp.getMembers("groupName");
+```
+
+13. getAdmins
+```
+await flutterXmpp.getAdmins("groupName");
+```
+
+14. getOwners
+```
+await flutterXmpp.getOwners("groupName");
+```
+
+15. Remove members from group
+```
+await flutterXmpp.removeMember("groupName", List<String> allMembersId);
+```
+
+16. Remove admins from group
+```
+await flutterXmpp.removeAdmin("groupName", List<String> allMembersId);
+```
+
+
+
+
+
 # To be Added
 
  - MAM
