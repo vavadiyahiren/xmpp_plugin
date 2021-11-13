@@ -81,6 +81,26 @@ class _MyAppState extends State<MyApp> {
     await flutterXmpp.getMembers(groupName);
   }
 
+  Future<void> getOwners(String groupName) async {
+    await flutterXmpp.getOwners(groupName);
+  }
+
+  Future<void> removeMember(String groupName, List<String> membersJid) async {
+    await flutterXmpp.removeMember(groupName, membersJid);
+  }
+
+  Future<void> removeAdmin(String groupName, List<String> membersJid) async {
+    await flutterXmpp.removeAdmin(groupName, membersJid);
+  }
+
+  Future<void> addOwner(String groupName, List<String> membersJid) async {
+    await flutterXmpp.addOwner(groupName, membersJid);
+  }
+
+  Future<void> removeOwner(String groupName, List<String> membersJid) async {
+    await flutterXmpp.removeOwner(groupName, membersJid);
+  }
+
   Future<void> getAdmins(String groupName) async {
     await flutterXmpp.getAdmins(groupName);
   }
@@ -88,10 +108,14 @@ class _MyAppState extends State<MyApp> {
   String dropdownvalue = 'Chat';
   var items = ['Chat', 'Group Chat'];
 
-  TextEditingController _userNameController = TextEditingController(text:'test');
-  TextEditingController _passwordController = TextEditingController(text: 'test');
-  TextEditingController _hostController = TextEditingController(text:'test.chat.fish');
-  TextEditingController _createMUCNamecontroller = TextEditingController(text: 'abc');
+  TextEditingController _userNameController =
+      TextEditingController();
+  TextEditingController _passwordController =
+      TextEditingController();
+  TextEditingController _hostController =
+      TextEditingController();
+  TextEditingController _createMUCNamecontroller =
+      TextEditingController();
 
   TextEditingController _toReceiptController = TextEditingController();
   TextEditingController _msgIdController = TextEditingController();
@@ -214,14 +238,20 @@ class _MyAppState extends State<MyApp> {
                             context,
                             MaterialPageRoute(
                                 builder: (context) => HomePage(
-                                    groupName: _createMUCNamecontroller.text,
-                                    addMembersInGroup: addMembersInGroup,
-                                    addAdminsInGroup: addAdminsInGroup,
-                                    getAdmins: getAdmins,
-                                    getMembers: getMembers)),
+                                      groupName: _createMUCNamecontroller.text,
+                                      addMembersInGroup: addMembersInGroup,
+                                      addAdminsInGroup: addAdminsInGroup,
+                                      removeMember: removeMember,
+                                      removeAdmin: removeAdmin,
+                                      addOwner: addOwner,
+                                      removeOwner: removeOwner,
+                                      getAdmins: getAdmins,
+                                      getMembers: getMembers,
+                                      getOwners: getOwners,
+                                    )),
                           );
                         },
-                        child: Text('Create Group 2'),
+                        child: Text('Create Group & Manage'),
                         style: ElevatedButton.styleFrom(
                           primary: Colors.black,
                         ),
