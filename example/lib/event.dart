@@ -17,7 +17,7 @@ class Event {
       this.customText});
 
   Event.fromJson(dynamic json) {
-    from = json["from"];
+    from = json["from"] ?? "";
     senderJid = json["senderJid"];
     id = json["id"];
     type = json["type"];

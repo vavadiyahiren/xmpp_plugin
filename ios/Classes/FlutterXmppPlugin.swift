@@ -11,7 +11,9 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             postNotification(Name: .xmpp_ConnectionStatus)
         }
     }
-        
+    var singalCallBack : FlutterResult?
+    
+    //MARK:-
     override init() {
         super.init()
     }
@@ -59,11 +61,14 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             
         case pluginMethod.getAdmins:
             self.hadleGetAdminsInGroupActivity(call, result)
+        
+        case pluginMethod.getOwners:
+            self.hadleGetOwnersInGroupActivity(call, result)
             
         default:
             break
         }
-        result("iOS " + UIDevice.current.systemVersion)
+        //result("iOS " + UIDevice.current.systemVersion)
     }
     
     func hadleLoginActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
@@ -229,10 +234,10 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         let vGroupName : String = (vData["group_name"] as? String ?? "").trim()
         printLog("\(#function) | \(vMethod) | arguments: \(vData) | vGroupName: \(vGroupName)")
         
+        APP_DELEGATE.singalCallBack = result
         APP_DELEGATE.objXMPP.getRoomMember(withUserType: .Member,
                                            forRoomName: vGroupName,
                                            withStrem: self.objXMPP.xmppStream)
-        result(xmppConstants.SUCCESS)
     }
     
     func hadleGetAdminsInGroupActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -244,10 +249,25 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         let vGroupName : String = (vData["group_name"] as? String ?? "").trim()
         printLog("\(#function) | \(vMethod) | arguments: \(vData) | vGroupName: \(vGroupName)")
         
+        APP_DELEGATE.singalCallBack = result
         APP_DELEGATE.objXMPP.getRoomMember(withUserType: .Admin,
                                            forRoomName: vGroupName,
                                            withStrem: self.objXMPP.xmppStream)
-        result(xmppConstants.SUCCESS)
+    }
+    
+    func hadleGetOwnersInGroupActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let vData = call.arguments as? [String : Any] else {
+            result(xmppConstants.ERROR)
+            return
+        }
+        let vMethod : String = call.method.trim()
+        let vGroupName : String = (vData["group_name"] as? String ?? "").trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(vData) | vGroupName: \(vGroupName)")
+        
+        APP_DELEGATE.singalCallBack = result
+        APP_DELEGATE.objXMPP.getRoomMember(withUserType: .Owner,
+                                           forRoomName: vGroupName,
+                                           withStrem: self.objXMPP.xmppStream)
     }
     
     //MARK: - perform XMPP Connection

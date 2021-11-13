@@ -33,6 +33,7 @@ struct pluginMethod {
     static let addAdminsInGroup : String            = "add_admins_in_group"
     static let getMembers : String                  = "get_members"
     static let getAdmins : String                   = "get_admins"
+    static let getOwners : String                    = "get_owners"
 }
 struct pluginMessType {
     static let Incoming : String = "incoming"
@@ -150,5 +151,5 @@ extension String {
 }
 
 func printLog(_ message : String) {
-    print(message)
+//    print(message)
 }

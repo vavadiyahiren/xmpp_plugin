@@ -111,8 +111,8 @@ extension XMPPController {
     
     func sendMemberList(withUsers arrUsers: [String]) {
         printLog("\(#function) | arrUsers: \(arrUsers)")
-        if let obj = APP_DELEGATE.objEventData {
-            obj(arrUsers)
+        if let callBack = APP_DELEGATE.singalCallBack {
+            callBack(arrUsers)
         }
     }
     
