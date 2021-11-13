@@ -47,7 +47,7 @@ class XMPPController : NSObject {
         self.xmppStream.hostName = hostName
         self.xmppStream.hostPort = UInt16(hostPort)
         self.xmppStream.myJID = userJID
-        self.xmppStream. = XMPPStreamStartTLSPolicy.required
+        self.xmppStream.startTLSPolicy = XMPPStreamStartTLSPolicy.required        
         
         self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
         
