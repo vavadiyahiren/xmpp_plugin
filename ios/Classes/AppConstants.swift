@@ -31,9 +31,13 @@ struct pluginMethod {
     static let sendReceiptDelivery : String         = "send_delivery_receipt"
     static let addMembersInGroup : String           = "add_members_in_group"
     static let addAdminsInGroup : String            = "add_admins_in_group"
+    static let addOwnersInGroup : String            = "add_owners_in_group"    
+    static let removeMembersInGroup : String        = "remove_members_from_group"
+    static let removeAdminsInGroup : String         = "remove_admins_from_group"
+    static let removeOwnersInGroup : String         = "remove_owners_from_group"
     static let getMembers : String                  = "get_members"
     static let getAdmins : String                   = "get_admins"
-    static let getOwners : String                    = "get_owners"
+    static let getOwners : String                   = "get_owners"
 }
 struct pluginMessType {
     static let Incoming : String = "incoming"
@@ -79,6 +83,7 @@ struct xmppMUCRole {
     static let Owner : String = "owner"
     static let Admin : String = "admin"
     static let Member : String = "member"
+    static let None : String = "none"
 }
 
 class groupInfo {
@@ -123,7 +128,10 @@ enum xmppMUCUserType {
     case Owner
     case Admin
     case Member
-    
+}
+enum xmppMUCUserActionType {
+    case Add
+    case Remove
 }
 enum Status {
     case Online

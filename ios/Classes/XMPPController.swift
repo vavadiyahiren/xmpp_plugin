@@ -373,7 +373,7 @@ extension XMPPController : XMPPRoomDelegate {
 }
 
 extension XMPPController {
-    /// Get All Members in XMPPRoom
+    /// Get All Members in XMPPRoom based on Memeber-role
     func getRoomMember(withUserType vType : xmppMUCUserType, forRoomName roomName: String, withStrem : XMPPStream) {
         if roomName.trim().isEmpty {
             print("\(#function) | roomName nil/empty")
@@ -404,8 +404,12 @@ extension XMPPController {
         }
     }
     
-    /// Add Members in XMPPRoom
-    func addMemberInRoom(withUserRole vRole : xmppMUCUserType, withRoomName roomName: String, withUsers arrUser : [String], withStrem: XMPPStream) {
+    /// Add-or-Remove Members in XMPPRoom
+    func addRemoveMemberInRoom(withUserRole vRole : xmppMUCUserType,
+                               actionType: xmppMUCUserActionType,
+                               withRoomName roomName: String,
+                               withUsers arrUser : [String],
+                               withStrem: XMPPStream) {
         if roomName.trim().isEmpty {
             print("\(#function) | roomName nil/empty")
             return
@@ -426,20 +430,22 @@ extension XMPPController {
             print("\(#function) | User not succesfully created/join XMPPRoom.")
             return
         }
-        printLog("\(#function) | perform activity of get XMPPRoom Member | room: \(roomName) | role: \(vRole)")
-        
+        printLog("\(#function) | perform activity of XMPPRoom Member - \(actionType) | room: \(roomName) | role: \(vRole)")
         
         /// Set Users role value
         var vUserRole : String = ""
         switch vRole {
         case .Member:
-            vUserRole = xmppMUCRole.Member
+            //vUserRole = xmppMUCRole.Member
+            vUserRole = (actionType == .Add) ? xmppMUCRole.Member : xmppMUCRole.None
             
         case .Admin:
-            vUserRole = xmppMUCRole.Admin
+            //vUserRole = xmppMUCRole.Admin
+            vUserRole = (actionType == .Add) ? xmppMUCRole.Admin : xmppMUCRole.Member
             
         case .Owner:
-            vUserRole = xmppMUCRole.Owner
+            //vUserRole = xmppMUCRole.Owner
+            vUserRole = (actionType == .Add) ? xmppMUCRole.Owner : xmppMUCRole.Member
         }
         if vUserRole.trim().isEmpty {
             print("\(#function) | Member role is empty/nil")
@@ -470,14 +476,14 @@ extension XMPPController {
         var arrUsers : [String] = []
         for objUser in items {
             guard let eleUser = objUser as? DDXMLElement else {
-                printLog("\(#function) | Invalid XMPPRoom Owners object | objOwner: \(objUser)")
+                printLog("\(#function) | Invalid XMPPRoom Users object | objUser: \(objUser)")
                 continue
             }
             var vAffiliation : String = ""
             var vJid : String = ""
             if let value = eleUser.attributeStringValue(forName: "affiliation") { vAffiliation = value.trim() }
             if let value = eleUser.attributeStringValue(forName: "jid") { vJid = value.trim() }
-            printLog("\(#function) | eleUser: \(eleUser) | eleUser-affiliation: \(vAffiliation) | eleUser-jid: \(vJid)")
+            printLog("\(#function) | eleUser: \(eleUser) | eleUser-affiliation: \(vAffiliation) | eleUser-jid: \(vJid) | role: \(vRole)")
             
             arrUsers.append(vJid)
         }
@@ -489,11 +495,11 @@ extension XMPPController {
      <item affiliation="member" jid="test@xrstudio.in"></item>
      */
     func xmppRoom(_ sender: XMPPRoom, didFetchMembersList items: [Any]) {
-        printLog("\(#function) | Get XMPPRoom Member | sender: \(sender) | items-count: \(items.count)")
+        printLog("\(#function) | Get XMPPRoom Members | sender: \(sender) | items-count: \(items.count)")
         self.getAllMemeberInfo(withItems: items, withUserRole: .Member)
     }
     func xmppRoom(_ sender: XMPPRoom, didNotFetchMembersList iqError: XMPPIQ) {
-        printLog("\(#function) | Get XMPPRoom Member error | sender: \(sender) | iqError: \(iqError)")
+        printLog("\(#function) | Get XMPPRoom Members error | sender: \(sender) | iqError: \(iqError)")
     }
     
     //MARK: Admins
@@ -501,11 +507,11 @@ extension XMPPController {
      <item affiliation="admin" jid="test@xrstudio.in"></item>
      */
     func xmppRoom(_ sender: XMPPRoom, didFetchAdminsList items: [Any]) {
-        printLog("\(#function) | Get XMPPRoom Member | sender: \(sender) | items-count: \(items.count)")
+        printLog("\(#function) | Get XMPPRoom Admins | sender: \(sender) | items-count: \(items.count)")
         self.getAllMemeberInfo(withItems: items, withUserRole: .Admin)
     }
     func xmppRoom(_ sender: XMPPRoom, didNotFetchAdminsList iqError: XMPPIQ) {
-        printLog("\(#function) | Get XMPPRoom Member error | \(iqError)")
+        printLog("\(#function) | Get XMPPRoom Admins error | \(iqError)")
     }
     
     //MARK: Owners
