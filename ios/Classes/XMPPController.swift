@@ -436,15 +436,12 @@ extension XMPPController {
         var vUserRole : String = ""
         switch vRole {
         case .Member:
-            //vUserRole = xmppMUCRole.Member
             vUserRole = (actionType == .Add) ? xmppMUCRole.Member : xmppMUCRole.None
             
         case .Admin:
-            //vUserRole = xmppMUCRole.Admin
             vUserRole = (actionType == .Add) ? xmppMUCRole.Admin : xmppMUCRole.Member
             
         case .Owner:
-            //vUserRole = xmppMUCRole.Owner
             vUserRole = (actionType == .Add) ? xmppMUCRole.Owner : xmppMUCRole.Member
         }
         if vUserRole.trim().isEmpty {
