@@ -186,6 +186,7 @@ class XmppConnection {
 
   Future<List<dynamic>> getOwners(String groupName) async {
     final params = {"group_name": groupName};
+    print('group_name: $groupName');
     List<dynamic> owners = await _channel.invokeMethod('get_owners', params);
     print('checkGroups getOwners owners: $owners');
     return owners;
@@ -200,6 +201,7 @@ class XmppConnection {
 
   Future<List<dynamic>> getMembers(String groupName) async {
     final params = {"group_name": groupName};
+    print('group_name: $groupName');
     List<dynamic> members = await _channel.invokeMethod('get_members', params);
     print('checkGroups getMembers members: $members');
     return members;
