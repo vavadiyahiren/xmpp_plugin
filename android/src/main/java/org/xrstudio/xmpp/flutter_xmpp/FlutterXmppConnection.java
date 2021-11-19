@@ -491,6 +491,23 @@ public class FlutterXmppConnection implements ConnectionListener {
         return jidList;
     }
 
+    public static int getOccupantsSize(String groupName) {
+
+        try {
+            String roomId = groupName;
+            if (!groupName.contains(Constants.CONFERENCE)) {
+                roomId = groupName + "@" + Constants.CONFERENCE + "." + mHost;
+            }
+
+            MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(roomId));
+            return muc.getOccupants().size();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public void disconnect() {
         if (FlutterXmppPlugin.DEBUG) {
             Log.d(TAG, "Disconnecting from server " + mServiceName);

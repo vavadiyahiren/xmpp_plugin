@@ -85,6 +85,10 @@ class _MyAppState extends State<MyApp> {
     await flutterXmpp.getOwners(groupName);
   }
 
+  Future<void> getOccupantsSize(String groupName) async {
+    await flutterXmpp.getOccupantsSize(groupName);
+  }
+
   Future<void> removeMember(String groupName, List<String> membersJid) async {
     await flutterXmpp.removeMember(groupName, membersJid);
   }
@@ -248,6 +252,7 @@ class _MyAppState extends State<MyApp> {
                                       getAdmins: getAdmins,
                                       getMembers: getMembers,
                                       getOwners: getOwners,
+                                  getOccupantsSize: getOccupantsSize,
                                     )),
                           );
                         },

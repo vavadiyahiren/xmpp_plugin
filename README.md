@@ -59,48 +59,51 @@ await xmppConnection.sendCustomGroupMessage("xyz@conference.domain", "Hi", "MSGI
 
 ```
 
-9. Sending Delivery Receipt
+8. Sending Delivery Receipt
 
 ```
 await flutterXmpp.sendDelieveryReceipt("xyz@domain", "Received-Message-Id", "Receipt-Id");
 ```
 
-10. Add members in group
+9. Add members in group
 ```
 await flutterXmpp.addMembersInGroup("groupName", List<String> allMembersId);
 ```
 
-11. Add Admins in group
+10. Add Admins in group
 ```
 await flutterXmpp.addAdminsInGroup("groupName", List<String> allMembersId);
 ```
 
-12. getMembers
+11. getMembers
 ```
 await flutterXmpp.getMembers("groupName");
 ```
 
-13. getAdmins
+12. getAdmins
 ```
 await flutterXmpp.getAdmins("groupName");
 ```
 
-14. getOwners
+13. getOwners
 ```
 await flutterXmpp.getOwners("groupName");
 ```
 
-15. Remove members from group
+14. Remove members from group
 ```
 await flutterXmpp.removeMember("groupName", List<String> allMembersId);
 ```
 
-16. Remove admins from group
+15. Remove admins from group
 ```
 await flutterXmpp.removeAdmin("groupName", List<String> allMembersId);
 ```
 
-
+16. get Occupants Size from group
+```
+await flutterXmpp.getOccupantsSize("groupName");
+```
 
 
 

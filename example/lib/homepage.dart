@@ -13,6 +13,7 @@ class HomePage extends StatefulWidget {
   Function(String) getMembers;
   Function(String) getAdmins;
   Function(String) getOwners;
+  Function(String) getOccupantsSize;
 
   HomePage(
       {required this.groupName,
@@ -24,7 +25,9 @@ class HomePage extends StatefulWidget {
       required this.removeOwner,
       required this.getMembers,
       required this.getOwners,
-      required this.getAdmins});
+      required this.getAdmins,
+      required this.getOccupantsSize
+      });
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -117,7 +120,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
-                         widget.removeMember(
+                        widget.removeMember(
                             widget.groupName, ["${_memberController.text}"]);
                       },
                       child: Text('Remove Member'),
@@ -127,7 +130,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     ElevatedButton(
                       onPressed: () async {
-                         widget.removeAdmin(
+                        widget.removeAdmin(
                             widget.groupName, ["${_memberController.text}"]);
                       },
                       child: Text('Remove admin'),
@@ -145,7 +148,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     ElevatedButton(
                       onPressed: () async {
-                         widget.addOwner(
+                        widget.addOwner(
                             widget.groupName, ["${_memberController.text}"]);
                       },
                       child: Text('Add owner'),
@@ -155,7 +158,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     ElevatedButton(
                       onPressed: () async {
-                         widget.removeOwner(
+                        widget.removeOwner(
                             widget.groupName, ["${_memberController.text}"]);
                       },
                       child: Text('Remove owner'),
@@ -176,6 +179,15 @@ class _HomePageState extends State<HomePage> {
                         widget.getOwners(widget.groupName);
                       },
                       child: Text('List owner'),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.black,
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        widget.getOccupantsSize(widget.groupName);
+                      },
+                      child: Text('Get Occupants Size'),
                       style: ElevatedButton.styleFrom(
                         primary: Colors.black,
                       ),
