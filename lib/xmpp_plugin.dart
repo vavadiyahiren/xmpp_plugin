@@ -192,11 +192,11 @@ class XmppConnection {
     return owners;
   }
 
-  Future<int> getOccupantsSize(String groupName) async {
+  Future<int> getOnlineMemberCount(String groupName) async {
     final params = {"group_name": groupName};
-    int occupantsSize = await _channel.invokeMethod('get_occupants_size', params);
-    print('checkGroups getOccupantsSize: $occupantsSize');
-    return occupantsSize;
+    int memberCount = await _channel.invokeMethod('get_online_member_count', params);
+    print('checkGroups getOccupantsSize: $memberCount');
+    return memberCount;
   }
 
   Future<List<dynamic>> getMembers(String groupName) async {

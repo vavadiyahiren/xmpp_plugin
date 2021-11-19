@@ -395,11 +395,11 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
 
             result.success(jidList);
 
-        } else if (call.method.equals(Constants.GET_OCCUPANTS_SIZE)) {
+        } else if (call.method.equals(Constants.GET_ONLINE_MEMBER_COUNT)) {
 
             String groupName = call.argument("group_name");
 
-            int occupantsSize = FlutterXmppConnection.getOccupantsSize(groupName);
+            int occupantsSize = FlutterXmppConnection.getOnlineMemberCount(groupName);
 
             result.success(occupantsSize);
 

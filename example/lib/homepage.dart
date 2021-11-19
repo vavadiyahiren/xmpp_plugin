@@ -13,7 +13,7 @@ class HomePage extends StatefulWidget {
   Function(String) getMembers;
   Function(String) getAdmins;
   Function(String) getOwners;
-  Function(String) getOccupantsSize;
+  Function(String) getOnlineMemberCount;
 
   HomePage(
       {required this.groupName,
@@ -26,7 +26,7 @@ class HomePage extends StatefulWidget {
       required this.getMembers,
       required this.getOwners,
       required this.getAdmins,
-      required this.getOccupantsSize
+      required this.getOnlineMemberCount
       });
 
   @override
@@ -185,7 +185,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                     ElevatedButton(
                       onPressed: () async {
-                        widget.getOccupantsSize(widget.groupName);
+                        widget.getOnlineMemberCount(widget.groupName);
                       },
                       child: Text('Get Occupants Size'),
                       style: ElevatedButton.styleFrom(

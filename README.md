@@ -100,9 +100,9 @@ await flutterXmpp.removeMember("groupName", List<String> allMembersId);
 await flutterXmpp.removeAdmin("groupName", List<String> allMembersId);
 ```
 
-16. get Occupants Size from group
+16. get online member count from group
 ```
-await flutterXmpp.getOccupantsSize("groupName");
+await flutterXmpp.getOnlineMemberCount("groupName");
 ```
 
 

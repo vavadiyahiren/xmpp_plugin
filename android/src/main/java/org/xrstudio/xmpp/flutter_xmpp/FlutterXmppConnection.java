@@ -151,7 +151,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         conf.setCustomSSLContext(context);
 
         conf.setKeystoreType(null);
-        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.ifpossible);
+        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
 
         Log.d("loginTest", "connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + mPort + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource);
 
@@ -491,8 +491,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         return jidList;
     }
 
-    public static int getOccupantsSize(String groupName) {
-
+    public static int getOnlineMemberCount(String groupName) {
         try {
             String roomId = groupName;
             if (!groupName.contains(Constants.CONFERENCE)) {

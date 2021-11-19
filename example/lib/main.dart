@@ -85,8 +85,8 @@ class _MyAppState extends State<MyApp> {
     await flutterXmpp.getOwners(groupName);
   }
 
-  Future<void> getOccupantsSize(String groupName) async {
-    await flutterXmpp.getOccupantsSize(groupName);
+  Future<void> getOnlineMemberCount(String groupName) async {
+    await flutterXmpp.getOnlineMemberCount(groupName);
   }
 
   Future<void> removeMember(String groupName, List<String> membersJid) async {
@@ -112,14 +112,10 @@ class _MyAppState extends State<MyApp> {
   String dropdownvalue = 'Chat';
   var items = ['Chat', 'Group Chat'];
 
-  TextEditingController _userNameController =
-      TextEditingController();
-  TextEditingController _passwordController =
-      TextEditingController();
-  TextEditingController _hostController =
-      TextEditingController();
-  TextEditingController _createMUCNamecontroller =
-      TextEditingController();
+  TextEditingController _userNameController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
+  TextEditingController _hostController = TextEditingController();
+  TextEditingController _createMUCNamecontroller = TextEditingController();
 
   TextEditingController _toReceiptController = TextEditingController();
   TextEditingController _msgIdController = TextEditingController();
@@ -252,7 +248,8 @@ class _MyAppState extends State<MyApp> {
                                       getAdmins: getAdmins,
                                       getMembers: getMembers,
                                       getOwners: getOwners,
-                                  getOccupantsSize: getOccupantsSize,
+                                      getOnlineMemberCount:
+                                          getOnlineMemberCount,
                                     )),
                           );
                         },

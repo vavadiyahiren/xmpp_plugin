@@ -16,7 +16,7 @@ public class Constants {
     public static final String GET_OWNERS = "get_owners";
     public static final String GET_ADMINS = "get_admins";
     public static final String GET_MEMBERS = "get_members";
-    public static final String GET_OCCUPANTS_SIZE = "get_occupants_size";
+    public static final String GET_ONLINE_MEMBER_COUNT = "get_online_member_count";
 
     // Broadcast Parameters
     public static final String GROUP_NAME = "group_name";
