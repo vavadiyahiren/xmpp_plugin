@@ -39,3 +39,11 @@
 ## 1.1.7
 
 * Added full Jid for message from IOS
+
+## 1.1.8 
+
+* Added Group management Features
+
+## 1.19 
+
+* Added capabilities to get online member count for group
