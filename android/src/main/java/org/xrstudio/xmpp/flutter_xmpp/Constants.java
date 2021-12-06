@@ -17,6 +17,17 @@ public class Constants {
     public static final String GET_ADMINS = "get_admins";
     public static final String GET_MEMBERS = "get_members";
     public static final String GET_ONLINE_MEMBER_COUNT = "get_online_member_count";
+    public static final String GET_LAST_SEEN = "get_last_seen";
+    public static final String CREATE_ROSTER = "create_roster";
+    public static final String GET_PRESENCE = "get_presence";
+    public static final String GET_MY_ROSTERS = "get_my_rosters";
+    public static final String SYMBOL_COMPARE_JID = "@";
+    public static final String ZERO = "0";
+
+
+    final public static int RESULT_SUCCESS = 1;
+    final public static int RESULT_EMPTY = 0;
+    final public static int RESULT_DEFAULT = -1;
 
     // Broadcast Parameters
     public static final String GROUP_NAME = "group_name";
@@ -31,5 +42,9 @@ public class Constants {
 
     //Static values
     public static final String TRUE = "true";
+
+    //Presence values
+    public static final String ONLINE = "online";
+    public static final String OFFLINE = "offline";
 
 }

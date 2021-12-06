@@ -8,7 +8,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
 import java.util.List;
 import java.util.Map;
 
@@ -120,6 +119,22 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
 
                         break;
 
+                    // Handle the auth status events.
+                    case FlutterXmppConnectionService.PRESENCE_MESSAGE:
+
+                        String jid = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_TO_JID);
+                        String presence = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_PRESENCE);
+
+                        Map<String, Object> presenceBuild = new HashMap<>();
+                        presenceBuild.put("type", "presence");
+                        presenceBuild.put("from", jid);
+                        presenceBuild.put("presence", presence);
+
+                        Log.d("presenceTest", "presenceBuild: " + presenceBuild);
+
+                        events.success(presenceBuild);
+                        break;
+
                 }
             }
         };
@@ -172,6 +187,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             IntentFilter filter = new IntentFilter();
             filter.addAction(FlutterXmppConnectionService.RECEIVE_MESSAGE);
             filter.addAction(FlutterXmppConnectionService.OUTGOING_MESSAGE);
+            filter.addAction(FlutterXmppConnectionService.PRESENCE_MESSAGE);
             activity.registerReceiver(mBroadcastReceiver, filter);
         }
 
@@ -402,6 +418,39 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             int occupantsSize = FlutterXmppConnection.getOnlineMemberCount(groupName);
 
             result.success(occupantsSize);
+
+        } else if (call.method.equals(Constants.GET_LAST_SEEN)) {
+
+            String userJid = call.argument("user_jid");
+
+            long userLastActivity = FlutterXmppConnection.getLastSeen(userJid);
+
+            if (userLastActivity < Constants.RESULT_EMPTY) {
+                // online
+            } else if (userLastActivity > Constants.RESULT_EMPTY) {
+                // not online but need to pass time
+            }
+
+            result.success(userLastActivity + "");
+
+        } else if (call.method.equals(Constants.GET_PRESENCE)) {
+
+            String userJid = call.argument("user_jid");
+
+            HashMap<String, String> getPresence = FlutterXmppConnection.getPresence(userJid);
+            result.success(getPresence.toString());
+
+        } else if (call.method.equals(Constants.GET_MY_ROSTERS)) {
+            List<String> getMyRosters = FlutterXmppConnection.getMyRosters();
+            result.success(getMyRosters.toString());
+
+        } else if (call.method.equals(Constants.CREATE_ROSTER)) {
+
+            String userJid = call.argument("user_jid");
+
+            FlutterXmppConnection.createRosterEntry(userJid);
+
+            result.success("SUCCESS");
 
         } else {
             result.notImplemented();

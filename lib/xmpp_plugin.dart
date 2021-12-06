@@ -194,9 +194,36 @@ class XmppConnection {
 
   Future<int> getOnlineMemberCount(String groupName) async {
     final params = {"group_name": groupName};
-    int memberCount = await _channel.invokeMethod('get_online_member_count', params);
+    int memberCount =
+        await _channel.invokeMethod('get_online_member_count', params);
     print('checkGroups getOccupantsSize: $memberCount');
     return memberCount;
+  }
+
+  Future<String> getLastSeen(String userJid) async {
+    final params = {"user_jid": userJid};
+    String lastSeenTime = await _channel.invokeMethod('get_last_seen', params);
+    print('checkNewFeat getLastSeen lastSeenTime: $lastSeenTime');
+    return lastSeenTime;
+  }
+
+  Future<void> createRoster(String userJid) async {
+    final params = {"user_jid": userJid};
+    await _channel.invokeMethod('create_roster', params);
+    print('checkNewFeat create roster success');
+  }
+
+  Future<String> getPresence(String userJid) async {
+    final params = {"user_jid": userJid};
+    String presence = await _channel.invokeMethod('get_presence', params);
+    print('checkNewFeat getPresence presence: $presence');
+    return presence;
+  }
+
+  Future<String> getMyRosters() async {
+    String myRosters = await _channel.invokeMethod('get_my_rosters');
+    print('checkNewFeat getRosters myRosters: $myRosters');
+    return myRosters;
   }
 
   Future<List<dynamic>> getMembers(String groupName) async {

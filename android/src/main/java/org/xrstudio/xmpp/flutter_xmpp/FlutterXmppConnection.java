@@ -15,16 +15,22 @@ import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
 import org.jivesoftware.smack.filter.StanzaFilter;
 import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Presence;
+import org.jivesoftware.smack.packet.StandardExtensionElement;
 import org.jivesoftware.smack.packet.Stanza;
+import org.jivesoftware.smack.roster.Roster;
+import org.jivesoftware.smack.roster.RosterEntry;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smack.util.TLSUtils;
+import org.jivesoftware.smackx.iqlast.LastActivityManager;
+import org.jivesoftware.smackx.iqlast.packet.LastActivity;
 import org.jivesoftware.smackx.muc.Affiliate;
 import org.jivesoftware.smackx.muc.MucEnterConfiguration;
 import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.jivesoftware.smackx.muc.MultiUserChatManager;
+import org.jivesoftware.smackx.receipts.DeliveryReceipt;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptRequest;
-import org.jivesoftware.smack.packet.StandardExtensionElement;
 import org.jivesoftware.smackx.xdata.Form;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.Jid;
@@ -38,13 +44,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-
-import org.jivesoftware.smackx.receipts.DeliveryReceipt;
-import org.jivesoftware.smackx.receipts.DeliveryReceiptManager;
-import org.jivesoftware.smackx.receipts.ReceiptReceivedListener;
-import org.jivesoftware.smackx.receipts.DeliveryReceiptManager.AutoReceiptMode;
-import org.jivesoftware.smackx.receipts.DeliveryReceiptRequest;
+import java.util.Set;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -55,6 +57,7 @@ public class FlutterXmppConnection implements ConnectionListener {
     private static final String conferenceDomainName = "@conference";
 
     private static XMPPTCPConnection mConnection;
+    private static Roster rosterConnection;
     private static MultiUserChatManager multiUserChatManager;
     private Context mApplicationContext;
     private static String mUsername = "";
@@ -151,7 +154,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         conf.setCustomSSLContext(context);
 
         conf.setKeystoreType(null);
-        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.required);
 
         Log.d("loginTest", "connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + mPort + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource);
 
@@ -167,11 +170,35 @@ public class FlutterXmppConnection implements ConnectionListener {
                 Log.d(TAG, "Calling connect() ");
             }
             mConnection.connect();
+
+            rosterConnection = Roster.getInstanceFor(mConnection);
+            rosterConnection.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
+
             mConnection.login(/*mUsername, mPassword*/);
 
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        mConnection.addSyncStanzaListener(new StanzaListener() {
+            @Override
+            public void processStanza(Stanza packet) {
+                Presence presence = (Presence) packet;
+                String jid = presence.getFrom().toString();
+                Presence.Type type = presence.getType();
+                Log.d("checkNewFeat", "getPresence: 0 jid: " + jid);
+                Intent intent = new Intent(FlutterXmppConnectionService.PRESENCE_MESSAGE);
+                intent.setPackage(mApplicationContext.getPackageName());
+                intent.putExtra(FlutterXmppConnectionService.BUNDLE_FROM_JID, jid);
+                intent.putExtra(FlutterXmppConnectionService.BUNDLE_PRESENCE, type == Presence.Type.available ? Constants.ONLINE : Constants.OFFLINE);
+                mApplicationContext.sendBroadcast(intent);
+            }
+        }, new StanzaFilter() {
+            @Override
+            public boolean accept(Stanza stanza) {
+                return stanza instanceof Presence;
+            }
+        });
 
         mConnection.addStanzaAcknowledgedListener(new StanzaListener() {
             @Override
@@ -505,6 +532,84 @@ public class FlutterXmppConnection implements ConnectionListener {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public static long getLastSeen(String userJid) {
+        long userLastActivity = Constants.RESULT_EMPTY;
+        try {
+            LastActivityManager lastActivityManager = LastActivityManager.getInstanceFor(mConnection);
+            Log.d("checkNewFeat", "getLastSeen: 0: " + JidCreate.from(Utils.getJidWithDomainName(userJid, mHost)).toString());
+            LastActivity lastActivity = lastActivityManager.getLastActivity(JidCreate.from(Utils.getJidWithDomainName(userJid, mHost)));
+            userLastActivity = lastActivity.lastActivity;
+//            Log.d("checkNewFeat", "getLastSeen: 0 userJid: " + userJid);
+//            Roster roster = Roster.getInstanceFor(mConnection);
+//            RosterEntry entry = roster.getEntry((BareJid) JidCreate.from(Utils.getJidWithDomainName(userJid, mHost)));
+//            if (entry != null) {
+//                Presence p = roster.getPresence(entry.getJid());
+//                Presence.Mode mode = p.getMode();
+//                Log.d("checkNewFeat", "getLastSeen: 1 mode: " + mode);
+//                if (mode != Presence.Mode.away) {
+//                    LastActivity activity = new LastActivity(JidCreate.from(Utils.getJidWithDomainName(userJid, mHost)));
+//                    LastActivity last = mConnection.createStanzaCollectorAndSend(activity).nextResult(5000);
+//                    long lastActivity = last.getIdleTime();
+//                    Log.d("checkNewFeat", "getLastSeen: 2 lastActivity: " + lastActivity);
+//                    if (lastActivity == Constants.RESULT_EMPTY || lastActivity == Constants.RESULT_DEFAULT) {
+//                        status = Constants.RESULT_DEFAULT;
+//                    } else {
+//                        lastActivity = lastActivity * 1000;
+//                        long currentTime = Utils.getLongDate();
+//                        status = currentTime - lastActivity;
+//                    }
+//                }
+//            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            userLastActivity = Constants.RESULT_EMPTY;
+            Log.d("checkNewFeat", "getLastSeen: exception: " + e.getLocalizedMessage());
+        }
+        Log.d("checkNewFeat", "getLastSeen: userLastActivity: " + userLastActivity);
+        return userLastActivity;
+    }
+
+    public static HashMap<String, String> getPresence(String userJid) {
+        HashMap<String, String> presenceMap = new HashMap<>();
+        try {
+
+            Presence presence = rosterConnection.getPresence(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)));
+            presenceMap.put("type", presence.getType().toString());
+            presenceMap.put("mode", presence.getMode().toString());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d("checkNewFeat", "getPresence: exception: " + e.getLocalizedMessage());
+        }
+        Log.d("checkNewFeat", "getPresence: presenceMap: " + presenceMap);
+        return presenceMap;
+    }
+
+    public static List<String> getMyRosters() {
+        List<String> muRosterList = new ArrayList<>();
+        try {
+            Set<RosterEntry> allRoster = rosterConnection.getEntries();
+            for (RosterEntry rosterEntry : allRoster) {
+                muRosterList.add(rosterEntry.toString());
+            }
+            Log.d("checkNewFeat", "getMyRosters: muRosterList: " + muRosterList);
+        } catch (Exception e) {
+            Log.d("checkNewFeat", "getMyRosters: exception: " + e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+        return muRosterList;
+    }
+
+    public static void createRosterEntry(String userJid) {
+        try {
+            rosterConnection.createEntry(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)), userJid, null);
+            Log.d("checkNewFeat", "createRosterEntry success");
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.d("checkNewFeat", "createRosterEntry: exception: " + e.getLocalizedMessage());
+        }
     }
 
     public void disconnect() {

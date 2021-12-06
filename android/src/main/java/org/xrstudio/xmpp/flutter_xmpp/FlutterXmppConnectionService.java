@@ -22,6 +22,7 @@ public class FlutterXmppConnectionService extends Service {
     public static final String BUNDLE_MESSAGE_TYPE = "b_body_type";
     public static final String BUNDLE_MESSAGE_SENDER_JID = "b_sender_jid";
     public static final String BUNDLE_TO = "b_to";
+    public static final String BUNDLE_PRESENCE = "b_presence";
     public static final String MEDIA_URL = "media_url";
     public static final String CUSTOM_TEXT = "custom_text";
     public static final String META_TEXT = "meta_text";
@@ -35,6 +36,7 @@ public class FlutterXmppConnectionService extends Service {
     public static final String BUNDLE_FROM_JID = "b_from";
     public static final String AUTH_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.authmessage";
     public static final String CONNECTION_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.connmessage";
+    public static final String PRESENCE_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.presencemessage";
 
     private static final String TAG = "flutter_xmpp";
     public static FlutterXmppConnection.ConnectionState sConnectionState;

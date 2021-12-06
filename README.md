@@ -105,6 +105,21 @@ await flutterXmpp.removeAdmin("groupName", List<String> allMembersId);
 await flutterXmpp.getOnlineMemberCount("groupName");
 ```
 
+17. get last seen
+```
+await flutterXmpp.getLastSeen(jid);
+```
+
+18. get my rosters
+```
+ await flutterXmpp.getMyRosters();
+```
+
+19. create roster
+```
+await flutterXmpp.createRoster(jid);
+```
+
 
 
 # To be Added

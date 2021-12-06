@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_xmpp_example/constants.dart';
 
 import 'package:flutter_xmpp_example/homepage.dart';
 import 'package:xmpp_plugin/custom_element.dart';
@@ -119,6 +120,8 @@ class _MyAppState extends State<MyApp> {
 
   TextEditingController _toReceiptController = TextEditingController();
   TextEditingController _msgIdController = TextEditingController();
+  TextEditingController _userJidController = TextEditingController();
+  TextEditingController _createRostersController = TextEditingController();
   TextEditingController _receiptIdController = TextEditingController();
   TextEditingController _joinMUCTextController = TextEditingController();
   TextEditingController _joinTimeController = TextEditingController();
@@ -216,46 +219,51 @@ class _MyAppState extends State<MyApp> {
                 ),
                 Row(
                   children: [
-                    ElevatedButton(
-                      onPressed: () async {
-                        await createMUC(
-                            "${_createMUCNamecontroller.text}", true);
-                      },
-                      child: Text('Create Group'),
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.black,
+                    Flexible(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await createMUC(
+                              "${_createMUCNamecontroller.text}", true);
+                        },
+                        child: Text('Create Group'),
+                        style: ElevatedButton.styleFrom(
+                          primary: Colors.black,
+                        ),
                       ),
                     ),
                     SizedBox(
                       width: 45,
                     ),
                     Builder(builder: (context) {
-                      return ElevatedButton(
-                        onPressed: () async {
-                          await createMUC(
-                              "${_createMUCNamecontroller.text}", true);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => HomePage(
-                                      groupName: _createMUCNamecontroller.text,
-                                      addMembersInGroup: addMembersInGroup,
-                                      addAdminsInGroup: addAdminsInGroup,
-                                      removeMember: removeMember,
-                                      removeAdmin: removeAdmin,
-                                      addOwner: addOwner,
-                                      removeOwner: removeOwner,
-                                      getAdmins: getAdmins,
-                                      getMembers: getMembers,
-                                      getOwners: getOwners,
-                                      getOnlineMemberCount:
-                                          getOnlineMemberCount,
-                                    )),
-                          );
-                        },
-                        child: Text('Create Group & Manage'),
-                        style: ElevatedButton.styleFrom(
-                          primary: Colors.black,
+                      return Flexible(
+                        child: ElevatedButton(
+                          onPressed: () async {
+                            await createMUC(
+                                "${_createMUCNamecontroller.text}", true);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => HomePage(
+                                        groupName:
+                                            _createMUCNamecontroller.text,
+                                        addMembersInGroup: addMembersInGroup,
+                                        addAdminsInGroup: addAdminsInGroup,
+                                        removeMember: removeMember,
+                                        removeAdmin: removeAdmin,
+                                        addOwner: addOwner,
+                                        removeOwner: removeOwner,
+                                        getAdmins: getAdmins,
+                                        getMembers: getMembers,
+                                        getOwners: getOwners,
+                                        getOnlineMemberCount:
+                                            getOnlineMemberCount,
+                                      )),
+                            );
+                          },
+                          child: Text('Create Group & Manage'),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.black,
+                          ),
                         ),
                       );
                     }),
@@ -421,6 +429,86 @@ class _MyAppState extends State<MyApp> {
                   child: Text(" Send Receipt "),
                   style: ElevatedButton.styleFrom(primary: Colors.black),
                 ),
+                SizedBox(
+                  height: 10,
+                ),
+                customTextField(
+                  hintText: "User Jid",
+                  textEditController: _userJidController,
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    String lastSeenTime =
+                        await flutterXmpp.getLastSeen(_userJidController.text);
+                    print('lastSeen lastSeenTime: $lastSeenTime');
+                    if (lastSeenTime.isNotEmpty) {
+                      int last = int.parse(lastSeenTime);
+
+                      if (last < Constants.RESULT_EMPTY) {
+                        // online
+                      } else if (last > Constants.RESULT_EMPTY) {
+                        // not online but need to pass time
+                        DateTime dateTime =
+                            DateTime.fromMillisecondsSinceEpoch(last);
+                      } else {
+                        // away
+                      }
+                    } else {
+                      // away
+                    }
+                  },
+                  child: Text("Get Last activity"),
+                  style: ElevatedButton.styleFrom(primary: Colors.black),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Flexible(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await flutterXmpp.getPresence(
+                            "${_userJidController.text}",
+                          );
+                        },
+                        child: Text(" Get Presence "),
+                        style: ElevatedButton.styleFrom(primary: Colors.black),
+                      ),
+                    ),
+                    Flexible(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await flutterXmpp.getMyRosters();
+                        },
+                        child: Text(" Get MyRosters "),
+                        style: ElevatedButton.styleFrom(primary: Colors.black),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                customTextField(
+                  hintText: "Create MyRosters",
+                  textEditController: _createRostersController,
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    await flutterXmpp.createRoster(_createRostersController.text);
+                   },
+                  child: Text("Create MyRosters"),
+                  style: ElevatedButton.styleFrom(primary: Colors.black),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+
                 Container(
                   height: 500,
                   child: ListView.builder(
