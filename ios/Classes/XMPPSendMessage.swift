@@ -9,22 +9,7 @@ import Foundation
 import XMPPFramework
 
 extension XMPPController {
-    /*func get_JidName_User(_ Jid : String) -> String {
-        if Jid.trim().isEmpty { return Jid }
-        if Jid.contains(self.hostName) == true { return Jid }
-        let vChatRoomName : String = [Jid, "@", self.hostName].joined(separator: "")
-        return vChatRoomName
-    }*/
-    func getJIDNameForUser(_ jid : String, withStrem: XMPPStream) -> String {
-        var vHost : String = ""
-        if let value = withStrem.hostName { vHost = value.trim() }
-        if jid.contains(vHost) {
-            return jid
-        }
-        return [jid, "@", vHost].joined(separator: "")
-    }
-
-    // This method handles sending the message to one-one chat
+    /// This method handles sending the message to one-one chat
     func sendMessage(messageBody:String,
                      reciverJID:String,
                      messageId: String,
@@ -120,6 +105,13 @@ extension XMPPController {
         printLog("\(#function) | arrJid: \(arrJid)")
         if let callBack = APP_DELEGATE.singalCallBack {
             callBack(arrJid)
+        }
+    }
+    
+    func sendLastActivity(withTime vTime: String) {
+        printLog("\(#function) | time: \(vTime)")
+        if let callBack = APP_DELEGATE.singalCallBack {
+            callBack(vTime)
         }
     }
     

@@ -271,8 +271,12 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             result(xmppConstants.DataNil)
             return
         }
+        APP_DELEGATE.singalCallBack = result
+        APP_DELEGATE.objXMPP.getLastActivity(withUserJid: vUserId,
+                                             withStrem: self.objXMPP.xmppStream,
+                                             objXMPP: self.objXMPP)
         printLog("\(#function) | \(vMethod) | vUserId: \(vUserId)")
-        result(xmppConstants.SUCCESS)
+        //result(xmppConstants.SUCCESS)
     }
     
     func createRostersActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
@@ -291,7 +295,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             return
         }
         APP_DELEGATE.objXMPP.createRosters(withUserJid: vUserId, withStrem: self.objXMPP.xmppStream, objXMPP: self.objXMPP)
-        result(xmppConstants.SUCCESS)
+        //result(xmppConstants.SUCCESS)
     }
     
     func getMyRostersActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
@@ -303,12 +307,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
                 
         APP_DELEGATE.singalCallBack = result
         APP_DELEGATE.objXMPP.getMyRosters(withStrem: self.objXMPP.xmppStream, objXMPP: self.objXMPP)
-        if let _ = vData {
-            result(xmppConstants.SUCCESS)
-        }
-        else {
-            result(xmppConstants.DataNil);
-        }
+        //result(xmppConstants.SUCCESS)
     }
     
     //MARK: - perform XMPP Connection
