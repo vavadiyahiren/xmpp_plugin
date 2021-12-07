@@ -424,13 +424,6 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             String userJid = call.argument("user_jid");
 
             long userLastActivity = FlutterXmppConnection.getLastSeen(userJid);
-
-            if (userLastActivity < Constants.RESULT_EMPTY) {
-                // online
-            } else if (userLastActivity > Constants.RESULT_EMPTY) {
-                // not online but need to pass time
-            }
-
             result.success(userLastActivity + "");
 
         } else if (call.method.equals(Constants.GET_PRESENCE)) {

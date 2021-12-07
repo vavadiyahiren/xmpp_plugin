@@ -535,7 +535,7 @@ public class FlutterXmppConnection implements ConnectionListener {
     }
 
     public static long getLastSeen(String userJid) {
-        long userLastActivity = Constants.RESULT_EMPTY;
+        long userLastActivity = Constants.RESULT_DEFAULT;
         try {
             LastActivityManager lastActivityManager = LastActivityManager.getInstanceFor(mConnection);
             Log.d("checkNewFeat", "getLastSeen: 0: " + JidCreate.from(Utils.getJidWithDomainName(userJid, mHost)).toString());
@@ -564,7 +564,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 //            }
         } catch (Exception e) {
             e.printStackTrace();
-            userLastActivity = Constants.RESULT_EMPTY;
+            userLastActivity = Constants.RESULT_DEFAULT;
             Log.d("checkNewFeat", "getLastSeen: exception: " + e.getLocalizedMessage());
         }
         Log.d("checkNewFeat", "getLastSeen: userLastActivity: " + userLastActivity);
