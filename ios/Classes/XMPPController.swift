@@ -15,6 +15,8 @@ class XMPPController : NSObject {
     var xmppReconnect = XMPPReconnect()
     var xmppRoom : XMPPRoom?
     var xmppStreamManagement : XMPPStreamManagement = XMPPStreamManagement(storage: XMPPStreamManagementMemoryStorage.init(), dispatchQueue: DispatchQueue.main)
+    var xmppRoster : XMPPRoster?
+    var xmppRosterStorage: XMPPRosterCoreDataStorage?
     
     internal var hostName: String = ""
     internal var hostPort: Int16 = 0
@@ -48,13 +50,24 @@ class XMPPController : NSObject {
         self.xmppStream.hostPort = UInt16(hostPort)
         self.xmppStream.myJID = userJID
         self.xmppStream.startTLSPolicy = XMPPStreamStartTLSPolicy.required
-        
         self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
         
+        /// xmppReconnect Configuration
         xmppReconnect = XMPPReconnect()
         self.xmppReconnect.manualStart()
         self.xmppReconnect.activate(self.xmppStream)
         self.xmppReconnect.addDelegate(self, delegateQueue: DispatchQueue.main)
+        
+        /// xmppRoster Configuration
+        self.xmppRosterStorage = XMPPRosterCoreDataStorage.init()
+        //self.xmppRoster = XMPPRoster.init(rosterStorage: self.xmppRosterStorage)
+        if let objRosSto = self.xmppRosterStorage {
+            self.xmppRoster = XMPPRoster.init(rosterStorage: objRosSto)
+        }
+        self.xmppRoster?.autoFetchRoster = true
+        self.xmppRoster?.autoAcceptKnownPresenceSubscriptionRequests = true
+        self.xmppRoster?.activate(self.xmppStream)
+        self.xmppRoster?.addDelegate(self, delegateQueue: DispatchQueue.main)
     }
         
     func connect() {
@@ -456,7 +469,7 @@ extension XMPPController {
                 print("\(#function) | UserJidString is empty/nil")
                 continue
             }
-            let userJIDString = get_JidName_User(user.trim(), withStrem: withStrem)
+            let userJIDString = getJIDNameForUser(user.trim(), withStrem: withStrem)
             let eleUser : XMLElement = XMLElement.init(name: "item")
             eleUser.addAttribute(withName: "affiliation", stringValue: vUserRole.trim())
             eleUser.addAttribute(withName: "jid", stringValue: userJIDString)
@@ -576,10 +589,68 @@ extension XMPPController : XMPPStreamManagementDelegate {
             guard let vMessId = value as? String  else {
                 print("\(#function) | getting Invalid Message Id | \(value)")
                 continue
-            }            
+            }
             self.sendAck(vMessId)
         }
-    }    
+    }
+}
+
+//MARK: - XMPPRoster
+extension XMPPController : XMPPRosterDelegate {
+//    func xmppRoster(_ sender: XMPPRoster, didReceiveRosterItem item: DDXMLElement) {
+//        printLog("\(#function) | items : \(item)")
+//    }
+    
+    func xmppRoster(_ sender: XMPPRoster, didReceivePresenceSubscriptionRequest presence: XMPPPresence) {
+        printLog("\(#function) | presence : \(presence)")
+    }
+    
+    func xmppRoster(_ sender: XMPPRoster, didReceiveRosterPush iq: XMPPIQ) {
+        printLog("\(#function) | iq : \(iq)")
+    }
+    
+    func xmppRosterDidBeginPopulating(_ sender: XMPPRoster, withVersion version: String) {
+        printLog("\(#function) | version : \(version)")
+    }
+    
+    func xmppRosterDidEndPopulating(_ sender: XMPPRoster) {
+        printLog("\(#function) | sender: \(sender)")
+    }
+    
+    //MARK: -
+    func createRosters(withUserJid jid: String, withStrem: XMPPStream, objXMPP : XMPPController) {
+        printLog("\(#function) | withUserJid: \(jid)")
+        
+        let strUseJid : String = jid.trim()
+        if strUseJid.isEmpty {
+            print("\(#function) | getting userJid is emtpy.")
+            return
+        }
+        let usJidString = getJIDNameForUser(strUseJid, withStrem: withStrem)
+        let vJid : XMPPJID? = XMPPJID(string: usJidString)
+        if let vJid = vJid {
+            objXMPP.xmppRoster?.subscribePresence(toUser: vJid)
+            return
+        }
+        print("\(#function) | Not create Roster | userJid : \(usJidString)")
+    }
+    
+    func getMyRosters(withStrem: XMPPStream, objXMPP : XMPPController) {
+        var arrJidString : [String] = []
+        guard let arrJid = objXMPP.xmppRosterStorage?.jids(for: withStrem) else {
+            printLog("\(#function) | Not getting roster.")
+            
+            self.sendRosters(withUsersJid: arrJidString)
+            return
+        }
+        
+        for jid in arrJid {
+            let strJid = jid.description.trim()
+            if strJid.isEmpty { continue }
+            arrJidString.append(strJid)
+        }
+        self.sendRosters(withUsersJid: arrJidString)
+    }
 }
 
 //MARK: - Extension

@@ -15,7 +15,7 @@ extension XMPPController {
         let vChatRoomName : String = [Jid, "@", self.hostName].joined(separator: "")
         return vChatRoomName
     }*/
-    func get_JidName_User(_ jid : String, withStrem: XMPPStream) -> String {
+    func getJIDNameForUser(_ jid : String, withStrem: XMPPStream) -> String {
         var vHost : String = ""
         if let value = withStrem.hostName { vHost = value.trim() }
         if jid.contains(vHost) {
@@ -61,7 +61,7 @@ extension XMPPController {
             return
         }
         
-        let vJid : XMPPJID? = XMPPJID(string: get_JidName_User(jid, withStrem: withStrem))
+        let vJid : XMPPJID? = XMPPJID(string: getJIDNameForUser(jid, withStrem: withStrem))
         let xmppMessage = XMPPMessage.init(type: xmppChatType.NORMAL, to: vJid)
         xmppMessage.addAttribute(withName: "id", stringValue: receiptId)
         
@@ -113,6 +113,13 @@ extension XMPPController {
         printLog("\(#function) | arrUsers: \(arrUsers)")
         if let callBack = APP_DELEGATE.singalCallBack {
             callBack(arrUsers)
+        }
+    }
+    
+    func sendRosters(withUsersJid arrJid : [String]) {
+        printLog("\(#function) | arrJid: \(arrJid)")
+        if let callBack = APP_DELEGATE.singalCallBack {
+            callBack(arrJid)
         }
     }
     

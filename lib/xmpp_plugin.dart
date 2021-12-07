@@ -220,8 +220,8 @@ class XmppConnection {
     return presence;
   }
 
-  Future<String> getMyRosters() async {
-    String myRosters = await _channel.invokeMethod('get_my_rosters');
+  Future<dynamic> getMyRosters() async {
+    List<dynamic> myRosters = await _channel.invokeMethod('get_my_rosters');
     print('checkNewFeat getRosters myRosters: $myRosters');
     return myRosters;
   }
