@@ -435,7 +435,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
 
         } else if (call.method.equals(Constants.GET_MY_ROSTERS)) {
             List<String> getMyRosters = FlutterXmppConnection.getMyRosters();
-            result.success(getMyRosters.toString());
+            result.success(getMyRosters);
 
         } else if (call.method.equals(Constants.CREATE_ROSTER)) {
 
