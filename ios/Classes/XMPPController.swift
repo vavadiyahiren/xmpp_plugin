@@ -36,6 +36,7 @@ class XMPPController : NSObject {
         
         let stUserJid = "\(userId)@\(hostName)"
         guard let userJID = XMPPJID.init(string: stUserJid, resource: xmppConstants.Resource) else {
+            APP_DELEGATE.objXMPPConnStatus = .Failed
             throw XMPPControllerError.wrongUserJID
         }
         
@@ -147,7 +148,6 @@ extension XMPPController: XMPPStreamDelegate, XMPPMUCLightDelegate  {
             try stream.authenticate(withPassword: self.password)
         } catch {
             APP_DELEGATE.objXMPPConnStatus = .Disconnect
-            APP_DELEGATE.performXMPPConnectionActivity()
         }
     }
     
@@ -160,7 +160,6 @@ extension XMPPController: XMPPStreamDelegate, XMPPMUCLightDelegate  {
         
         self.changeStatus(.Offline, withXMPPStrem: sender)
         APP_DELEGATE.objXMPPConnStatus = .Disconnect
-        APP_DELEGATE.performXMPPConnectionActivity()
     }
     
     //MARK:- Authenticate
@@ -200,7 +199,8 @@ extension XMPPController : XMPPRoomDelegate {
         vRoom = "\(value)"
         printLog("\(#function) | XMPPRoom Joined | XMPPRoom-Name: \(vRoom)")
         
-        self.updateGroupInfoIntoXMPPRoomCreatedAndJoined(withXMPPRoomObj: sender, roomName: vRoom)
+        /// No needs for update  alredy join room setting updates
+        //self.updateGroupInfoIntoXMPPRoomCreatedAndJoined(withXMPPRoomObj: sender, roomName: vRoom)
     }
     
     func xmppRoom(_ sender: XMPPRoom, didFetchConfigurationForm configForm: DDXMLElement) {
@@ -266,6 +266,7 @@ extension XMPPController : XMPPRoomDelegate {
         printLog("\(#function) | XMPPRoom: \(sender) | iqResult: \(iqResult)")
     }
     
+    //MARK: -
     func createRoom(withRooms arrRooms: [groupInfo], withStrem : XMPPStream) {
         for objRoom in arrRooms {
             let roomName = objRoom.name.trim()
@@ -394,18 +395,24 @@ extension XMPPController {
     func getRoomMember(withUserType vType : xmppMUCUserType, forRoomName roomName: String, withStrem : XMPPStream) {
         if roomName.trim().isEmpty {
             print("\(#function) | roomName nil/empty")
+            
+            self.sendMemberList(withUsers: [])
             return
         }
         guard let index = self.arrGroups.firstIndex(where: { (objGroup) -> Bool in
             return objGroup.name == roomName
         }) else {
             print("\(#function) | Not found XMPPRoom object in user created/join GroupList")
+            
+            self.sendMemberList(withUsers: [])
             return
         }
         
         let objRoom = self.arrGroups[index]
         guard let objXMPPRoom = objRoom.objRoomXMPP else {
             print("\(#function) | User not succesfully created/join XMPPRoom")
+            
+            self.sendMemberList(withUsers: [])
             return
         }
         printLog("\(#function) | perform activity of get XMPPRoom Member | room: \(roomName) | role: \(vType)")

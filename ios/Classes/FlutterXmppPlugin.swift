@@ -28,7 +28,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         
         APP_DELEGATE.manange_NotifcationObservers()
     }
-    
+    //MARK: -
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         let vMethod : String = call.method.trim()
         switch vMethod {
@@ -320,18 +320,15 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
                 try self.objXMPP = XMPPController.init(hostName: xmpp_HostName, hostPort: xmpp_HostPort, userId: xmpp_UserId, password: xmpp_UserPass)
                 self.objXMPP.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
                 self.objXMPP.connect()
-            } catch {
-                APP_DELEGATE.performXMPPConnectionActivity()
+            } catch let err {
+                print("\(#function) | Getting error on XMPP Connect | error : \(err.localizedDescription)")
             }
-            break
             
         case .Processing:
             break
             
         case .Disconnect:
             APP_DELEGATE.objXMPPConnStatus = .None
-            APP_DELEGATE.performXMPPConnectionActivity()
-            break
             
         default:
             break
@@ -355,8 +352,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             
         case .Failed:
             valueStatus = xmppConnStatus.Failed
-            
-            
+                        
         case .Disconnect,
              .None:
             valueStatus = xmppConnStatus.Disconnect
