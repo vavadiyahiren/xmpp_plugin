@@ -65,65 +65,72 @@ await xmppConnection.sendCustomGroupMessage("xyz@conference.domain", "Hi", "MSGI
 await flutterXmpp.sendDelieveryReceipt("xyz@domain", "Received-Message-Id", "Receipt-Id");
 ```
 
-9. Add members in group
+9. Adding members to MUC
+
 ```
 await flutterXmpp.addMembersInGroup("groupName", List<String> allMembersId);
 ```
 
-10. Add Admins in group
+10. Adding admins to MUC
+
 ```
 await flutterXmpp.addAdminsInGroup("groupName", List<String> allMembersId);
 ```
 
-11. getMembers
+11. Get member list from the MUC
+
 ```
 await flutterXmpp.getMembers("groupName");
 ```
 
-12. getAdmins
+12. Get Admin list from the MUC 
+
 ```
 await flutterXmpp.getAdmins("groupName");
 ```
 
-13. getOwners
+13. Get Owner list from the MUC
+
 ```
 await flutterXmpp.getOwners("groupName");
 ```
 
-14. Remove members from group
+14. Remove members from the MUC
+
 ```
 await flutterXmpp.removeMember("groupName", List<String> allMembersId);
 ```
 
 15. Remove admins from group
+
 ```
 await flutterXmpp.removeAdmin("groupName", List<String> allMembersId);
 ```
 
-16. get online member count from group
+16. Get online member count from group
+
 ```
-await flutterXmpp.getOnlineMemberCount("groupName");
+var onlineCount = await flutterXmpp.getOnlineMemberCount("groupName");
 ```
 
-17. get last seen
+17. Get last activity of the jid
+
 ```
-await flutterXmpp.getLastSeen(jid);
+var lastseen = await flutterXmpp.getLastSeen(jid);
 ```
 
-18. get my rosters
+18. Get the list of my rosters
+
 ```
  await flutterXmpp.getMyRosters();
 ```
 
-19. create roster
+19. Creating a roster entry
+
 ```
 await flutterXmpp.createRoster(jid);
 ```
 
-
-
 # To be Added
 
  - MAM
- - Presence
- - Last Activity
