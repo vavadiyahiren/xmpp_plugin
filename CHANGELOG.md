@@ -39,3 +39,17 @@
 ## 1.1.7
 
 * Added full Jid for message from IOS
+
+## 1.1.8 
+
+* Added Group management Features(XEP-0045)
+
+## 1.1.9 
+
+* Added capabilities to get online member count for group
+
+## 1.1.10
+
+* Added Creating Roster Entry capabilities
+* Added Auto Accept Roster Requests(XEP-0162)
+* Added Last Activity support (XEP-0012)
