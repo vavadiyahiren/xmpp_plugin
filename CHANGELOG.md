@@ -44,6 +44,6 @@
 
 * Added Group management Features
 
-## 1.19 
+## 1.1.9 
 
 * Added capabilities to get online member count for group
