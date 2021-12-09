@@ -33,50 +33,59 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         let vMethod : String = call.method.trim()
         switch vMethod {
         case pluginMethod.login:
-            self.hadleLoginActivity(call, result)
+            self.performLoginActivity(call, result)
                         
         case pluginMethod.sendMessage,
              pluginMethod.sendMessageInGroup,
              pluginMethod.sendCustomMessage,
              pluginMethod.sendCustomMessageInGroup:
-            self.hadleSendMessageActivity(call, result)
+            self.performSendMessageActivity(call, result)
                         
         case pluginMethod.createMUC:
-            self.hadleCreateMUCActivity(call, result)
+            self.performCreateMUCActivity(call, result)
             
         case pluginMethod.joinMUC:
-            self.hadleJoinMUCActivity(call, result)
+            self.performJoinMUCActivity(call, result)
         
         case pluginMethod.sendReceiptDelivery:
-            self.hadleReceiptDeliveryActivity(call, result)
+            self.performReceiptDeliveryActivity(call, result)
             
         case pluginMethod.addMembersInGroup:
-            self.hadleAddRemoveMembersInGroupActivity(withMemeberType: .Member, actionType: .Add, call, result)
+            self.performAddRemoveMembersInGroupActivity(withMemeberType: .Member, actionType: .Add, call, result)
             
         case pluginMethod.addAdminsInGroup:
-            self.hadleAddRemoveMembersInGroupActivity(withMemeberType: .Admin, actionType: .Add, call, result)
+            self.performAddRemoveMembersInGroupActivity(withMemeberType: .Admin, actionType: .Add, call, result)
             
         case pluginMethod.addOwnersInGroup:
-            self.hadleAddRemoveMembersInGroupActivity(withMemeberType: .Owner, actionType: .Add, call, result)
+            self.performAddRemoveMembersInGroupActivity(withMemeberType: .Owner, actionType: .Add, call, result)
             
         case pluginMethod.getMembers:
-            self.hadleGetMembersInGroupActivity(withMemeberType: .Member, call, result)
+            self.performGetMembersInGroupActivity(withMemeberType: .Member, call, result)
             
         case pluginMethod.getAdmins:
-            self.hadleGetMembersInGroupActivity(withMemeberType: .Admin, call, result)
+            self.performGetMembersInGroupActivity(withMemeberType: .Admin, call, result)
             
         case pluginMethod.getOwners:
-            self.hadleGetMembersInGroupActivity(withMemeberType: .Owner, call, result)
+            self.performGetMembersInGroupActivity(withMemeberType: .Owner, call, result)
             
         case pluginMethod.removeMembersInGroup:
-            self.hadleAddRemoveMembersInGroupActivity(withMemeberType: .Member, actionType: .Remove, call, result)
+            self.performAddRemoveMembersInGroupActivity(withMemeberType: .Member, actionType: .Remove, call, result)
         
         case pluginMethod.removeAdminsInGroup:
-            self.hadleAddRemoveMembersInGroupActivity(withMemeberType: .Admin, actionType: .Remove, call, result)
+            self.performAddRemoveMembersInGroupActivity(withMemeberType: .Admin, actionType: .Remove, call, result)
             
         case pluginMethod.removeOwnersInGroup:
-            self.hadleAddRemoveMembersInGroupActivity(withMemeberType: .Owner, actionType: .Remove, call, result)
+            self.performAddRemoveMembersInGroupActivity(withMemeberType: .Owner, actionType: .Remove, call, result)
         
+        case pluginMethod.getLastSeen:
+            self.performLastActivity(call, result)
+            
+        case pluginMethod.createRosters:
+            self.createRostersActivity(call, result)
+            
+        case pluginMethod.getMyRosters:
+            self.getMyRostersActivity(call, result)
+            
         default:
             guard let vData = call.arguments as? [String : Any] else {
                 print("Getting invalid/nil arguments-data by pluging.... | \(vMethod) | arguments: \(String(describing: call.arguments))")
@@ -90,9 +99,9 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         //result("iOS " + UIDevice.current.systemVersion)
     }
     
-    func hadleLoginActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
+    func performLoginActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
         guard let vData = call.arguments as? [String : Any] else {
-            result("Data nil");
+            result(xmppConstants.DataNil);
             return
         }
         let vMethod : String = call.method.trim()
@@ -123,7 +132,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         result(xmppConstants.SUCCESS)
     }
     
-    func hadleSendMessageActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    func performSendMessageActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let vData = call.arguments as? [String : Any] else {
             result(xmppConstants.ERROR)
             return
@@ -149,7 +158,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         result(xmppConstants.SUCCESS)
     }
     
-    func hadleCreateMUCActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    func performCreateMUCActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let vData = call.arguments as? [String : Any] else {
             result(xmppConstants.ERROR)
             return
@@ -172,7 +181,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         result(xmppConstants.SUCCESS)
     }
     
-    func hadleJoinMUCActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    func performJoinMUCActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let vData = call.arguments as? [String : Any] else {
             result(xmppConstants.ERROR)
             return
@@ -192,7 +201,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         result(xmppConstants.SUCCESS)
     }
     
-    func hadleReceiptDeliveryActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    func performReceiptDeliveryActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let vData = call.arguments as? [String : Any] else {
             result(xmppConstants.ERROR)
             return
@@ -210,7 +219,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         result(xmppConstants.SUCCESS)
     }
     
-    func hadleAddRemoveMembersInGroupActivity(withMemeberType type : xmppMUCUserType,
+    func performAddRemoveMembersInGroupActivity(withMemeberType type : xmppMUCUserType,
                                               actionType: xmppMUCUserActionType,
                                               _ call: FlutterMethodCall,
                                               _ result: @escaping FlutterResult) {
@@ -230,7 +239,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
                                                    withStrem: self.objXMPP.xmppStream)
     }
     
-    func hadleGetMembersInGroupActivity(withMemeberType type : xmppMUCUserType,
+    func performGetMembersInGroupActivity(withMemeberType type : xmppMUCUserType,
                                         _ call: FlutterMethodCall,
                                         _ result: @escaping FlutterResult) {
         guard let vData = call.arguments as? [String : Any] else {
@@ -245,6 +254,60 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         APP_DELEGATE.objXMPP.getRoomMember(withUserType: type,
                                            forRoomName: vGroupName,
                                            withStrem: self.objXMPP.xmppStream)
+    }
+    
+    func performLastActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
+        guard let vData = call.arguments as? [String : Any] else {
+            result(xmppConstants.DataNil);
+            return
+        }
+        let vMethod : String = call.method.trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(vData)")
+        
+        var vUserId : String = (vData["user_jid"] as? String ?? "").trim()
+        vUserId = (vUserId.components(separatedBy: "@").first ?? "").trim()
+        
+        if vUserId.isEmpty {
+            result(xmppConstants.DataNil)
+            return
+        }
+        APP_DELEGATE.singalCallBack = result
+        APP_DELEGATE.objXMPP.getLastActivity(withUserJid: vUserId,
+                                             withStrem: self.objXMPP.xmppStream,
+                                             objXMPP: self.objXMPP)
+        printLog("\(#function) | \(vMethod) | vUserId: \(vUserId)")
+        //result(xmppConstants.SUCCESS)
+    }
+    
+    func createRostersActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
+        guard let vData = call.arguments as? [String : Any] else {
+            result(xmppConstants.DataNil);
+            return
+        }
+        let vMethod : String = call.method.trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(vData)")
+        
+        var vUserId : String = (vData["user_jid"] as? String ?? "").trim()
+        vUserId = (vUserId.components(separatedBy: "@").first ?? "").trim()
+        
+        if vUserId.isEmpty {
+            result(xmppConstants.DataNil)
+            return
+        }
+        APP_DELEGATE.objXMPP.createRosters(withUserJid: vUserId, withStrem: self.objXMPP.xmppStream, objXMPP: self.objXMPP)
+        //result(xmppConstants.SUCCESS)
+    }
+    
+    func getMyRostersActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
+        var vData : [String : Any]?
+        if let data = call.arguments as? [String : Any] { vData = data }
+        
+        let vMethod : String = call.method.trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(String(describing: vData))")
+                
+        APP_DELEGATE.singalCallBack = result
+        APP_DELEGATE.objXMPP.getMyRosters(withStrem: self.objXMPP.xmppStream, objXMPP: self.objXMPP)
+        //result(xmppConstants.SUCCESS)
     }
     
     //MARK: - perform XMPP Connection

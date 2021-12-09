@@ -15,6 +15,9 @@ class XMPPController : NSObject {
     var xmppReconnect = XMPPReconnect()
     var xmppRoom : XMPPRoom?
     var xmppStreamManagement : XMPPStreamManagement = XMPPStreamManagement(storage: XMPPStreamManagementMemoryStorage.init(), dispatchQueue: DispatchQueue.main)
+    var xmppRoster : XMPPRoster?
+    var xmppRosterStorage: XMPPRosterCoreDataStorage?
+    var xmppLastActivity = XMPPLastActivity()
     
     internal var hostName: String = ""
     internal var hostPort: Int16 = 0
@@ -48,29 +51,44 @@ class XMPPController : NSObject {
         self.xmppStream.hostPort = UInt16(hostPort)
         self.xmppStream.myJID = userJID
         self.xmppStream.startTLSPolicy = XMPPStreamStartTLSPolicy.required
-        
         self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
         
+        /// xmppReconnect Configuration
         xmppReconnect = XMPPReconnect()
         self.xmppReconnect.manualStart()
         self.xmppReconnect.activate(self.xmppStream)
         self.xmppReconnect.addDelegate(self, delegateQueue: DispatchQueue.main)
+        
+        /// xmppRoster Configuration
+        self.xmppRosterStorage = XMPPRosterCoreDataStorage.init()
+        if let objRosSto = self.xmppRosterStorage {
+            self.xmppRoster = XMPPRoster.init(rosterStorage: objRosSto)
+            self.xmppRoster?.autoFetchRoster = true
+            self.xmppRoster?.autoAcceptKnownPresenceSubscriptionRequests = true
+            self.xmppRoster?.activate(self.xmppStream)
+            self.xmppRoster?.addDelegate(self, delegateQueue: DispatchQueue.main)
+        }
+        
+        /// xmppLastActivity Configuration
+        self.xmppLastActivity = XMPPLastActivity.init()
+        self.xmppLastActivity.activate(self.xmppStream)
+        self.xmppLastActivity.addDelegate(self, delegateQueue: DispatchQueue.main)
     }
         
     func connect() {
-        if self.xmppStream.isDisconnected {
-            do {
-                var vTimeout : TimeInterval = XMPPStreamTimeoutNone
-                vTimeout = 60.00
-                try self.xmppStream.connect(withTimeout: vTimeout)
-                APP_DELEGATE.objXMPPConnStatus = .Processing
-            } catch let error{
-                print("\(#function) | Error: connect() | error: \(error.localizedDescription)")
-                APP_DELEGATE.objXMPPConnStatus = .Failed
-            }
+        if !self.xmppStream.isDisconnected {
+            printLog("\(#function) | XMPPConnected - Yes")
             return
         }
-        printLog("\(#function) | XMPPConnected - Yes")
+        do {
+            var vTimeout : TimeInterval = XMPPStreamTimeoutNone
+            vTimeout = 60.00
+            try self.xmppStream.connect(withTimeout: vTimeout)
+            APP_DELEGATE.objXMPPConnStatus = .Processing
+        } catch let error{
+            print("\(#function) | Error: connect() | error: \(error.localizedDescription)")
+            APP_DELEGATE.objXMPPConnStatus = .Failed
+        }
     }
     
     func disconnect() {
@@ -102,18 +120,19 @@ class XMPPController : NSObject {
         }
         return vUserId
     }
+
+    func getJIDNameForUser(_ jid : String, withStrem: XMPPStream) -> String {
+        var vHost : String = ""
+        if let value = withStrem.hostName { vHost = value.trim() }
+        if jid.contains(vHost) { return jid }
+        return [jid, "@", vHost].joined(separator: "")
+    }
     
     //MARK:- User status
-    func changeStatus(_ UserStatus: Status) {
-        switch UserStatus {
-        case .Online:
-            let presence = XMPPPresence(type: "available")
-            self.xmppStream.send(presence)
-            
-        case .Offline:
-            let presence = XMPPPresence(type: "unavailable")
-            self.xmppStream.send(presence)
-        }
+    func changeStatus(_ userStatus: Status, withXMPPStrem xmppStream : XMPPStream) {
+        let vStatus : String = (userStatus == .Online) ? "available" : "unavailable"
+        let presence = XMPPPresence(type: vStatus.trim())
+        xmppStream.send(presence)
     }
 }
 
@@ -139,7 +158,7 @@ extension XMPPController: XMPPStreamDelegate, XMPPMUCLightDelegate  {
         }
         print("\(#function) | XMPP Server connection error | error: \(err.localizedDescription)")
         
-        self.changeStatus(.Offline)
+        self.changeStatus(.Offline, withXMPPStrem: sender)
         APP_DELEGATE.objXMPPConnStatus = .Disconnect
         APP_DELEGATE.performXMPPConnectionActivity()
     }
@@ -147,7 +166,7 @@ extension XMPPController: XMPPStreamDelegate, XMPPMUCLightDelegate  {
     //MARK:- Authenticate
     func xmppStreamDidAuthenticate(_ sender: XMPPStream) {
         self.configureStreamManagement()
-        self.changeStatus(.Online)
+        self.changeStatus(.Online, withXMPPStrem: sender)
         
         APP_DELEGATE.objXMPPConnStatus = .Sucess
     }
@@ -254,7 +273,7 @@ extension XMPPController : XMPPRoomDelegate {
                 print("\(#function) | roomName nil/empty")
                 return
             }
-            guard let roomJID = XMPPJID(string: get_RoomName(roomName: roomName, withStrem: withStrem)) else {
+            guard let roomJID = XMPPJID(string: getXMPPRoomJidName(withRoomName: roomName, withStrem: withStrem)) else {
                 print("\(#function) | Invalid XMPPRoom Jid: \(roomName)")
                 return
             }
@@ -289,7 +308,7 @@ extension XMPPController : XMPPRoomDelegate {
             print("\(#function) | XMPP UserId is nil/empty")
             return
         }
-        guard let xmppJID = XMPPJID(string: get_RoomName(roomName: roomName, withStrem: withStrem)) else {
+        guard let xmppJID = XMPPJID(string: getXMPPRoomJidName(withRoomName: roomName, withStrem: withStrem)) else {
             print("\(#function) | Invalid XMPPRoom Jid: \(roomName)")
             return
         }
@@ -309,14 +328,12 @@ extension XMPPController : XMPPRoomDelegate {
         printLog("\(#function) | perform activity of Join XMPPRoom | \(roomName) | userId: \(vUserId) | history: \(history)")
     }
 
-    func get_RoomName(roomName : String, withStrem : XMPPStream) -> String {
+    func getXMPPRoomJidName(withRoomName roomName : String, withStrem : XMPPStream) -> String {
         var vHost : String = ""
         if let value = withStrem.hostName { vHost = value.trim() }
         
         let valueConference : String = "conference"
-        if roomName.contains(valueConference) {
-            return roomName
-        }
+        if roomName.contains(valueConference) { return roomName }
         return [roomName, "@", valueConference, ".", vHost].joined(separator: "")
     }
     
@@ -456,7 +473,7 @@ extension XMPPController {
                 print("\(#function) | UserJidString is empty/nil")
                 continue
             }
-            let userJIDString = get_JidName_User(user.trim(), withStrem: withStrem)
+            let userJIDString = getJIDNameForUser(user.trim(), withStrem: withStrem)
             let eleUser : XMLElement = XMLElement.init(name: "item")
             eleUser.addAttribute(withName: "affiliation", stringValue: vUserRole.trim())
             eleUser.addAttribute(withName: "jid", stringValue: userJIDString)
@@ -576,10 +593,137 @@ extension XMPPController : XMPPStreamManagementDelegate {
             guard let vMessId = value as? String  else {
                 print("\(#function) | getting Invalid Message Id | \(value)")
                 continue
-            }            
+            }
             self.sendAck(vMessId)
         }
-    }    
+    }
+}
+
+//MARK: - XMPPRoster
+extension XMPPController : XMPPRosterDelegate {
+    func xmppRoster(_ sender: XMPPRoster, didReceivePresenceSubscriptionRequest presence: XMPPPresence) {
+        printLog("\(#function) | presence : \(presence)")
+    }
+    
+    func xmppRoster(_ sender: XMPPRoster, didReceiveRosterPush iq: XMPPIQ) {
+        printLog("\(#function) | iq : \(iq)")
+    }
+    
+    func xmppRosterDidBeginPopulating(_ sender: XMPPRoster, withVersion version: String) {
+        printLog("\(#function) | version : \(version)")
+    }
+    
+    func xmppRosterDidEndPopulating(_ sender: XMPPRoster) {
+        printLog("\(#function) | sender: \(sender)")
+    }
+    
+    //MARK: -
+    func createRosters(withUserJid jid: String, withStrem: XMPPStream, objXMPP : XMPPController) {
+        printLog("\(#function) | withUserJid: \(jid)")
+        if jid.trim().isEmpty {
+            print("\(#function) | getting userJid is emtpy.")
+            return
+        }
+        let vJid : XMPPJID? = XMPPJID(string: getJIDNameForUser(jid.trim(), withStrem: withStrem))
+        if let vJid = vJid {
+            objXMPP.xmppRoster?.subscribePresence(toUser: vJid)
+            return
+        }
+        print("\(#function) | Getting Invalid Jid, not created Roster | userJid : \(jid)")
+    }
+    
+    func getMyRosters(withStrem: XMPPStream, objXMPP : XMPPController) {
+        var arrJidString : [String] = []
+        guard let arrJid = objXMPP.xmppRosterStorage?.jids(for: withStrem) else {
+            printLog("\(#function) | Not getting roster.")
+            
+            self.sendRosters(withUsersJid: arrJidString)
+            return
+        }
+        
+        for jid in arrJid {
+            let strJid = jid.description.trim()
+            if strJid.isEmpty { continue }
+            arrJidString.append(strJid)
+        }
+        self.sendRosters(withUsersJid: arrJidString)
+    }
+}
+
+//MARK: - XMPPRoster
+extension XMPPController : XMPPLastActivityDelegate {
+    func numberOfIdleTimeSeconds(for sender: XMPPLastActivity!, queryIQ iq: XMPPIQ!, currentIdleTimeSeconds idleSeconds: UInt) -> UInt {
+        printLog("\(#function) | response : \(String(describing: iq)) | idleSeconds : \(idleSeconds)")
+        return 0
+    }
+    
+    func xmppLastActivity(_ sender: XMPPLastActivity!, didReceiveResponse response: XMPPIQ!) {
+        /**
+         ///-------------------------------------------------------------------------------------------------------------------------------------
+         /// Error
+         <iq
+             xmlns="jabber:client" from="test2@xrstudio.in" to="test@xrstudio.in/iOS" id="9826D8E8-5BD0-4B59-AD24-21B5331DAB4F" type="error">
+             <query
+                 xmlns="jabber:iq:last">
+             </query>
+             <error code="403" type="auth">
+                 <forbidden
+                     xmlns="urn:ietf:params:xml:ns:xmpp-stanzas">
+                 </forbidden>
+             </error>
+         </iq>
+         
+         ///-------------------------------------------------------------------------------------------------------------------------------------
+         /// Result
+         <iq
+             xmlns="jabber:client" from="test@xrstudio.in" to="test@xrstudio.in/iOS" id="D5B3B096-16A5-4E6B-B03F-8216BD81F330" type="result">
+             <query
+                 xmlns="jabber:iq:last" seconds="0">
+             </query>
+         </iq>
+         */
+        printLog("\(#function) | response : \(String(describing: response))")
+        var vTimeInSec : String = "-1"
+        let isErrorResponse : Bool = response.isErrorIQ
+        if isErrorResponse {
+            print("\(#function) | Getting error in XMPPLastActivity IQ | response: \(String(describing: response))")
+            
+            self.sendLastActivity(withTime: vTimeInSec)
+            return
+        }
+        
+        guard let eleQuery = response.children?.first else {
+            print("\(#function) | Not getting Valid XMPPLastActivity IQ-Query | response-iq: \(String(describing: response))")
+            
+            self.sendLastActivity(withTime: vTimeInSec)
+            return
+        }
+        guard let ele = eleQuery as? DDXMLElement else {
+            print("\(#function) | Not getting Valid IQ-Query | elementQuery: \(eleQuery)")
+            
+            self.sendLastActivity(withTime: vTimeInSec)
+            return
+        }
+        if let value = ele.attribute(forName: "seconds")?.stringValue {
+            vTimeInSec = value.trim()
+        }
+        self.sendLastActivity(withTime: vTimeInSec)
+    }
+    
+    func xmppLastActivity(_ sender: XMPPLastActivity!, didNotReceiveResponse queryID: String!, dueToTimeout timeout: TimeInterval) {
+        printLog("\(#function) | queryID : \(String(describing: queryID)) | timeout : \(timeout)")
+        self.sendLastActivity(withTime: "-1")
+    }
+    
+    //MARK: -
+    func getLastActivity(withUserJid jid: String, withStrem: XMPPStream, objXMPP : XMPPController) {
+        printLog("\(#function) | withUserJid : \(jid)")
+        guard let vJid = XMPPJID(string: getJIDNameForUser(jid.trim(), withStrem: withStrem)) else {
+            print("\(#function) | Getting invalid UserJid : \(jid)")
+            return
+        }
+        objXMPP.xmppLastActivity.sendQuery(to: vJid)
+    }
 }
 
 //MARK: - Extension

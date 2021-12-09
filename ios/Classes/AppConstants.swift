@@ -31,14 +31,18 @@ struct pluginMethod {
     static let sendReceiptDelivery : String         = "send_delivery_receipt"
     static let addMembersInGroup : String           = "add_members_in_group"
     static let addAdminsInGroup : String            = "add_admins_in_group"
-    static let addOwnersInGroup : String            = "add_owners_in_group"    
+    static let addOwnersInGroup : String            = "add_owners_in_group"
     static let removeMembersInGroup : String        = "remove_members_from_group"
     static let removeAdminsInGroup : String         = "remove_admins_from_group"
     static let removeOwnersInGroup : String         = "remove_owners_from_group"
     static let getMembers : String                  = "get_members"
     static let getAdmins : String                   = "get_admins"
     static let getOwners : String                   = "get_owners"
+    static let getLastSeen : String                 = "get_last_seen"
+    static let createRosters : String               = "create_roster"
+    static let getMyRosters : String                = "get_my_rosters"
 }
+
 struct pluginMessType {
     static let Incoming : String = "incoming"
     static let Message : String = "Message"
