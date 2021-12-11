@@ -36,8 +36,7 @@ public class Utils {
         if (logFilePath == null || logFilePath.isEmpty()) {
             return;
         }
-        text = "time: " + getTimeMillisecondFormat() + " text: " + text;
-        Log.d("logFileInStorage", "fileName: " + logFileName + " text: " + text);
+        text = "Time: " + getTimeMillisecondFormat() + " " + text;
         boolean fileExists = true;
         checkDirectoryExist(logFilePath);
 

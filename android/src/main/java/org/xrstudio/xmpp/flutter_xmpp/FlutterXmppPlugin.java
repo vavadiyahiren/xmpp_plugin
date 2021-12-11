@@ -64,7 +64,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                         connectionBuild.put("type", "connection");
                         connectionBuild.put("status", "connected");
 
-                        Utils.addLogInStorage("sentMessageToFlutter connectionBuild: " + connectionBuild.toString());
+                        Utils.addLogInStorage("Action: sentMessageToFlutter, Content: " + connectionBuild.toString());
 
                         events.success(connectionBuild);
                         break;
@@ -76,7 +76,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                         authBuild.put("type", "connection");
                         authBuild.put("status", "authenticated");
 
-                        Utils.addLogInStorage("sentMessageToFlutter authBuild: " + authBuild.toString());
+                        Utils.addLogInStorage("Action: sentMessageToFlutter, Content: " + authBuild.toString());
 
                         events.success(authBuild);
                         break;
@@ -102,7 +102,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                         build.put("senderJid", senderJid);
                         build.put("customText", customText);
 
-                        Utils.addLogInStorage("sentMessageToFlutter build: " + build.toString());
+                        Utils.addLogInStorage("Action: sentMessageToFlutter, Content: " + build.toString());
 
                         events.success(build);
 
@@ -217,7 +217,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
     public void onMethodCall(MethodCall call, Result result) {
         Log.d("loginTest", "onMethodCall call: " + call.method);
         // Check if login method was called.
-        Utils.addLogInStorage("methodReceiveFromFlutter method: " + call.method.toString());
+        Utils.addLogInStorage("Action: methodReceiveFromFlutter, NativeMethod: " + call.method.toString() + " Content: " + call.arguments + "");
         if (call.method.equals("login")) {
             if (!call.hasArgument("user_jid") || !call.hasArgument("password") || !call.hasArgument("host")) {
                 result.error("MISSING", "Missing auth.", null);

@@ -210,7 +210,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 
                         Message ackMessage = (Message) packet;
 
-                        Utils.addLogInStorage("receiveStanzaAckFromServer ackMessage: " + ackMessage.toXML(null).toString());
+                        Utils.addLogInStorage("Action: receiveStanzaAckFromServer, Content: " + ackMessage.toXML(null).toString());
 
                         //Bundle up the intent and send the broadcast.
                         Intent intent = new Intent(FlutterXmppConnectionService.RECEIVE_MESSAGE);
@@ -237,7 +237,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 
                     Message message = (Message) packet;
 
-                    Utils.addLogInStorage("receiveMessageFromServer message: " + message.toXML(null).toString());
+                    Utils.addLogInStorage("Action: receiveMessageFromServer, Content: " + message.toXML(null).toString());
 
                     String META_TEXT = "Message";
                     String body = message.getBody();
@@ -350,7 +350,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                 muc.sendMessage(xmppMessage);
             }
 
-            Utils.addLogInStorage("sentMessageToServer xmppMessage: " + xmppMessage.toXML(null).toString());
+            Utils.addLogInStorage("Action: sentMessageToServer, Content: " + xmppMessage.toXML(null).toString());
 
             if (FlutterXmppPlugin.DEBUG) {
                 Log.d(TAG, "Sent message from :" + xmppMessage.toXML(null) + "  sent.");
@@ -391,7 +391,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                 muc.sendMessage(xmppMessage);
             }
 
-            Utils.addLogInStorage("sentCustomMessageToServer xmppMessage: " + xmppMessage.toXML(null).toString());
+            Utils.addLogInStorage("Action: sentCustomMessageToServer, Content: " + xmppMessage.toXML(null).toString());
 
             if (FlutterXmppPlugin.DEBUG) {
                 Log.d(TAG, "Sent message from :" + xmppMessage.toXML(null) + "  sent.");
@@ -423,7 +423,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 
             mConnection.sendStanza(deliveryMessage);
 
-            Utils.addLogInStorage("sentDeliveryReceiptToServer deliveryMessage: " + deliveryMessage.toXML(null).toString());
+            Utils.addLogInStorage("Action: sentDeliveryReceiptToServer, Content: " + deliveryMessage.toXML(null).toString());
 
         } catch (Exception e) {
             e.printStackTrace();
