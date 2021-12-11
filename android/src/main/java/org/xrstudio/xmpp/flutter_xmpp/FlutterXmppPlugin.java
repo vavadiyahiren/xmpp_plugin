@@ -63,6 +63,9 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                         Map<String, Object> connectionBuild = new HashMap<>();
                         connectionBuild.put("type", "connection");
                         connectionBuild.put("status", "connected");
+
+                        Utils.addLogInStorage("sentMessageToFlutter connectionBuild: " + connectionBuild.toString());
+
                         events.success(connectionBuild);
                         break;
 
@@ -72,6 +75,9 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                         Map<String, Object> authBuild = new HashMap<>();
                         authBuild.put("type", "connection");
                         authBuild.put("status", "authenticated");
+
+                        Utils.addLogInStorage("sentMessageToFlutter authBuild: " + authBuild.toString());
+
                         events.success(authBuild);
                         break;
 
@@ -95,6 +101,8 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                         build.put("msgtype", type);
                         build.put("senderJid", senderJid);
                         build.put("customText", customText);
+
+                        Utils.addLogInStorage("sentMessageToFlutter build: " + build.toString());
 
                         events.success(build);
 
@@ -209,6 +217,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
     public void onMethodCall(MethodCall call, Result result) {
         Log.d("loginTest", "onMethodCall call: " + call.method);
         // Check if login method was called.
+        Utils.addLogInStorage("methodReceiveFromFlutter method: " + call.method.toString());
         if (call.method.equals("login")) {
             if (!call.hasArgument("user_jid") || !call.hasArgument("password") || !call.hasArgument("host")) {
                 result.error("MISSING", "Missing auth.", null);
@@ -219,6 +228,11 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             if (call.hasArgument("port")) {
                 this.port = Integer.parseInt(call.argument("port").toString());
             }
+
+            if (call.hasArgument("nativeLogFilePath")) {
+                Utils.logFilePath = call.argument("nativeLogFilePath").toString();
+            }
+
             // Start authentication.
             doLogin();
 

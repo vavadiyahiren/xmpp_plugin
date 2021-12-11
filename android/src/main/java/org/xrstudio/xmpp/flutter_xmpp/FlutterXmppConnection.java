@@ -209,6 +209,9 @@ public class FlutterXmppConnection implements ConnectionListener {
                     if (packet instanceof Message) {
 
                         Message ackMessage = (Message) packet;
+
+                        Utils.addLogInStorage("receiveStanzaAckFromServer ackMessage: " + ackMessage.toXML(null).toString());
+
                         //Bundle up the intent and send the broadcast.
                         Intent intent = new Intent(FlutterXmppConnectionService.RECEIVE_MESSAGE);
                         intent.setPackage(mApplicationContext.getPackageName());
@@ -233,6 +236,9 @@ public class FlutterXmppConnection implements ConnectionListener {
                 try {
 
                     Message message = (Message) packet;
+
+                    Utils.addLogInStorage("receiveMessageFromServer message: " + message.toXML(null).toString());
+
                     String META_TEXT = "Message";
                     String body = message.getBody();
                     String from = message.getFrom().toString();
@@ -344,6 +350,8 @@ public class FlutterXmppConnection implements ConnectionListener {
                 muc.sendMessage(xmppMessage);
             }
 
+            Utils.addLogInStorage("sentMessageToServer xmppMessage: " + xmppMessage.toXML(null).toString());
+
             if (FlutterXmppPlugin.DEBUG) {
                 Log.d(TAG, "Sent message from :" + xmppMessage.toXML(null) + "  sent.");
             }
@@ -383,6 +391,8 @@ public class FlutterXmppConnection implements ConnectionListener {
                 muc.sendMessage(xmppMessage);
             }
 
+            Utils.addLogInStorage("sentCustomMessageToServer xmppMessage: " + xmppMessage.toXML(null).toString());
+
             if (FlutterXmppPlugin.DEBUG) {
                 Log.d(TAG, "Sent message from :" + xmppMessage.toXML(null) + "  sent.");
             }
@@ -412,6 +422,8 @@ public class FlutterXmppConnection implements ConnectionListener {
             deliveryMessage.addExtension(deliveryReceipt);
 
             mConnection.sendStanza(deliveryMessage);
+
+            Utils.addLogInStorage("sentDeliveryReceiptToServer deliveryMessage: " + deliveryMessage.toXML(null).toString());
 
         } catch (Exception e) {
             e.printStackTrace();
