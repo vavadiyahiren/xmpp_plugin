@@ -755,6 +755,29 @@ extension XMPPMessage {
     }
     
     /**
+     <TIME
+         xmlns="urn:xmpp:time">
+         <ts>1639390823958</ts>
+     </TIME>
+     */
+    func getTimeElementInfo() -> String {
+        var value : String = "0"
+        let arrMI = self.elements(forName: eleTIME.Name)
+        guard let eleMI = arrMI.first else {
+            //printLog("\(#function) | \(eleCustom.Name) element not get")
+            return value
+        }
+        
+        let arrMInfo = eleMI.elements(forName: eleTIME.Kay)
+        guard let vInfo = arrMInfo.first?.stringValue else {
+            //printLog("\(#function) | \(vKey) element not get")
+            return value
+        }
+        value = vInfo.trim()
+        return value
+    }
+    
+    /**
      <CUSTOM
          xmlns="urn:xmpp:custom">
          <custom>test</custom>

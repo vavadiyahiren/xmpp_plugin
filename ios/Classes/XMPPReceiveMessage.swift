@@ -34,7 +34,8 @@ extension XMPPController {
                        "body" : objMess.message,
                        "customText" : customElement,
                        "msgtype" : vMessType,
-                       "senderJid": objMess.senderJid] as [String : Any]
+                       "senderJid": objMess.senderJid,
+                       "time" : objMess.time] as [String : Any]
         APP_DELEGATE.objEventData!(dicDate)
     }
     

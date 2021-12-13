@@ -11,6 +11,7 @@ import XMPPFramework
 extension XMPPController {
     /// This method handles sending the message to one-one chat
     func sendMessage(messageBody:String,
+                     time:String,
                      reciverJID:String,
                      messageId: String,
                      isGroup : Bool = false,
@@ -25,6 +26,11 @@ extension XMPPController {
         xmppMessage.addAttribute(withName: "id", stringValue: messageId)
         xmppMessage.addBody(messageBody)
         
+        /// Time
+        if let eleTime = self.getTimeElement(withTime: time) {
+            xmppMessage.addChild(eleTime)
+        }
+        /// Custom Element
         if let ele = self.getCustomELE(withElementName: customElement) {
             xmppMessage.addChild(ele)
         }
@@ -116,6 +122,12 @@ extension XMPPController {
     }
     
     //MARK: -
+    private func getTimeElement(withTime time :String) -> XMLElement? {
+        let ele: XMLElement = XMLElement.init(name: eleTIME.Name, xmlns: eleTIME.Namespace)
+        ele.addChild(XMLElement.init(name: eleTIME.Kay, stringValue: time))
+        return ele
+    }
+    
     private func getCustomELE(withElementName name :String) -> XMLElement? {
         if name.trim().isEmpty {
             //print("\(#function) | custom element '\(name)' is empty/nil.")

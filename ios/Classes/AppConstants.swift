@@ -107,9 +107,21 @@ class groupInfo {
     }
 }
 
+struct eleTIME {
+    /// Value - TIME
+    static let Name : String = "TIME"
+    /// Value - urn:xmpp:time
+    static let Namespace : String = "urn:xmpp:time"
+    /// Value - ts
+    static let Kay : String = "ts"
+}
+
 struct eleCustom {
+    /// Value - CUSTOM
     static let Name : String = "CUSTOM"
+    /// Value - urn:xmpp:custom
     static let Namespace : String = "urn:xmpp:custom"
+    /// Value - custom
     static let Kay : String = "custom"
 }
 
