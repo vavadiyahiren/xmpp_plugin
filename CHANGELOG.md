@@ -53,3 +53,9 @@
 * Added Creating Roster Entry capabilities
 * Added Auto Accept Roster Requests(XEP-0162)
 * Added Last Activity support (XEP-0012)
+
+## 1.1.11
+
+* Added custom ts support
+* Added logging support
+
