@@ -38,10 +38,9 @@ public class Utils {
         }
         text = "Time: " + getTimeMillisecondFormat() + " " + text;
         boolean fileExists = true;
-        checkDirectoryExist(logFilePath);
-
+//        checkDirectoryExist(logFilePath);
         try {
-            File logFile = new File(logFilePath + File.separator + logFileName);
+            File logFile = new File(logFilePath);
 
             if (!logFile.exists()) {
                 try {

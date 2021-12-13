@@ -3,11 +3,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_xmpp_example/constants.dart';
-
+import 'package:flutter_xmpp_example/event.dart';
 import 'package:flutter_xmpp_example/homepage.dart';
+import 'package:flutter_xmpp_example/native_log_helper.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:share/share.dart';
 import 'package:xmpp_plugin/custom_element.dart';
 import 'package:xmpp_plugin/xmpp_plugin.dart';
-import 'package:flutter_xmpp_example/event.dart';
 
 void main() {
   runApp(MyApp());
@@ -29,12 +31,36 @@ class _MyAppState extends State<MyApp> {
           "${_userNameController.text}@${_hostController.text}/${Platform.isAndroid ? "Android" : "iOS"}",
       "password": "${_passwordController.text}",
       "host": "${_hostController.text}",
-      "port": '5222'
+      "port": '5222',
+      "nativeLogFilePath": NativeLogHelper.logFilePath
     };
 
     flutterXmpp = XmppConnection(auth);
     await flutterXmpp.start(_onReceiveMessage, _onError);
     await flutterXmpp.login();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    checkStoragePermission();
+  }
+
+  void checkStoragePermission() async {
+    var status = await Permission.storage.status;
+    if (!status.isGranted) {
+      final PermissionStatus _permissionStatus =
+          await Permission.storage.request();
+      if (_permissionStatus.isGranted) {
+        String filePath = await NativeLogHelper().getDefaultLogFilePath();
+        print('logFilePath: $filePath');
+      } else {
+        print('logFilePath: please allow permission');
+      }
+    } else {
+      String filePath = await NativeLogHelper().getDefaultLogFilePath();
+      print('logFilePath: $filePath');
+    }
   }
 
   Future<void> _onReceiveMessage(dynamic event) async {
@@ -129,6 +155,8 @@ class _MyAppState extends State<MyApp> {
   TextEditingController _custommessageController = TextEditingController();
   TextEditingController _toNameController = TextEditingController();
 
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+
   List<CustomElement> customElements = [
     CustomElement(
         childBody: "test",
@@ -141,6 +169,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        key: _scaffoldKey,
         appBar: AppBar(
           title: const Text('XMPP Plugin'),
           backgroundColor: Colors.black,
@@ -150,6 +179,32 @@ class _MyAppState extends State<MyApp> {
                 await disconnectXMPP();
               },
               icon: Icon(Icons.power_settings_new),
+            ),
+            IconButton(
+              onPressed: () async {
+                if (await NativeLogHelper().isFileExist()) {
+                  Share.shareFiles([NativeLogHelper.logFilePath]);
+                } else {
+                  if (_scaffoldKey.currentState != null) {
+                    _scaffoldKey.currentState!.showSnackBar(
+                        new SnackBar(content: new Text('File not found!')));
+                  }
+                }
+              },
+              icon: Icon(Icons.share),
+            ),
+            IconButton(
+              onPressed: () async {
+                if (await NativeLogHelper().isFileExist()) {
+                  NativeLogHelper().deleteLogFile();
+                } else {
+                  if (_scaffoldKey.currentState != null) {
+                    _scaffoldKey.currentState!.showSnackBar(
+                        new SnackBar(content: new Text('File not found!')));
+                  }
+                }
+              },
+              icon: Icon(Icons.delete),
             ),
           ],
         ),
@@ -500,15 +555,15 @@ class _MyAppState extends State<MyApp> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    await flutterXmpp.createRoster(_createRostersController.text);
-                   },
+                    await flutterXmpp
+                        .createRoster(_createRostersController.text);
+                  },
                   child: Text("Create MyRosters"),
                   style: ElevatedButton.styleFrom(primary: Colors.black),
                 ),
                 SizedBox(
                   height: 15,
                 ),
-
                 Container(
                   height: 500,
                   child: ListView.builder(
