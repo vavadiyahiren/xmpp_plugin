@@ -92,6 +92,8 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                         String metaInfo = intent.getStringExtra(FlutterXmppConnectionService.META_TEXT);
                         String senderJid = intent.hasExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_JID)
                                 ? intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_JID) : "";
+                        String time = intent.hasExtra(FlutterXmppConnectionService.TIME)
+                                ? intent.getStringExtra(FlutterXmppConnectionService.TIME) : "0";
 
                         Map<String, Object> build = new HashMap<>();
                         build.put("type", metaInfo);
@@ -101,6 +103,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                         build.put("msgtype", type);
                         build.put("senderJid", senderJid);
                         build.put("customText", customText);
+                        build.put("time", time);
 
                         Utils.addLogInStorage("Action: sentMessageToFlutter, Content: " + build.toString());
 
@@ -149,7 +152,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
     }
 
     // Sending a message to one-one chat.
-    public static void send_message(String body, String toUser, String msgId, String method) {
+    public static void send_message(String body, String toUser, String msgId, String method, String time) {
 
         if (FlutterXmppConnectionService.getState().equals(FlutterXmppConnection.ConnectionState.CONNECTED)) {
 
@@ -158,6 +161,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                 intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY, body);
                 intent.putExtra(FlutterXmppConnectionService.BUNDLE_TO, toUser);
                 intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS, msgId);
+                intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_TIME, time);
 
                 activity.sendBroadcast(intent);
             } else {
@@ -165,6 +169,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
                 intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY, body);
                 intent.putExtra(FlutterXmppConnectionService.BUNDLE_TO, toUser);
                 intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS, msgId);
+                intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_TIME, time);
 
                 activity.sendBroadcast(intent);
             }
@@ -173,12 +178,12 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
         }
     }
 
-    public static void send_custom_message(String body, String toUser, String msgId, String customText) {
-        FlutterXmppConnection.sendCustomMessage(body, toUser, msgId, customText, true);
+    public static void send_custom_message(String body, String toUser, String msgId, String customText, String time) {
+        FlutterXmppConnection.sendCustomMessage(body, toUser, msgId, customText, true, time);
     }
 
-    public static void send_customgroup_message(String body, String toUser, String msgId, String customText) {
-        FlutterXmppConnection.sendCustomMessage(body, toUser, msgId, customText, false);
+    public static void send_customgroup_message(String body, String toUser, String msgId, String customText, String time) {
+        FlutterXmppConnection.sendCustomMessage(body, toUser, msgId, customText, false, time);
     }
 
 
@@ -254,8 +259,13 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             String to_jid = call.argument("to_jid");
             String body = call.argument("body");
             String id = call.argument("id");
+            String time = "0";
 
-            send_message(body, to_jid, id, call.method);
+            if (call.hasArgument("time")) {
+                time = call.argument("time");
+            }
+
+            send_message(body, to_jid, id, call.method, time);
 
             result.success("SUCCESS");
 
@@ -316,8 +326,13 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             String body = call.argument("body");
             String id = call.argument("id");
             String customString = call.argument("customText");
+            String time = "0";
 
-            send_custom_message(body, to_jid, id, customString);
+            if (call.hasArgument("time")) {
+                time = call.argument("time");
+            }
+
+            send_custom_message(body, to_jid, id, customString, time);
 
             result.success("SUCCESS");
 
@@ -332,8 +347,13 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             String body = call.argument("body");
             String id = call.argument("id");
             String customString = call.argument("customText");
+            String time = "0";
 
-            send_customgroup_message(body, to_jid, id, customString);
+            if (call.hasArgument("time")) {
+                time = call.argument("time");
+            }
+
+            send_customgroup_message(body, to_jid, id, customString, time);
 
             result.success("SUCCESS");
 

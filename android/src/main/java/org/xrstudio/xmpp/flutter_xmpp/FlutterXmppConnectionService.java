@@ -21,11 +21,13 @@ public class FlutterXmppConnectionService extends Service {
     public static final String BUNDLE_MESSAGE_PARAMS = "b_body_params";
     public static final String BUNDLE_MESSAGE_TYPE = "b_body_type";
     public static final String BUNDLE_MESSAGE_SENDER_JID = "b_sender_jid";
+    public static final String BUNDLE_MESSAGE_SENDER_TIME = "b_sender_time";
     public static final String BUNDLE_TO = "b_to";
     public static final String BUNDLE_PRESENCE = "b_presence";
     public static final String MEDIA_URL = "media_url";
     public static final String CUSTOM_TEXT = "custom_text";
     public static final String META_TEXT = "meta_text";
+    public static final String TIME = "time";
     public static final String OUTGOING_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.outgoinmessage";
     public static final String BUNDLE_TO_JID = "c_from";
     public static final String GROUP_SEND_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.sendGroupMessage";

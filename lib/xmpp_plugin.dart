@@ -24,11 +24,12 @@ class XmppConnection {
     await _channel.invokeMethod('logout');
   }
 
-  Future<String> sendMessage(String toJid, String body, String id) async {
+  Future<String> sendMessage(String toJid, String body, String id, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
       "id": id,
+      "time": time.toString(),
     };
     printLogForMethodCall('send_message', params);
     final String status = await _channel.invokeMethod('send_message', params);
@@ -39,22 +40,25 @@ class XmppConnection {
     String toJid,
     String body,
     String id,
+    int time,
   ) async {
     final params = {
       "to_jid": toJid,
       "body": body,
       "id": id,
+      "time": time.toString(),
     };
     printLogForMethodCall('send_message', params);
     final String status = await _channel.invokeMethod('send_message', params);
     return status;
   }
 
-  Future<String> sendGroupMessage(String toJid, String body, String id) async {
+  Future<String> sendGroupMessage(String toJid, String body, String id, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
       "id": id,
+      "time": time.toString(),
     };
     printLogForMethodCall('send_group_message', params);
     final String status =
@@ -66,11 +70,13 @@ class XmppConnection {
     String toJid,
     String body,
     String id,
+    int time,
   ) async {
     final params = {
       "to_jid": toJid,
       "body": body,
       "id": id,
+      "time": time.toString(),
     };
     printLogForMethodCall('send_group_message', params);
     final String status =
@@ -118,12 +124,13 @@ class XmppConnection {
   }
 
   Future<void> sendCustomMessage(
-      String toJid, String body, String id, String customString) async {
+      String toJid, String body, String id, String customString, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
       "id": id,
       "customText": customString,
+      "time": time.toString(),
     };
     await _channel.invokeMethod('send_custom_message', params);
   }
@@ -133,12 +140,13 @@ class XmppConnection {
   }
 
   Future<void> sendCustomGroupMessage(
-      String toJid, String body, String id, String customString) async {
+      String toJid, String body, String id, String customString, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
       "id": id,
       "customText": customString,
+      "time": time.toString(),
     };
     await _channel.invokeMethod('send_customgroup_message', params);
   }
