@@ -250,6 +250,15 @@ public class FlutterXmppConnection implements ConnectionListener {
                         customText = customElement.getFirstElement("custom").getText();
                     }
 
+                    String time = "0";
+                    if(message.getExtension("urn:xmpp:time") != null) {
+                        StandardExtensionElement timeElement = (StandardExtensionElement) message
+                                .getExtension("urn:xmpp:time");
+                        if (timeElement != null && timeElement.getFirstElement("ts") != null) {
+                            time = timeElement.getFirstElement("ts").getText();
+                        }
+                    }
+
                     if (message.hasExtension(DeliveryReceipt.ELEMENT, DeliveryReceipt.NAMESPACE)) {
                         DeliveryReceipt dr = DeliveryReceipt.from((Message) message);
                         msgId = dr.getId();
@@ -271,6 +280,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                         intent.putExtra(FlutterXmppConnectionService.MEDIA_URL, mediaURL);
                         intent.putExtra(FlutterXmppConnectionService.CUSTOM_TEXT, customText);
                         intent.putExtra(FlutterXmppConnectionService.META_TEXT, META_TEXT);
+                        intent.putExtra(FlutterXmppConnectionService.TIME, time);
 
                         mApplicationContext.sendBroadcast(intent);
                     }
@@ -308,7 +318,8 @@ public class FlutterXmppConnection implements ConnectionListener {
                     sendMessage(intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY),
                             intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_TO),
                             intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS),
-                            action.equals(FlutterXmppConnectionService.SEND_MESSAGE));
+                            action.equals(FlutterXmppConnectionService.SEND_MESSAGE),
+                            intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_TIME));
 
                 } else if (action.equals(FlutterXmppConnectionService.JOIN_GROUPS_MESSAGE)) {
                     // Join all group
@@ -327,7 +338,7 @@ public class FlutterXmppConnection implements ConnectionListener {
     }
 
 
-    private void sendMessage(String body, String toJid, String msgId, boolean isDm) {
+    private void sendMessage(String body, String toJid, String msgId, boolean isDm, String time) {
 
         try {
 
@@ -336,6 +347,10 @@ public class FlutterXmppConnection implements ConnectionListener {
 
             xmppMessage.setBody(body);
             xmppMessage.setType(isDm ? Message.Type.chat : Message.Type.groupchat);
+
+            StandardExtensionElement timeElement = StandardExtensionElement.builder("TIME", "urn:xmpp:time")
+                    .addElement("ts", time).build();
+            xmppMessage.addExtension(timeElement);
 
             DeliveryReceiptRequest.addTo(xmppMessage);
 
@@ -365,7 +380,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         }
     }
 
-    public static void sendCustomMessage(String body, String toJid, String msgId, String customText, boolean isDm) {
+    public static void sendCustomMessage(String body, String toJid, String msgId, String customText, boolean isDm, String time) {
 
         try {
 
@@ -375,6 +390,10 @@ public class FlutterXmppConnection implements ConnectionListener {
             xmppMessage.setBody(body);
             xmppMessage.setType(isDm ? Message.Type.chat : Message.Type.groupchat);
             DeliveryReceiptRequest.addTo(xmppMessage);
+
+            StandardExtensionElement timeElement = StandardExtensionElement.builder("TIME", "urn:xmpp:time")
+                    .addElement("ts", time).build();
+            xmppMessage.addExtension(timeElement);
 
             StandardExtensionElement element = StandardExtensionElement.builder("CUSTOM", "urn:xmpp:custom")
                     .addElement("custom", customText).build();
@@ -394,7 +413,7 @@ public class FlutterXmppConnection implements ConnectionListener {
             Utils.addLogInStorage("Action: sentCustomMessageToServer, Content: " + xmppMessage.toXML(null).toString());
 
             if (FlutterXmppPlugin.DEBUG) {
-                Log.d(TAG, "Sent message from :" + xmppMessage.toXML(null) + "  sent.");
+                Log.d(TAG, "Sent custom message from :" + xmppMessage.toXML(null) + "  sent.");
             }
 
         } catch (SmackException.NotConnectedException e) {

@@ -8,11 +8,12 @@
 import Foundation
 import XMPPFramework
 
-struct Message {
+class Message {
     var id: String = ""
     var jid: String = ""
     var message : String = ""
     var senderJid : String = ""
+    var time : String = "0"
     
     //MARK:-
     private struct keys {
@@ -20,7 +21,8 @@ struct Message {
         static let jid = "jid"
         static let message = "message"
         static let senderJid = "senderJid"
-    }
+        static let time = "time"
+    } 
     
     //MARK:-
     public init() {
@@ -32,6 +34,7 @@ struct Message {
         self.jid = data[keys.jid] as? String ?? ""
         self.message = data[keys.message] as? String ?? ""
         self.senderJid = data[keys.senderJid] as? String ?? ""
+        self.time = data[keys.time] as? String ?? self.time
     }
     
     public func toDictionary() -> [String: Any] {
@@ -40,16 +43,18 @@ struct Message {
         dict[keys.jid] = jid
         dict[keys.message] = message
         dict[keys.senderJid] = senderJid
+        dict[keys.time] = time
         return dict
     }
     
     //MARK:-
-    public mutating func initWithMessage(message : XMPPMessage)  {
+    public func initWithMessage(message : XMPPMessage)  {
         self.setSenderReciver(message: message)
         self.setText(message: message)
+        self.time = message.getTimeElementInfo()
     }
     
-    private mutating func setSenderReciver(message: XMPPMessage) {
+    private func setSenderReciver(message: XMPPMessage) {
         let vMessage_ID : String = (message.elementID ?? "").trim()
         var vSender_ID : String = ""
         var vJID : String = ""
@@ -71,7 +76,7 @@ struct Message {
         self.senderJid = vSender_ID
     }
     
-    private mutating func setText(message: XMPPMessage) {
+    private func setText(message: XMPPMessage) {
         let vMess_Body : String = (message.elements(forName: xmppConstants.BODY.lowercased()).first?.children?.first?.stringValue ?? "").trim()
         self.message = vMess_Body
     }

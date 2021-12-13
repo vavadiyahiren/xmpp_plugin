@@ -92,9 +92,11 @@ class XMPPController : NSObject {
         }
     }
     
-    func disconnect() {
-        APP_DELEGATE.objXMPPConnStatus = .Disconnect
+    func disconnect(withStrem: XMPPStream) {
+        self.changeStatus(.Offline, withXMPPStrem: withStrem)
         self.xmppStream.disconnectAfterSending()
+        
+        APP_DELEGATE.objXMPPConnStatus = .Disconnect
     }
     
     func restart() {
@@ -556,6 +558,7 @@ extension XMPPController {
     }
     
     func xmppStream(_ sender: XMPPStream, didReceive message: XMPPMessage) {
+        addLogger(.receiveMessageFromServer, message)
         printLog("\(#function) | didReceive message: \(message)")
         
         let vMessType : String = (message.type ?? xmppChatType.NORMAL).trim()
@@ -592,6 +595,8 @@ extension XMPPController : XMPPStreamManagementDelegate {
     }
     
     func xmppStreamManagement(_ sender: XMPPStreamManagement, didReceiveAckForStanzaIds stanzaIds: [Any]) {
+        addLogger(.receiveStanzaAckFromServer, stanzaIds)
+        
         if APP_DELEGATE.objEventData == nil {
             print("\(#function) | Nil data of APP_DELEGATE.objEventData")
             return
@@ -752,6 +757,29 @@ extension XMPPMessage {
     
     public func getElementValue(_ elementKey : String) -> String? {
         return self.elements(forName: elementKey).first?.children?.first?.stringValue
+    }
+    
+    /**
+     <TIME
+         xmlns="urn:xmpp:time">
+         <ts>1639390823958</ts>
+     </TIME>
+     */
+    func getTimeElementInfo() -> String {
+        var value : String = "0"
+        let arrMI = self.elements(forName: eleTIME.Name)
+        guard let eleMI = arrMI.first else {
+            //printLog("\(#function) | \(eleCustom.Name) element not get")
+            return value
+        }
+        
+        let arrMInfo = eleMI.elements(forName: eleTIME.Kay)
+        guard let vInfo = arrMInfo.first?.stringValue else {
+            //printLog("\(#function) | \(vKey) element not get")
+            return value
+        }
+        value = vInfo.trim()
+        return value
     }
     
     /**

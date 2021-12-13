@@ -13,6 +13,8 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
     }
     var singalCallBack : FlutterResult?
     
+    var objXMPPLogger : xmppLoggerInfo?
+    
     //MARK:-
     override init() {
         super.init()
@@ -30,11 +32,16 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
     }
     //MARK: -
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        addLogger(.receiveFromFlutter, call)
+        
         let vMethod : String = call.method.trim()
         switch vMethod {
         case pluginMethod.login:
             self.performLoginActivity(call, result)
-                        
+               
+        case pluginMethod.logout:
+            self.performLogoutActivity(call, result)
+            
         case pluginMethod.sendMessage,
              pluginMethod.sendMessageInGroup,
              pluginMethod.sendCustomMessage,
@@ -113,6 +120,8 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         vUserId = (vUserId.components(separatedBy: "@").first ?? "").trim()
         let vPassword : String = (vData["password"] as? String ?? "").trim()
         
+        let vLogPath : String = (vData["password"] as? String ?? "").trim()
+        
         if [vHost.count, vUserId.count, vPassword.count].contains(0) {
             result(xmppConstants.DataNil)
             return
@@ -126,10 +135,30 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         xmpp_UserId = vUserId
         xmpp_UserPass = vPassword
         
-        // TODO : Rename name
-        self.performXMPPConnectionActivity()
+        //-------------------------------------------------------
+        // Logs
+        if !vLogPath.isEmpty {
+            if let logFileUrl = URL(string: vLogPath) {
+                self.objXMPPLogger = xmppLoggerInfo.init()
+                self.objXMPPLogger.isLogEnable = true
+                self.objXMPPLogger.logPath = ""
+                self.objXMPPLogger.logFileName = logFileUrl.lastPathComponent
+            }
+        }
+        //-------------------------------------------------------
         
+        self.performXMPPConnectionActivity()
         result(xmppConstants.SUCCESS)
+    }
+    
+    func performLogoutActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        var dicData : [String : Any] = [:]
+        if let dic = call.arguments as? [String : Any] {
+            dicData = dic
+        }
+        let vMethod : String = call.method.trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(dicData)")
+        self.objXMPP.disconnect(withStrem: self.objXMPP.xmppStream)
     }
     
     func performSendMessageActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
@@ -143,6 +172,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         let toJid : String = (vData["to_jid"] as? String ?? "").trim()
         let body : String = vData["body"] as? String ?? ""
         let id : String = (vData["id"] as? String ?? "").trim()
+        let time : String = (vData["time"] as? String ?? "0").trim()
         
         var customElement : String = ""
         if [pluginMethod.sendCustomMessage, pluginMethod.sendCustomMessageInGroup].contains(vMethod) {
@@ -150,6 +180,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         }
         let isGroupMess : Bool = [pluginMethod.sendMessageInGroup, pluginMethod.sendCustomMessageInGroup].contains(vMethod)
         self.objXMPP.sendMessage(messageBody: body,
+                                 time: time,
                                  reciverJID: toJid,
                                  messageId: id,
                                  isGroup: isGroupMess,

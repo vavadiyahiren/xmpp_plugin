@@ -408,12 +408,12 @@ class _MyAppState extends State<MyApp> {
                                 "${_toNameController.text}",
                                 "${_messageController.text}",
                                 "$id",
-                              )
+                                DateTime.now().millisecondsSinceEpoch)
                             : await flutterXmpp.sendGroupMessageWithType(
                                 "${_toNameController.text}",
                                 "${_messageController.text}",
                                 "$id",
-                              );
+                                DateTime.now().millisecondsSinceEpoch);
                       },
                       child: Text(" Send "),
                       style: ElevatedButton.styleFrom(
@@ -430,12 +430,14 @@ class _MyAppState extends State<MyApp> {
                                 "${_toNameController.text}",
                                 "${_messageController.text}",
                                 "$id",
-                                "${_custommessageController.text}")
+                                "${_custommessageController.text}",
+                                DateTime.now().millisecondsSinceEpoch)
                             : await flutterXmpp.sendCustomGroupMessage(
                                 "${_toNameController.text}",
                                 "${_messageController.text}",
                                 "$id",
-                                "${_custommessageController.text}");
+                                "${_custommessageController.text}",
+                                DateTime.now().millisecondsSinceEpoch);
                       },
                       child: Text(" Send Custom Message "),
                       style: ElevatedButton.styleFrom(

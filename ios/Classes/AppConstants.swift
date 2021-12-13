@@ -22,6 +22,7 @@ let default_isPersistent : Bool = false
 //MARK:- Struct's
 struct pluginMethod {
     static let login : String                       = "login"
+    static let logout : String                      = "logout"
     static let sendMessage : String                 = "send_message"
     static let sendMessageInGroup : String          = "send_group_message"
     static let sendCustomMessage : String           = "send_custom_message"
@@ -107,9 +108,30 @@ class groupInfo {
     }
 }
 
+class xmppLoggerInfo {
+    var isLogEnable : Bool = false
+    var logFileName : String = ""
+    var logPath : String = ""
+    
+    func `init`() {
+    }
+}
+
+struct eleTIME {
+    /// Value - TIME
+    static let Name : String = "TIME"
+    /// Value - urn:xmpp:time
+    static let Namespace : String = "urn:xmpp:time"
+    /// Value - ts
+    static let Kay : String = "ts"
+}
+
 struct eleCustom {
+    /// Value - CUSTOM
     static let Name : String = "CUSTOM"
+    /// Value - urn:xmpp:custom
     static let Namespace : String = "urn:xmpp:custom"
+    /// Value - custom
     static let Kay : String = "custom"
 }
 
@@ -141,6 +163,18 @@ enum Status {
     case Online
     case Offline
 }
+enum LogType : String {
+    case none = "default"
+    
+    case receiveFromFlutter             = "methodReceiveFromFlutter" //----
+    case receiveStanzaAckFromServer     = "receiveStanzaAckFromServer" //---
+    case receiveMessageFromServer       = "receiveMessageFromServer" //---
+    
+    case sentMessageToFlutter           = "sentMessageToFlutter" //---
+    case sentMessageToServer            = "sentMessageToServer" //--
+    case sentCustomMessageToServer      = "sentCustomMessageToServer" //--
+    case sentDeliveryReceiptToServer    = "sentDeliveryReceiptToServer" //--
+}
 
 //MARK:- Extension
 extension Notification.Name {
@@ -148,10 +182,6 @@ extension Notification.Name {
     static let xmpp_ConnectionStatus = Notification.Name(rawValue: "xmpp_ConnectionStatus")
 }
 
-//MARK:- Notifcation Observers
-public func postNotification(Name:Notification.Name, withObject: Any? = nil, userInfo:[AnyHashable : Any]? = nil){
-    NotificationCenter.default.post(name: Name, object: withObject, userInfo: userInfo)
-}
 extension String {
     var boolValue: Bool {
         return (self as NSString).boolValue
@@ -160,8 +190,4 @@ extension String {
     func trim() -> String {
         self.trimmingCharacters(in: .whitespaces)
     }
-}
-
-func printLog(_ message : String) {
-//    print(message)
 }
