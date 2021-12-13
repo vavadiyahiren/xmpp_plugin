@@ -119,8 +119,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         var vUserId : String = (vData["user_jid"] as? String ?? "").trim()
         vUserId = (vUserId.components(separatedBy: "@").first ?? "").trim()
         let vPassword : String = (vData["password"] as? String ?? "").trim()
-        
-        let vLogPath : String = (vData["password"] as? String ?? "").trim()
+        let vLogPath : String = (vData["nativeLogFilePath"] as? String ?? "").trim()
         
         if [vHost.count, vUserId.count, vPassword.count].contains(0) {
             result(xmppConstants.DataNil)
@@ -130,25 +129,35 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             result(xmppConstants.SUCCESS)
             return
         }
+        // Logs
+        if self.setupXMPPLoggerSetting(withLogFileUrl: vLogPath) {
+            addLogger(.receiveFromFlutter, call)
+        }
+        
         xmpp_HostName = vHost
         xmpp_HostPort = Int16(vPort) ?? 0
         xmpp_UserId = vUserId
         xmpp_UserPass = vPassword
         
-        //-------------------------------------------------------
-        // Logs
-        if !vLogPath.isEmpty {
-            if let logFileUrl = URL(string: vLogPath) {
-                self.objXMPPLogger = xmppLoggerInfo.init()
-                self.objXMPPLogger.isLogEnable = true
-                self.objXMPPLogger.logPath = ""
-                self.objXMPPLogger.logFileName = logFileUrl.lastPathComponent
-            }
-        }
-        //-------------------------------------------------------
-        
         self.performXMPPConnectionActivity()
         result(xmppConstants.SUCCESS)
+    }
+    
+    func setupXMPPLoggerSetting(withLogFileUrl urlString: String) -> Bool {
+        if urlString.trim().isEmpty {
+            printLog("\(#function) | Getting nativeLogFilePath is empty.")
+            return false
+        }
+        guard let urlLogFile = URL(string: urlString) else {
+            printLog("\(#function) | Invalid nativeLogFilePath | path: \(urlString)")
+            return false
+        }
+        let objLogger = xmppLoggerInfo.init()
+        objLogger.isLogEnable = true
+        objLogger.logPath = urlLogFile.absoluteString
+        
+        APP_DELEGATE.objXMPPLogger = objLogger
+        return true
     }
     
     func performLogoutActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {

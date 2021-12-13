@@ -110,7 +110,6 @@ class groupInfo {
 
 class xmppLoggerInfo {
     var isLogEnable : Bool = false
-    var logFileName : String = ""
     var logPath : String = ""
     
     func `init`() {
