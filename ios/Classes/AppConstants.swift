@@ -22,6 +22,7 @@ let default_isPersistent : Bool = false
 //MARK:- Struct's
 struct pluginMethod {
     static let login : String                       = "login"
+    static let logout : String                      = "logout"
     static let sendMessage : String                 = "send_message"
     static let sendMessageInGroup : String          = "send_group_message"
     static let sendCustomMessage : String           = "send_custom_message"

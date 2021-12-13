@@ -34,7 +34,10 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         switch vMethod {
         case pluginMethod.login:
             self.performLoginActivity(call, result)
-                        
+               
+        case pluginMethod.logout:
+            self.performLogoutActivity(call, result)
+            
         case pluginMethod.sendMessage,
              pluginMethod.sendMessageInGroup,
              pluginMethod.sendCustomMessage,
@@ -130,6 +133,16 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         self.performXMPPConnectionActivity()
         
         result(xmppConstants.SUCCESS)
+    }
+    
+    func performLogoutActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        var dicData : [String : Any] = [:]
+        if let dic = call.arguments as? [String : Any] {
+            dicData = dic
+        }
+        let vMethod : String = call.method.trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(dicData)")
+        self.objXMPP.disconnect(withStrem: self.objXMPP.xmppStream)
     }
     
     func performSendMessageActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {

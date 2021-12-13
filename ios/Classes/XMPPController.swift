@@ -92,9 +92,11 @@ class XMPPController : NSObject {
         }
     }
     
-    func disconnect() {
-        APP_DELEGATE.objXMPPConnStatus = .Disconnect
+    func disconnect(withStrem: XMPPStream) {
+        self.changeStatus(.Offline, withXMPPStrem: withStrem)
         self.xmppStream.disconnectAfterSending()
+        
+        APP_DELEGATE.objXMPPConnStatus = .Disconnect
     }
     
     func restart() {
