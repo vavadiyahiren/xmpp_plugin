@@ -558,6 +558,7 @@ extension XMPPController {
     }
     
     func xmppStream(_ sender: XMPPStream, didReceive message: XMPPMessage) {
+        addLogger(.receiveMessageFromServer, message)
         printLog("\(#function) | didReceive message: \(message)")
         
         let vMessType : String = (message.type ?? xmppChatType.NORMAL).trim()
@@ -594,6 +595,8 @@ extension XMPPController : XMPPStreamManagementDelegate {
     }
     
     func xmppStreamManagement(_ sender: XMPPStreamManagement, didReceiveAckForStanzaIds stanzaIds: [Any]) {
+        addLogger(.receiveStanzaAckFromServer, stanzaIds)
+        
         if APP_DELEGATE.objEventData == nil {
             print("\(#function) | Nil data of APP_DELEGATE.objEventData")
             return

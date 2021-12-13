@@ -108,6 +108,15 @@ class groupInfo {
     }
 }
 
+class xmppLoggerInfo {
+    var isLogEnable : Bool = false
+    var logFileName : String = ""
+    var logPath : String = ""
+    
+    func `init`() {
+    }
+}
+
 struct eleTIME {
     /// Value - TIME
     static let Name : String = "TIME"
@@ -154,6 +163,18 @@ enum Status {
     case Online
     case Offline
 }
+enum LogType : String {
+    case none = "default"
+    
+    case receiveFromFlutter             = "methodReceiveFromFlutter" //----
+    case receiveStanzaAckFromServer     = "receiveStanzaAckFromServer" //---
+    case receiveMessageFromServer       = "receiveMessageFromServer" //---
+    
+    case sentMessageToFlutter           = "sentMessageToFlutter" //---
+    case sentMessageToServer            = "sentMessageToServer" //--
+    case sentCustomMessageToServer      = "sentCustomMessageToServer" //--
+    case sentDeliveryReceiptToServer    = "sentDeliveryReceiptToServer" //--
+}
 
 //MARK:- Extension
 extension Notification.Name {
@@ -161,10 +182,6 @@ extension Notification.Name {
     static let xmpp_ConnectionStatus = Notification.Name(rawValue: "xmpp_ConnectionStatus")
 }
 
-//MARK:- Notifcation Observers
-public func postNotification(Name:Notification.Name, withObject: Any? = nil, userInfo:[AnyHashable : Any]? = nil){
-    NotificationCenter.default.post(name: Name, object: withObject, userInfo: userInfo)
-}
 extension String {
     var boolValue: Bool {
         return (self as NSString).boolValue
@@ -173,8 +190,4 @@ extension String {
     func trim() -> String {
         self.trimmingCharacters(in: .whitespaces)
     }
-}
-
-func printLog(_ message : String) {
-//    print(message)
 }

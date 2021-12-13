@@ -31,11 +31,15 @@ extension XMPPController {
             xmppMessage.addChild(eleTime)
         }
         /// Custom Element
+        var isCustom : Bool = false
         if let ele = self.getCustomELE(withElementName: customElement) {
             xmppMessage.addChild(ele)
+            isCustom = true
         }
         xmppMessage.addReceiptRequest()
         withStrem.send(xmppMessage)
+        
+        addLogger(isCustom ? .sentCustomMessageToServer : .sentMessageToServer, xmppMessage)
     }
     
     func sentMessageDeliveryReceipt(withReceiptId receiptId: String, jid : String, messageId : String, withStrem : XMPPStream) {
@@ -62,6 +66,8 @@ extension XMPPController {
         
         xmppMessage.addReceiptRequest()
         withStrem.send(xmppMessage)
+        
+        addLogger(.sentDeliveryReceiptToServer, xmppMessage)
     }
 
     //MARK: - Send Ack
@@ -79,6 +85,8 @@ extension XMPPController {
                        "body" : vBody,
                        "msgtype" : "normal"]
         printLog("\(#function) | data: \(dicDate)")
+        addLogger(.sentMessageToFlutter, dicDate)
+        
         if let obj = APP_DELEGATE.objEventData {
             obj(dicDate)
         }
@@ -93,7 +101,8 @@ extension XMPPController {
                        "from" : vFrom,
                        "body" : vBody,
                        "msgtype" : "normal"]
-        print("\(#function) | data: \(dicDate)")
+        printLog("\(#function) | data: \(dicDate)")
+        addLogger(.sentMessageToFlutter, dicDate)
         
         if let obj = APP_DELEGATE.objEventData {
             obj(dicDate)
@@ -102,6 +111,8 @@ extension XMPPController {
     
     func sendMemberList(withUsers arrUsers: [String]) {
         printLog("\(#function) | arrUsers: \(arrUsers)")
+        addLogger(.sentMessageToFlutter, arrUsers)
+        
         if let callBack = APP_DELEGATE.singalCallBack {
             callBack(arrUsers)
         }
@@ -109,6 +120,8 @@ extension XMPPController {
     
     func sendRosters(withUsersJid arrJid : [String]) {
         printLog("\(#function) | arrJid: \(arrJid)")
+        addLogger(.sentMessageToFlutter, arrJid)
+        
         if let callBack = APP_DELEGATE.singalCallBack {
             callBack(arrJid)
         }
@@ -116,6 +129,8 @@ extension XMPPController {
     
     func sendLastActivity(withTime vTime: String) {
         printLog("\(#function) | time: \(vTime)")
+        addLogger(.sentMessageToFlutter, vTime)
+        
         if let callBack = APP_DELEGATE.singalCallBack {
             callBack(vTime)
         }

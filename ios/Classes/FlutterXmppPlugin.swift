@@ -13,6 +13,8 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
     }
     var singalCallBack : FlutterResult?
     
+    var objXMPPLogger : xmppLoggerInfo?
+    
     //MARK:-
     override init() {
         super.init()
@@ -30,6 +32,8 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
     }
     //MARK: -
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+        addLogger(.receiveFromFlutter, call)
+        
         let vMethod : String = call.method.trim()
         switch vMethod {
         case pluginMethod.login:
@@ -116,6 +120,8 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         vUserId = (vUserId.components(separatedBy: "@").first ?? "").trim()
         let vPassword : String = (vData["password"] as? String ?? "").trim()
         
+        let vLogPath : String = (vData["password"] as? String ?? "").trim()
+        
         if [vHost.count, vUserId.count, vPassword.count].contains(0) {
             result(xmppConstants.DataNil)
             return
@@ -129,9 +135,19 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         xmpp_UserId = vUserId
         xmpp_UserPass = vPassword
         
-        // TODO : Rename name
-        self.performXMPPConnectionActivity()
+        //-------------------------------------------------------
+        // Logs
+        if !vLogPath.isEmpty {
+            if let logFileUrl = URL(string: vLogPath) {
+                self.objXMPPLogger = xmppLoggerInfo.init()
+                self.objXMPPLogger.isLogEnable = true
+                self.objXMPPLogger.logPath = ""
+                self.objXMPPLogger.logFileName = logFileUrl.lastPathComponent
+            }
+        }
+        //-------------------------------------------------------
         
+        self.performXMPPConnectionActivity()
         result(xmppConstants.SUCCESS)
     }
     
