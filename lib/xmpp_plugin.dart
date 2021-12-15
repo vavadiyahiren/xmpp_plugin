@@ -107,10 +107,12 @@ class XmppConnection {
     streamGetMsg.cancel();
   }
 
-  Future<void> createMUC(String name, bool persistent) async {
+  /// Return: "SUCCESS" or "FAIL"
+  Future<String> createMUC(String name, bool persistent) async {
     final params = {"group_name": name, "persistent": "$persistent"};
     String response = await _channel.invokeMethod('create_muc', params);
     print("response $response");
+    return response;
   }
 
   Future<void> joinMucGroups(List<String> allGroupsId) async {

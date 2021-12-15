@@ -616,9 +616,9 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
-
   createMUC(String groupName, bool persistent) async {
-    await flutterXmpp.createMUC(groupName, persistent);
+    String groupResponse = await flutterXmpp.createMUC(groupName, persistent);
+    print('groupResponse $groupResponse');
   }
 }
 
