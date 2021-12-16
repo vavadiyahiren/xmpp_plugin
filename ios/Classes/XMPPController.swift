@@ -184,8 +184,12 @@ extension XMPPController : XMPPRoomDelegate {
         var vRoom : String = ""
         guard let value = sender.myRoomJID?.bareJID.user else {
             print("\(#function) | XMPPRoom Creating Error | XMPPRoom-Name: \(vRoom)")
+            
+            sendMUCCreateStatus(false)
             return
         }
+        sendMUCCreateStatus(true)
+        
         vRoom = "\(value)"
         printLog("\(#function) | XMPPRoom Created | XMPPRoom-Name: \(vRoom)")
         
@@ -196,11 +200,14 @@ extension XMPPController : XMPPRoomDelegate {
         var vRoom : String = ""
         guard let value = sender.myRoomJID?.bareJID.user else {
             print("\(#function) | XMPPRoom Joining Error | XMPPRoom-Name: \(vRoom)")
+            
+            sendMUCJoinStatus(false)
             return
         }
         vRoom = "\(value)"
         printLog("\(#function) | XMPPRoom Joined | XMPPRoom-Name: \(vRoom)")
         
+        sendMUCJoinStatus(true)
         /// No needs for update  alredy join room setting updates
         //self.updateGroupInfoIntoXMPPRoomCreatedAndJoined(withXMPPRoomObj: sender, roomName: vRoom)
     }
@@ -274,15 +281,21 @@ extension XMPPController : XMPPRoomDelegate {
             let roomName = objRoom.name.trim()
             if roomName.isEmpty {
                 print("\(#function) | roomName nil/empty")
+                
+                sendMUCCreateStatus(false)
                 return
             }
             guard let roomJID = XMPPJID(string: getXMPPRoomJidName(withRoomName: roomName, withStrem: withStrem)) else {
                 print("\(#function) | Invalid XMPPRoom Jid: \(roomName)")
+                
+                sendMUCCreateStatus(false)
                 return
             }
             let vUserId : String = self.getUserId(usingXMPPStream: withStrem)
             if vUserId.isEmpty {
                 print("\(#function) | XMPP UserId is nil/empty")
+                
+                sendMUCCreateStatus(false)
                 return
             }
             let roomMS : XMPPRoomMemoryStorage = XMPPRoomMemoryStorage.init()
@@ -303,20 +316,28 @@ extension XMPPController : XMPPRoomDelegate {
     func joinRoom(roomName: String, time : Int64, withStrem : XMPPStream){
         if roomName.trim().isEmpty {
             print("\(#function) | roomName nil/empty")
+            
+            sendMUCJoinStatus(false)
             return
         }
         
         let vUserId : String = self.getUserId(usingXMPPStream: withStrem)
         if vUserId.isEmpty {
             print("\(#function) | XMPP UserId is nil/empty")
+            
+            sendMUCJoinStatus(false)
             return
         }
         guard let xmppJID = XMPPJID(string: getXMPPRoomJidName(withRoomName: roomName, withStrem: withStrem)) else {
             print("\(#function) | Invalid XMPPRoom Jid: \(roomName)")
+            
+            sendMUCJoinStatus(false)
             return
         }
         guard let roomMemory = XMPPRoomMemoryStorage.init() else {
             print("\(#function) | XMPPRoomMemoryStorage is nil/empty")
+            
+            sendMUCJoinStatus(false)
             return
         }
         let xmppRoom : XMPPRoom = XMPPRoom.init(roomStorage: roomMemory, jid: xmppJID)

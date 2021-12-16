@@ -136,6 +136,24 @@ extension XMPPController {
         }
     }
     
+    func sendMUCJoinStatus(_ isSuccess: Bool) {
+        printLog("\(#function) | isSuccess: \(isSuccess)")
+        addLogger(.sentMessageToFlutter, isSuccess)
+        
+        if let callBack = APP_DELEGATE.singalCallBack {
+            callBack(isSuccess)
+        }
+    }
+    
+    func sendMUCCreateStatus(_ isSuccess: Bool) {
+        printLog("\(#function) | isSuccess: \(isSuccess)")
+        addLogger(.sentMessageToFlutter, isSuccess)
+        
+        if let callBack = APP_DELEGATE.singalCallBack {
+            callBack(isSuccess.description)
+        }
+    }
+    
     //MARK: -
     private func getTimeElement(withTime time :String) -> XMLElement? {
         let ele: XMLElement = XMLElement.init(name: eleTIME.Name, xmlns: eleTIME.Namespace)

@@ -51,9 +51,12 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         case pluginMethod.createMUC:
             self.performCreateMUCActivity(call, result)
             
-        case pluginMethod.joinMUC:
-            self.performJoinMUCActivity(call, result)
+        case pluginMethod.joinMUCGroups:
+            self.performJoinMUCGroupsActivity(call, result)
         
+        case pluginMethod.joinMUCGroup:
+            self.performJoinMUCGroupActivity(call, result)
+            
         case pluginMethod.sendReceiptDelivery:
             self.performReceiptDeliveryActivity(call, result)
             
@@ -224,11 +227,13 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         let objGroupInfo : groupInfo = groupInfo.init()
         objGroupInfo.name = vGroupName
         objGroupInfo.isPersistent = isPersistent
+        
+        APP_DELEGATE.singalCallBack = result
         APP_DELEGATE.objXMPP.createRoom(withRooms: [objGroupInfo], withStrem: self.objXMPP.xmppStream)
-        result(xmppConstants.SUCCESS)
+        //result(xmppConstants.SUCCESS)
     }
     
-    func performJoinMUCActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+    func performJoinMUCGroupsActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
         guard let vData = call.arguments as? [String : Any] else {
             result(xmppConstants.ERROR)
             return
@@ -239,13 +244,43 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         let arrRooms = vData["all_groups_ids"] as? [String] ?? []
         for vRoom  in arrRooms {
             let arrRoomCompo : [String] = vRoom.components(separatedBy: ",")
+            if arrRoomCompo.count != 2 { continue }
+            
             let vRoomName : String = arrRoomCompo.first ?? ""
             let vRoomTS : String = arrRoomCompo.last ?? "0"
             if vRoomName.isEmpty { continue }
             let vRoomTSLongFormat : Int64 = Int64(vRoomTS) ?? 0
             APP_DELEGATE.objXMPP.joinRoom(roomName: vRoomName, time: vRoomTSLongFormat, withStrem: self.objXMPP.xmppStream)
         }
-        result(xmppConstants.SUCCESS)
+        //result(xmppConstants.SUCCESS)
+        result(true)
+    }
+    
+    func performJoinMUCGroupActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        guard let vData = call.arguments as? [String : Any] else {
+            result(xmppConstants.ERROR)
+            return
+        }
+        let vMethod : String = call.method.trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(vData)")
+        
+        let vRoom = vData["group_id"] as? String ?? ""
+        let arrRoomCompo : [String] = vRoom.components(separatedBy: ",")
+        if arrRoomCompo.count != 2 {
+            result(false)
+            return
+        }
+        let vRoomName : String = arrRoomCompo.first ?? ""
+        let vRoomTS : String = arrRoomCompo.last ?? "0"
+        if vRoomName.isEmpty {
+            result(false)
+            return
+        }
+        let vRoomTSLongFormat : Int64 = Int64(vRoomTS) ?? 0
+        
+        APP_DELEGATE.singalCallBack = result
+        APP_DELEGATE.objXMPP.joinRoom(roomName: vRoomName, time: vRoomTSLongFormat, withStrem: self.objXMPP.xmppStream)
+        //result(true)
     }
     
     func performReceiptDeliveryActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
