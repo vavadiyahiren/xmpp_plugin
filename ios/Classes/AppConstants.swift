@@ -16,7 +16,8 @@ public var xmpp_HostName: String = ""
 public var xmpp_HostPort: Int16 = 0
 public var xmpp_UserId: String = ""
 public var xmpp_UserPass: String = ""
- 
+public var xmpp_Resource: String = ""
+
 let default_isPersistent : Bool = false
 
 //MARK:- Struct's
