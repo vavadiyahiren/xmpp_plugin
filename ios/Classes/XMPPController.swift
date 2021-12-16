@@ -31,11 +31,11 @@ class XMPPController : NSObject {
         super.init()
     }
     
-    init(hostName: String, hostPort : Int16, userId: String, password: String) throws {
+    init(hostName: String, hostPort : Int16, userId: String, password: String, resource: String) throws {
         super.init()
         
         let stUserJid = "\(userId)@\(hostName)"
-        guard let userJID = XMPPJID.init(string: stUserJid, resource: xmppConstants.Resource) else {
+        guard let userJID = XMPPJID.init(string: stUserJid, resource: resource) else {
             APP_DELEGATE.objXMPPConnStatus = .Failed
             throw XMPPControllerError.wrongUserJID
         }

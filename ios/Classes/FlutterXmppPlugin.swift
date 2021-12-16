@@ -118,6 +118,12 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         let vPort : String = (vData["port"] as? String ?? "0").trim()
         var vUserId : String = (vData["user_jid"] as? String ?? "").trim()
         vUserId = (vUserId.components(separatedBy: "@").first ?? "").trim()
+        
+        var vResource : String = xmppConstants.Resource
+        let arrResource = vUserId.components(separatedBy: "/")
+        if arrResource.count == 2 {
+            vResource = (arrResource.last ?? vResource).trim()
+        }
         let vPassword : String = (vData["password"] as? String ?? "").trim()
         let vLogPath : String = (vData["nativeLogFilePath"] as? String ?? "").trim()
         
@@ -138,6 +144,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         xmpp_HostPort = Int16(vPort) ?? 0
         xmpp_UserId = vUserId
         xmpp_UserPass = vPassword
+        xmpp_Resource = vResource
         
         self.performXMPPConnectionActivity()
         result(xmppConstants.SUCCESS)
@@ -357,7 +364,11 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
              .Failed:
             APP_DELEGATE.objXMPPConnStatus = .Processing
             do {
-                try self.objXMPP = XMPPController.init(hostName: xmpp_HostName, hostPort: xmpp_HostPort, userId: xmpp_UserId, password: xmpp_UserPass)
+                try self.objXMPP = XMPPController.init(hostName: xmpp_HostName,
+                                                       hostPort: xmpp_HostPort,
+                                                       userId: xmpp_UserId,
+                                                       password: xmpp_UserPass,
+                                                       resource: xmpp_Resource)
                 self.objXMPP.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
                 self.objXMPP.connect()
             } catch let err {
