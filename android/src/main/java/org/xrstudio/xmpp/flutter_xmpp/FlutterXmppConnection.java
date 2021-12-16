@@ -251,7 +251,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                     }
 
                     String time = "0";
-                    if(message.getExtension("urn:xmpp:time") != null) {
+                    if (message.getExtension("urn:xmpp:time") != null) {
                         StandardExtensionElement timeElement = (StandardExtensionElement) message
                                 .getExtension("urn:xmpp:time");
                         if (timeElement != null && timeElement.getFirstElement("ts") != null) {
@@ -793,7 +793,38 @@ public class FlutterXmppConnection implements ConnectionListener {
         }
     }
 
-    void printLog(String message) {
+    public static boolean joinGroupWithResponse(String groupId) {
+
+        try {
+            String[] groupData = groupId.split(",");
+            String groupName = groupData[0];
+            String lastMsgTime = groupData[1];
+
+            String roomId = groupName + conferenceDomainName + "." + mHost;
+            MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(roomId));
+            Resourcepart resourcepart = Resourcepart.from(mUsername);
+
+            long currentTime = new Date().getTime();
+            long lastMessageTime = Long.valueOf(lastMsgTime);
+            long diff = currentTime - lastMessageTime;
+
+            MucEnterConfiguration mucEnterConfiguration = multiUserChat.getEnterConfigurationBuilder(resourcepart)
+                    .requestHistorySince((int) diff)
+                    .build();
+
+            if (!multiUserChat.isJoined()) {
+                multiUserChat.join(mucEnterConfiguration);
+            }
+
+        } catch (Exception e) {
+            printLog("groupID : exception: " + e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    static void printLog(String message) {
         if (FlutterXmppPlugin.DEBUG) {
             Log.d(TAG, message);
         }

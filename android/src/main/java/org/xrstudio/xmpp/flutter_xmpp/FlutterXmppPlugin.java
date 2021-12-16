@@ -305,6 +305,20 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
 
             result.success("SUCCESS");
 
+
+        } else if (call.method.equals("join_muc_group")) {
+
+            boolean isJoined = false;
+            if (!call.hasArgument("group_id")) {
+                result.error("MISSING", "Missing argument group_id.", null);
+            }
+            ArrayList<String> allGroupsIds = call.argument("group_id");
+
+            if (!group_id.isEmpty()) {
+                isJoined = joinGroup(group_id);
+            }
+            result.success(isJoined ? "TRUE" : "FALSE");
+
         } else if (call.method.equals(Constants.CREATE_MUC)) {
 
             System.out.println("Creating a MUC ");
@@ -522,6 +536,11 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             activity.sendBroadcast(intent);
 
         }
+    }
+
+    // Join the muc.
+    private boolean joinGroup(String groupID) {
+        return FlutterXmppConnection.joinGroupWithResponse(groupID);
     }
 
 }

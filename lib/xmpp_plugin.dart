@@ -24,7 +24,8 @@ class XmppConnection {
     await _channel.invokeMethod('logout');
   }
 
-  Future<String> sendMessage(String toJid, String body, String id, int time) async {
+  Future<String> sendMessage(
+      String toJid, String body, String id, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -53,7 +54,8 @@ class XmppConnection {
     return status;
   }
 
-  Future<String> sendGroupMessage(String toJid, String body, String id, int time) async {
+  Future<String> sendGroupMessage(
+      String toJid, String body, String id, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -123,8 +125,16 @@ class XmppConnection {
     }
   }
 
-  Future<void> sendCustomMessage(
-      String toJid, String body, String id, String customString, int time) async {
+  Future<bool> joinMucGroup(String groupID) async {
+    final params = {
+      "group_id": groupID,
+    };
+    printLogForMethodCall('join_muc_group', params);
+    return await _channel.invokeMethod('join_muc_group', params);
+  }
+
+  Future<void> sendCustomMessage(String toJid, String body, String id,
+      String customString, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -139,8 +149,8 @@ class XmppConnection {
     log('call method to app from flutter methodName: $methodName: params: $params');
   }
 
-  Future<void> sendCustomGroupMessage(
-      String toJid, String body, String id, String customString, int time) async {
+  Future<void> sendCustomGroupMessage(String toJid, String body, String id,
+      String customString, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
