@@ -117,7 +117,7 @@ class XmppConnection {
     return response;
   }
 
-  /// Return: "SUCCESS" or "FAIL"
+  /// Return: "TRUE" or "FALSE"
   Future<String> joinMucGroups(List<String> allGroupsId) async {
     if (allGroupsId.isNotEmpty) {
       final params = {
@@ -131,6 +131,7 @@ class XmppConnection {
     return "SUCCESS";
   }
 
+  /// Return: "TRUE" or "FALSE"
   Future<bool> joinMucGroup(String groupID) async {
     final params = {
       "group_id": groupID,

@@ -91,9 +91,12 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> disconnectXMPP() async => await flutterXmpp.logout();
 
-  Future<void> joinMucGroups(List<String> allGroupsId) async {
-    String joinMucGroupsResponse = await flutterXmpp.joinMucGroups(allGroupsId);
-    print('joinMucGroupsResponse $joinMucGroupsResponse');
+  Future<String> joinMucGroups(List<String> allGroupsId) async {
+    return await flutterXmpp.joinMucGroups(allGroupsId);
+  }
+
+  Future<bool> joinMucGroup(String groupId) async {
+    return await flutterXmpp.joinMucGroup(groupId);
   }
 
   Future<void> addMembersInGroup(String groupName, List<String> members) async {
@@ -344,9 +347,8 @@ class _MyAppState extends State<MyApp> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    await joinMucGroups([
-                      "${_joinMUCTextController.text},${_joinTimeController.text}"
-                    ]);
+                    _joinGroup("${_joinMUCTextController.text}",
+                        "${_joinTimeController.text}");
                   },
                   child: Text('Join Group'),
                   style: ElevatedButton.styleFrom(
@@ -617,9 +619,15 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
+
   createMUC(String groupName, bool persistent) async {
-    String groupResponse = await flutterXmpp.createMUC(groupName, persistent);
+    bool groupResponse = await flutterXmpp.createMUC(groupName, persistent);
     print('groupResponse $groupResponse');
+  }
+
+  void _joinGroup(String grouname, String time) async {
+    bool response = await joinMucGroup("$grouname,$time");
+    print("response $response");
   }
 }
 

@@ -309,19 +309,19 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             if (!call.hasArgument("group_id")) {
                 result.error("MISSING", "Missing argument group_id.", null);
             }
-            ArrayList<String> allGroupsIds = call.argument("group_id");
+            String group_id = call.argument("group_id");
 
             if (!group_id.isEmpty()) {
                 isJoined = joinGroup(group_id);
             }
-            result.success(isJoined ? "TRUE" : "FALSE");
+            result.success(isJoined);
 
         } else if (call.method.equals(Constants.CREATE_MUC)) {
 
             String group_name = call.argument("group_name");
             String persistent = call.argument("persistent");
 
-            String response = createMUC(group_name, persistent);
+            boolean response = createMUC(group_name, persistent);
             result.success(response);
 
         } else if (call.method.equals(Constants.CUSTOM_MESSAGE)) {
@@ -493,7 +493,7 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
         }
     }
 
-    private String createMUC(String group_name, String persistent) {
+    private boolean createMUC(String group_name, String persistent) {
         return FlutterXmppConnection.createMUC(group_name, persistent);
     }
 

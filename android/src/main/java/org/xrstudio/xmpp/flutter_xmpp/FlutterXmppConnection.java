@@ -693,9 +693,9 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     }
 
-    public static String createMUC(String groupName, String persistent) {
+    public static boolean createMUC(String groupName, String persistent) {
 
-        String response = "FALSE";
+        boolean isGroupCreatedSuccessfully = false;
         try {
 
             MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
@@ -709,12 +709,12 @@ public class FlutterXmppConnection implements ConnectionListener {
                 multiUserChat.sendConfigurationForm(answerForm);
             }
 
-            response = "TRUE";
+            isGroupCreatedSuccessfully = true;
 
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return response;
+        return isGroupCreatedSuccessfully;
 
     }
 
@@ -753,6 +753,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     public static boolean joinGroupWithResponse(String groupId) {
 
+        boolean isJoinedSuccessfully = false;
         try {
             String[] groupData = groupId.split(",");
             String groupName = groupData[0];
@@ -774,12 +775,13 @@ public class FlutterXmppConnection implements ConnectionListener {
                 multiUserChat.join(mucEnterConfiguration);
             }
 
+            isJoinedSuccessfully = true;
         } catch (Exception e) {
             printLog("groupID : exception: " + e.getLocalizedMessage());
             e.printStackTrace();
         }
 
-        return true;
+        return isJoinedSuccessfully;
     }
 
     static void printLog(String message) {
