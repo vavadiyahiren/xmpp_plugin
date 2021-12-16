@@ -32,6 +32,14 @@ public class Utils {
         return jid.contains(host) ? jid : jid + Constants.SYMBOL_COMPARE_JID + host;
     }
 
+    public static String getRoomIdWithDomainName(String groupName, String host) {
+        String roomId = groupName;
+        if (!groupName.contains(Constants.CONFERENCE)) {
+            roomId = groupName + "@" + Constants.CONFERENCE + "." + host;
+        }
+        return roomId;
+    }
+
     public static void addLogInStorage(String text) {
         if (logFilePath == null || logFilePath.isEmpty()) {
             return;

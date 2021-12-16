@@ -186,7 +186,6 @@ public class FlutterXmppConnection implements ConnectionListener {
                 Presence presence = (Presence) packet;
                 String jid = presence.getFrom().toString();
                 Presence.Type type = presence.getType();
-                Log.d("checkNewFeat", "getPresence: 0 jid: " + jid);
                 Intent intent = new Intent(FlutterXmppConnectionService.PRESENCE_MESSAGE);
                 intent.setPackage(mApplicationContext.getPackageName());
                 intent.putExtra(FlutterXmppConnectionService.BUNDLE_FROM_JID, jid);
@@ -321,9 +320,6 @@ public class FlutterXmppConnection implements ConnectionListener {
                             action.equals(FlutterXmppConnectionService.SEND_MESSAGE),
                             intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_TIME));
 
-                } else if (action.equals(FlutterXmppConnectionService.JOIN_GROUPS_MESSAGE)) {
-                    // Join all group
-                    joinAllGroups(intent.getStringArrayListExtra(FlutterXmppConnectionService.GROUP_IDS));
                 }
             }
         };
@@ -332,7 +328,6 @@ public class FlutterXmppConnection implements ConnectionListener {
         filter.addAction(FlutterXmppConnectionService.SEND_MESSAGE);
         filter.addAction(FlutterXmppConnectionService.READ_MESSAGE);
         filter.addAction(FlutterXmppConnectionService.GROUP_SEND_MESSAGE);
-        filter.addAction(FlutterXmppConnectionService.JOIN_GROUPS_MESSAGE);
         mApplicationContext.registerReceiver(uiThreadMessageReceiver, filter);
 
     }
@@ -569,36 +564,11 @@ public class FlutterXmppConnection implements ConnectionListener {
         long userLastActivity = Constants.RESULT_DEFAULT;
         try {
             LastActivityManager lastActivityManager = LastActivityManager.getInstanceFor(mConnection);
-            Log.d("checkNewFeat", "getLastSeen: 0: " + JidCreate.from(Utils.getJidWithDomainName(userJid, mHost)).toString());
             LastActivity lastActivity = lastActivityManager.getLastActivity(JidCreate.from(Utils.getJidWithDomainName(userJid, mHost)));
             userLastActivity = lastActivity.lastActivity;
-//            Log.d("checkNewFeat", "getLastSeen: 0 userJid: " + userJid);
-//            Roster roster = Roster.getInstanceFor(mConnection);
-//            RosterEntry entry = roster.getEntry((BareJid) JidCreate.from(Utils.getJidWithDomainName(userJid, mHost)));
-//            if (entry != null) {
-//                Presence p = roster.getPresence(entry.getJid());
-//                Presence.Mode mode = p.getMode();
-//                Log.d("checkNewFeat", "getLastSeen: 1 mode: " + mode);
-//                if (mode != Presence.Mode.away) {
-//                    LastActivity activity = new LastActivity(JidCreate.from(Utils.getJidWithDomainName(userJid, mHost)));
-//                    LastActivity last = mConnection.createStanzaCollectorAndSend(activity).nextResult(5000);
-//                    long lastActivity = last.getIdleTime();
-//                    Log.d("checkNewFeat", "getLastSeen: 2 lastActivity: " + lastActivity);
-//                    if (lastActivity == Constants.RESULT_EMPTY || lastActivity == Constants.RESULT_DEFAULT) {
-//                        status = Constants.RESULT_DEFAULT;
-//                    } else {
-//                        lastActivity = lastActivity * 1000;
-//                        long currentTime = Utils.getLongDate();
-//                        status = currentTime - lastActivity;
-//                    }
-//                }
-//            }
         } catch (Exception e) {
             e.printStackTrace();
-            userLastActivity = Constants.RESULT_DEFAULT;
-            Log.d("checkNewFeat", "getLastSeen: exception: " + e.getLocalizedMessage());
         }
-        Log.d("checkNewFeat", "getLastSeen: userLastActivity: " + userLastActivity);
         return userLastActivity;
     }
 
@@ -612,9 +582,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("checkNewFeat", "getPresence: exception: " + e.getLocalizedMessage());
         }
-        Log.d("checkNewFeat", "getPresence: presenceMap: " + presenceMap);
         return presenceMap;
     }
 
@@ -625,9 +593,7 @@ public class FlutterXmppConnection implements ConnectionListener {
             for (RosterEntry rosterEntry : allRoster) {
                 muRosterList.add(rosterEntry.toString());
             }
-            Log.d("checkNewFeat", "getMyRosters: muRosterList: " + muRosterList);
         } catch (Exception e) {
-            Log.d("checkNewFeat", "getMyRosters: exception: " + e.getLocalizedMessage());
             e.printStackTrace();
         }
         return muRosterList;
@@ -636,10 +602,8 @@ public class FlutterXmppConnection implements ConnectionListener {
     public static void createRosterEntry(String userJid) {
         try {
             rosterConnection.createEntry(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)), userJid, null);
-            Log.d("checkNewFeat", "createRosterEntry success");
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("checkNewFeat", "createRosterEntry: exception: " + e.getLocalizedMessage());
         }
     }
 
@@ -734,12 +698,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         String response = "FAIL";
         try {
 
-            String roomId = groupName;
-            if (!groupName.contains(Constants.CONFERENCE)) {
-                roomId = groupName + "@" + Constants.CONFERENCE + "." + mHost;
-            }
-
-            MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(roomId));
+            MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
             multiUserChat.create(Resourcepart.from(mUsername));
 
             if (persistent.equals(Constants.TRUE)) {
@@ -759,8 +718,8 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     }
 
-    private void joinAllGroups(ArrayList<String> allGroupsIds) {
-
+    public static String joinAllGroups(ArrayList<String> allGroupsIds) {
+        String response = "FAIL";
         try {
 
             for (String groupId : allGroupsIds) {
@@ -769,8 +728,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                 String groupName = groupData[0];
                 String lastMsgTime = groupData[1];
 
-                String roomId = groupName + conferenceDomainName + "." + mHost;
-                MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(roomId));
+                MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
                 Resourcepart resourcepart = Resourcepart.from(mUsername);
 
                 long currentTime = new Date().getTime();
@@ -787,10 +745,13 @@ public class FlutterXmppConnection implements ConnectionListener {
 
             }
 
+            response = "SUCCESS";
+
         } catch (Exception e) {
-            printLog("joinAllGroups: exception: " + e.getLocalizedMessage());
+            Log.d("joinAllGroups", "exception: " + e.getLocalizedMessage());
             e.printStackTrace();
         }
+        return response;
     }
 
     void printLog(String message) {

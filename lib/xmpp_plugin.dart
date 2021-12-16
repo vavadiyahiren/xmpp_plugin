@@ -111,18 +111,22 @@ class XmppConnection {
   Future<String> createMUC(String name, bool persistent) async {
     final params = {"group_name": name, "persistent": "$persistent"};
     String response = await _channel.invokeMethod('create_muc', params);
-    print("response $response");
+    print("createMUC response $response");
     return response;
   }
 
-  Future<void> joinMucGroups(List<String> allGroupsId) async {
+  /// Return: "SUCCESS" or "FAIL"
+  Future<String> joinMucGroups(List<String> allGroupsId) async {
     if (allGroupsId.isNotEmpty) {
       final params = {
         "all_groups_ids": allGroupsId,
       };
       printLogForMethodCall('join_muc_groups', params);
-      await _channel.invokeMethod('join_muc_groups', params);
+      String response = await _channel.invokeMethod('join_muc_groups', params);
+      print("joinMucGroups response $response");
+      return response;
     }
+    return "SUCCESS";
   }
 
   Future<void> sendCustomMessage(
