@@ -131,6 +131,12 @@ var lastseen = await flutterXmpp.getLastSeen(jid);
 await flutterXmpp.createRoster(jid);
 ```
 
+20. Join single MUC
+
+```
+await flutterXmpp.joinMucGroup(groupId);
+```
+
 # To be Added
 
  - MAM
