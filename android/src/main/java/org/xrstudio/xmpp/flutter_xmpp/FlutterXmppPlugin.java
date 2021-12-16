@@ -299,11 +299,8 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             }
             ArrayList<String> allGroupsIds = call.argument("all_groups_ids");
 
-            if (!allGroupsIds.isEmpty()) {
-                joinAllGroups(allGroupsIds);
-            }
-
-            result.success("SUCCESS");
+            String response = joinAllGroups(allGroupsIds);
+            result.success(response);
 
 
         } else if (call.method.equals("join_muc_group")) {
@@ -320,8 +317,6 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
             result.success(isJoined ? "TRUE" : "FALSE");
 
         } else if (call.method.equals(Constants.CREATE_MUC)) {
-
-            System.out.println("Creating a MUC ");
 
             String group_name = call.argument("group_name");
             String persistent = call.argument("persistent");
@@ -502,6 +497,10 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
         return FlutterXmppConnection.createMUC(group_name, persistent);
     }
 
+    private String joinAllGroups(ArrayList<String> allGroupsIds) {
+        return FlutterXmppConnection.joinAllGroups(allGroupsIds);
+    }
+
     // login
     private void doLogin() {
 
@@ -521,20 +520,6 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
         if (FlutterXmppConnectionService.getState().equals(FlutterXmppConnection.ConnectionState.CONNECTED)) {
             Intent i1 = new Intent(activity, FlutterXmppConnectionService.class);
             activity.stopService(i1);
-        }
-    }
-
-
-    // Join all the muc.
-    private void joinAllGroups(ArrayList<String> allGroupsIds) {
-
-        if (FlutterXmppConnectionService.getState().equals(FlutterXmppConnection.ConnectionState.CONNECTED)) {
-
-            Intent intent = new Intent(FlutterXmppConnectionService.JOIN_GROUPS_MESSAGE);
-            intent.putStringArrayListExtra(FlutterXmppConnectionService.GROUP_IDS, allGroupsIds);
-
-            activity.sendBroadcast(intent);
-
         }
     }
 

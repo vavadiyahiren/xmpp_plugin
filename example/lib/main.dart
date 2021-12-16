@@ -92,7 +92,8 @@ class _MyAppState extends State<MyApp> {
   Future<void> disconnectXMPP() async => await flutterXmpp.logout();
 
   Future<void> joinMucGroups(List<String> allGroupsId) async {
-    await flutterXmpp.joinMucGroups(allGroupsId);
+    String joinMucGroupsResponse = await flutterXmpp.joinMucGroups(allGroupsId);
+    print('joinMucGroupsResponse $joinMucGroupsResponse');
   }
 
   Future<void> addMembersInGroup(String groupName, List<String> members) async {
@@ -616,9 +617,9 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
-
   createMUC(String groupName, bool persistent) async {
-    await flutterXmpp.createMUC(groupName, persistent);
+    String groupResponse = await flutterXmpp.createMUC(groupName, persistent);
+    print('groupResponse $groupResponse');
   }
 }
 

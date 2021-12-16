@@ -31,7 +31,6 @@ public class FlutterXmppConnectionService extends Service {
     public static final String OUTGOING_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.outgoinmessage";
     public static final String BUNDLE_TO_JID = "c_from";
     public static final String GROUP_SEND_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.sendGroupMessage";
-    public static final String JOIN_GROUPS_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.joinAllGroupsMessage";
     public static final String CREATE_MUC = "org.xrstudio.xmpp.flutter_xmpp.createMUC";
     public static final String GROUP_IDS = "group_ids";
     public static final String RECEIVE_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.receivemessage";
