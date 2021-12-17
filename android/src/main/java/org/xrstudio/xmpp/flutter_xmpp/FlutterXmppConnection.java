@@ -157,8 +157,6 @@ public class FlutterXmppConnection implements ConnectionListener {
         conf.setSecurityMode(ConnectionConfiguration.SecurityMode.required);
 
         Log.d("loginTest", "connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + mPort + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource);
-
-
         //Set up the ui thread broadcast message receiver.
 
         mConnection = new XMPPTCPConnection(conf.build());
