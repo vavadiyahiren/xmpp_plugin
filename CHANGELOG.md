@@ -59,3 +59,8 @@
 * Added custom ts support
 * Added logging support
 
+## 1.1.12 
+
+* Added response back to the create muc methods
+* Added single group join capabilies with synchronous response
+* Added resource name capabilites to the ios login 
