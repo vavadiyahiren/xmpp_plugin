@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_xmpp_example/constants.dart';
 import 'package:flutter_xmpp_example/event.dart';
 import 'package:flutter_xmpp_example/homepage.dart';
-import 'package:workmanager/workmanager.dart';
 import 'package:flutter_xmpp_example/native_log_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share/share.dart';
@@ -16,42 +15,45 @@ import 'package:xmpp_plugin/xmpp_plugin.dart';
 const myTask = "syncWithTheBackEnd";
 void main() {
   runApp(MyApp());
-  Workmanager().initialize(callbackDispatcher);
-  Workmanager().registerOneOffTask(
-    "1",
-    myTask,
-    initialDelay: Duration(seconds: 30),
-    constraints: Constraints(
-      requiresCharging: true,
-      networkType: NetworkType.connected,
-    ),
-  );
+  if(Platform.isAndroid){
+    // Workmanager().initialize(callbackDispatcher);
+    // Workmanager().registerOneOffTask(
+    //   "1",
+    //   myTask,
+    //   initialDelay: Duration(seconds: 30),
+    //   constraints: Constraints(
+    //     requiresCharging: true,
+    //     networkType: NetworkType.connected,
+    //   ),
+    // );
+  }
+
 }
 
-void callbackDispatcher() {
-  Workmanager().executeTask((task, inputData) async {
-    switch (task) {
-      case myTask:
-        log("this method was called from native!");
-        final auth = {
-          "user_jid":
-          "test4@xrstudio.in/${Platform.isAndroid ? "Android" : "iOS"}",
-          "password": "test4",
-          "host": "xrstudio.in",
-          "port": '5222'
-        };
-
-        XmppConnection flutterXmpp = XmppConnection(auth);
-        // await flutterXmpp.start(_onReceiveMessage, _onError);
-        await flutterXmpp.login();
-        break;
-      case Workmanager.iOSBackgroundTask:
-        log("iOS background fetch delegate ran");
-        break;
-    }
-    return Future.value(true);
-  });
-}
+// void callbackDispatcher() {
+//   Workmanager().executeTask((task, inputData) async {
+//     switch (task) {
+//       case myTask:
+//         log("this method was called from native!");
+//         final auth = {
+//           "user_jid":
+//           "test4@xrstudio.in/${Platform.isAndroid ? "Android" : "iOS"}",
+//           "password": "test4",
+//           "host": "xrstudio.in",
+//           "port": '5222'
+//         };
+//
+//         XmppConnection flutterXmpp = XmppConnection(auth);
+//         // await flutterXmpp.start(_onReceiveMessage, _onError);
+//         await flutterXmpp.login();
+//         break;
+//       case Workmanager.iOSBackgroundTask:
+//         log("iOS background fetch delegate ran");
+//         break;
+//     }
+//     return Future.value(true);
+//   });
+// }
 
 class MyApp extends StatefulWidget {
   @override
@@ -65,6 +67,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
 
   @override
   void initState() {
+    checkStoragePermission();
     super.initState();
     log('didChangeAppLifecycleState() initState');
     WidgetsBinding.instance!.addObserver(this);
@@ -107,11 +110,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     await flutterXmpp.login();
   }
 
-  @override
-  void initState() {
-    super.initState();
-    checkStoragePermission();
-  }
+
 
   void checkStoragePermission() async {
     var status = await Permission.storage.status;
@@ -689,12 +688,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
 
   createMUC(String groupName, bool persistent) async {
     bool groupResponse = await flutterXmpp.createMUC(groupName, persistent);
-    print('groupResponse $groupResponse');
+    print('responseTest groupResponse $groupResponse');
   }
 
   void _joinGroup(String grouname, String time) async {
     bool response = await joinMucGroup("$grouname,$time");
-    print("response $response");
+    print("responseTest joinResponse $response");
   }
 }
 

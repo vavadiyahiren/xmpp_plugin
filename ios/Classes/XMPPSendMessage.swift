@@ -150,7 +150,7 @@ extension XMPPController {
         addLogger(.sentMessageToFlutter, isSuccess)
         
         if let callBack = APP_DELEGATE.singalCallBack {
-            callBack(isSuccess.description)
+            callBack(isSuccess)
         }
     }
     

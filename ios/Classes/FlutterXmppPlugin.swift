@@ -119,8 +119,8 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         
         let vHost : String = (vData["host"] as? String ?? "").trim()
         let vPort : String = (vData["port"] as? String ?? "0").trim()
-        var vUserId : String = (vData["user_jid"] as? String ?? "").trim()
-        vUserId = (vUserId.components(separatedBy: "@").first ?? "").trim()
+        let vUserId : String = (vData["user_jid"] as? String ?? "").trim()
+        let vUserJid = (vUserId.components(separatedBy: "@").first ?? "").trim()
         
         var vResource : String = xmppConstants.Resource
         let arrResource = vUserId.components(separatedBy: "/")
@@ -130,7 +130,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         let vPassword : String = (vData["password"] as? String ?? "").trim()
         let vLogPath : String = (vData["nativeLogFilePath"] as? String ?? "").trim()
         
-        if [vHost.count, vUserId.count, vPassword.count].contains(0) {
+        if [vHost.count, vUserJid.count, vPassword.count].contains(0) {
             result(xmppConstants.DataNil)
             return
         }
@@ -145,7 +145,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         
         xmpp_HostName = vHost
         xmpp_HostPort = Int16(vPort) ?? 0
-        xmpp_UserId = vUserId
+        xmpp_UserId = vUserJid
         xmpp_UserPass = vPassword
         xmpp_Resource = vResource
         
@@ -224,6 +224,15 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         else if let value = vData["persistent"] as? String {
             isPersistent = value.boolValue
         }
+        
+        if !self.isValidMUCInfo(withRoomName: vGroupName) {
+            printLog("\(#function) | \(vMethod) | invalid groupname validation : \(vGroupName)")
+            result(false)
+            return
+        }
+        
+        printLog("\(#function) | \(vMethod) | after validation : \(vData)")
+        
         let objGroupInfo : groupInfo = groupInfo.init()
         objGroupInfo.name = vGroupName
         objGroupInfo.isPersistent = isPersistent
@@ -248,8 +257,12 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             
             let vRoomName : String = arrRoomCompo.first ?? ""
             let vRoomTS : String = arrRoomCompo.last ?? "0"
-            if vRoomName.isEmpty { continue }
             let vRoomTSLongFormat : Int64 = Int64(vRoomTS) ?? 0
+            
+            if !self.isValidMUCInfo(withRoomName: vRoomName, timeStamp: vRoomTSLongFormat) {
+                result(false)
+                continue
+            }
             APP_DELEGATE.objXMPP.joinRoom(roomName: vRoomName, time: vRoomTSLongFormat, withStrem: self.objXMPP.xmppStream)
         }
         //result(xmppConstants.SUCCESS)
@@ -272,12 +285,12 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         }
         let vRoomName : String = arrRoomCompo.first ?? ""
         let vRoomTS : String = arrRoomCompo.last ?? "0"
-        if vRoomName.isEmpty {
+        let vRoomTSLongFormat : Int64 = Int64(vRoomTS) ?? 0
+        
+        if !self.isValidMUCInfo(withRoomName: vRoomName, timeStamp: vRoomTSLongFormat) {
             result(false)
             return
         }
-        let vRoomTSLongFormat : Int64 = Int64(vRoomTS) ?? 0
-        
         APP_DELEGATE.singalCallBack = result
         APP_DELEGATE.objXMPP.joinRoom(roomName: vRoomName, time: vRoomTSLongFormat, withStrem: self.objXMPP.xmppStream)
         //result(true)
@@ -459,6 +472,34 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             return
         }
         objEventData(dicDate)
+    }
+    
+    //MARK: - MUC Validation
+    func isValidMUCInfo(withRoomName vRoom : String) -> Bool {
+        if vRoom.trim().isEmpty {
+            printLog("\(#function) | MUCRoomName is empty.")
+            return false
+        }
+        
+        if vRoom.containsWhitespace {
+            printLog("\(#function) | MUCRoomName is invalid | Its contail whitespapce | MUCRoomName: \(vRoom)")
+            return false
+        }
+        printLog("returning true ")
+        return true
+    }
+    
+    func isValidMUCInfo(withRoomName vRoom : String, timeStamp : Int64) -> Bool {
+        if !self.isValidMUCInfo(withRoomName: vRoom) {
+            return false
+        }
+        
+        let vCurretTimeStamp = getTimeStamp()
+        if timeStamp > vCurretTimeStamp {
+            printLog("\(#function) | Timestamp is invalid | timeStamp is more then curretTimeStamp | curretTimestamp: \(vCurretTimeStamp) | timeStamp: \(timeStamp)")
+            return false
+        }
+        return true
     }
 }
 

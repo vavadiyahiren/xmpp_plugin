@@ -275,6 +275,54 @@ extension XMPPController : XMPPRoomDelegate {
         printLog("\(#function) | XMPPRoom: \(sender) | iqResult: \(iqResult)")
     }
     
+    func xmppStream(_ sender: XMPPStream, didReceive iq: XMPPIQ) -> Bool {
+        printLog("\(#function) | XMPPRoom: \(sender) | iq: \(iq)")
+        
+        // error of room joining
+        // room creation error
+        /**
+         <iq
+         xmlns="jabber:client" from="mytestingaabbccddqqwweerrrtttyyy@conference.xrstudio.in" to="test1@xrstudio.in/iOS" id="CB4C2C2C-47A2-4F99-9CE9-E3685CE98DC1" type="error">
+         <query
+         xmlns="http://jabber.org/protocol/muc#owner">
+         </query>
+         <error code="403" type="auth">
+         <forbidden
+         xmlns="urn:ietf:params:xml:ns:xmpp-stanzas">
+         </forbidden>
+         <text
+         xmlns="urn:ietf:params:xml:ns:xmpp-stanzas">Owner privileges required
+         </text>
+         </error>
+         </iq>
+         */
+        if let eleError = iq.childErrorElement {
+            var vCode : String = ""
+            var vErrorMess : String = ""
+            
+            if let valueCode = eleError.attributeStringValue(forName: "code") { vCode = valueCode.trim() }
+            if let valueErrorMess = eleError.getElements(withKey: "text").first?.stringValue { vErrorMess = valueErrorMess.trim() }
+            let isErrorIQ = (vCode == "403") && (vErrorMess.lowercased() == xmppConstants.errorMessOfMUC.lowercased())
+            printLog("\(#function) | isErrorIQ: \(isErrorIQ) | vCode: \(vCode) | vErrorMess: \(vErrorMess)")
+            
+            ///Getting MUC Room Id
+            var vMUCRoomName : String = ""
+            if let valueFrom = iq.fromStr, valueFrom.lowercased().contains(xmppConstants.Conference) {
+                vMUCRoomName = valueFrom.components(separatedBy: "@").first ?? ""
+            }
+            printLog("\(#function) | vMUCRoomName: \(vMUCRoomName)")
+            
+            if vMUCRoomName.isEmpty { return true }
+            if let _ = APP_DELEGATE.objXMPP.arrGroups.firstIndex(where: { (objGroup) -> Bool in
+                return objGroup.name == vMUCRoomName
+            }) {
+                sendMUCJoinStatus(false)
+                return true
+            }
+            printLog("\(#function) | Not getting MUCRoom")
+        }
+        return true
+    }
     //MARK: -
     func createRoom(withRooms arrRooms: [groupInfo], withStrem : XMPPStream) {
         for objRoom in arrRooms {
@@ -291,6 +339,7 @@ extension XMPPController : XMPPRoomDelegate {
                 sendMUCCreateStatus(false)
                 return
             }
+            
             let vUserId : String = self.getUserId(usingXMPPStream: withStrem)
             if vUserId.isEmpty {
                 print("\(#function) | XMPP UserId is nil/empty")
@@ -298,6 +347,9 @@ extension XMPPController : XMPPRoomDelegate {
                 sendMUCCreateStatus(false)
                 return
             }
+            
+            self.addUpdateGroupInfo(objGroupInfo: objRoom)
+            
             let roomMS : XMPPRoomMemoryStorage = XMPPRoomMemoryStorage.init()
             let xmppRoom = XMPPRoom.init(roomStorage: roomMS, jid: roomJID)
             xmppRoom.activate(withStrem)
@@ -307,8 +359,6 @@ extension XMPPController : XMPPRoomDelegate {
             xmppRoom.join(usingNickname: vUserId, history: history)
             
             xmppRoom.fetchConfigurationForm()
-            self.addUpdateGroupInfo(objGroupInfo: objRoom)
-            
             printLog("\(#function) | perform activity of create XMPPRoom | \(roomName)")
         }
     }
@@ -340,6 +390,10 @@ extension XMPPController : XMPPRoomDelegate {
             sendMUCJoinStatus(false)
             return
         }
+        let objGroupInfo : groupInfo = groupInfo.init()
+        objGroupInfo.name = roomName
+        self.addUpdateGroupInfo(objGroupInfo: objGroupInfo)
+                
         let xmppRoom : XMPPRoom = XMPPRoom.init(roomStorage: roomMemory, jid: xmppJID)
         xmppRoom.activate(withStrem)
         xmppRoom.addDelegate(self, delegateQueue: DispatchQueue.main)
@@ -535,9 +589,6 @@ extension XMPPController {
     }
     
     //MARK: Members
-    /**
-     <item affiliation="member" jid="test@xrstudio.in"></item>
-     */
     func xmppRoom(_ sender: XMPPRoom, didFetchMembersList items: [Any]) {
         printLog("\(#function) | Get XMPPRoom Members | sender: \(sender) | items-count: \(items.count)")
         self.getAllMemeberInfo(withItems: items, withUserRole: .Member)
@@ -547,9 +598,6 @@ extension XMPPController {
     }
     
     //MARK: Admins
-    /**
-     <item affiliation="admin" jid="test@xrstudio.in"></item>
-     */
     func xmppRoom(_ sender: XMPPRoom, didFetchAdminsList items: [Any]) {
         printLog("\(#function) | Get XMPPRoom Admins | sender: \(sender) | items-count: \(items.count)")
         self.getAllMemeberInfo(withItems: items, withUserRole: .Admin)
@@ -559,9 +607,6 @@ extension XMPPController {
     }
     
     //MARK: Owners
-    /**
-     <item affiliation="owner" jid="test@xrstudio.in"></item>
-     */
     func xmppRoom(_ sender: XMPPRoom, didFetchOwnersList items: [Any]) {
         printLog("\(#function) | Get XMPPRoom Owners | sender: \(sender) | items-count: \(items.count)")
         self.getAllMemeberInfo(withItems: items, withUserRole: .Owner)
@@ -691,30 +736,7 @@ extension XMPPController : XMPPLastActivityDelegate {
     }
     
     func xmppLastActivity(_ sender: XMPPLastActivity!, didReceiveResponse response: XMPPIQ!) {
-        /**
-         ///-------------------------------------------------------------------------------------------------------------------------------------
-         /// Error
-         <iq
-             xmlns="jabber:client" from="test2@xrstudio.in" to="test@xrstudio.in/iOS" id="9826D8E8-5BD0-4B59-AD24-21B5331DAB4F" type="error">
-             <query
-                 xmlns="jabber:iq:last">
-             </query>
-             <error code="403" type="auth">
-                 <forbidden
-                     xmlns="urn:ietf:params:xml:ns:xmpp-stanzas">
-                 </forbidden>
-             </error>
-         </iq>
-         
-         ///-------------------------------------------------------------------------------------------------------------------------------------
-         /// Result
-         <iq
-             xmlns="jabber:client" from="test@xrstudio.in" to="test@xrstudio.in/iOS" id="D5B3B096-16A5-4E6B-B03F-8216BD81F330" type="result">
-             <query
-                 xmlns="jabber:iq:last" seconds="0">
-             </query>
-         </iq>
-         */
+
         printLog("\(#function) | response : \(String(describing: response))")
         var vTimeInSec : String = "-1"
         let isErrorResponse : Bool = response.isErrorIQ
@@ -779,47 +801,31 @@ extension XMPPMessage {
     public func getElementValue(_ elementKey : String) -> String? {
         return self.elements(forName: elementKey).first?.children?.first?.stringValue
     }
-    
-    /**
-     <TIME
-         xmlns="urn:xmpp:time">
-         <ts>1639390823958</ts>
-     </TIME>
-     */
+
     func getTimeElementInfo() -> String {
         var value : String = "0"
         let arrMI = self.elements(forName: eleTIME.Name)
         guard let eleMI = arrMI.first else {
-            //printLog("\(#function) | \(eleCustom.Name) element not get")
             return value
         }
         
         let arrMInfo = eleMI.elements(forName: eleTIME.Kay)
         guard let vInfo = arrMInfo.first?.stringValue else {
-            //printLog("\(#function) | \(vKey) element not get")
             return value
         }
         value = vInfo.trim()
         return value
     }
-    
-    /**
-     <CUSTOM
-         xmlns="urn:xmpp:custom">
-         <custom>test</custom>
-     </CUSTOM>
-     */
+
     func getCustomElementInfo(withKey vKey : String) -> String {
         var value : String = ""
         let arrMI = self.elements(forName: eleCustom.Name)
         guard let eleMI = arrMI.first else {
-            //printLog("\(#function) | \(eleCustom.Name) element not get")
             return value
         }
         
         let arrMInfo = eleMI.elements(forName: vKey)
         guard let vInfo = arrMInfo.first?.stringValue else {
-            //printLog("\(#function) | \(vKey) element not get")
             return value
         }
         value = vInfo.trim()
@@ -828,11 +834,7 @@ extension XMPPMessage {
 }
 
 extension DDXMLElement {
-    /**
-     <field var="muc#roomconfig_persistentroom" type="boolean" label="Room is Persistent">
-         <value>0</value>
-     </field>
-     */
+
     func getElements(withKey vKey : String) -> [DDXMLElement] {
         return self.elements(forName: vKey)
     }
@@ -840,7 +842,6 @@ extension DDXMLElement {
     func getValue(withKey vKey : String) -> String? {
         var value : String = ""
         guard let vInfo = self.stringValue else {
-            //printLog("\(#function) | \(vKey) key element not getting")
             return value
         }
         value = vInfo.trim()

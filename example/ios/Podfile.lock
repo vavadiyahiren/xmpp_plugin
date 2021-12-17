@@ -5,6 +5,8 @@ PODS:
   - CocoaLumberjack/Core (3.7.2)
   - CocoaLumberjack/Swift (3.7.2):
     - CocoaLumberjack/Core
+  - device_info (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - KissXML (5.3.1):
     - KissXML/All (= 5.3.1)
@@ -15,7 +17,15 @@ PODS:
     - KissXML/Core
   - KissXML/Core (5.3.1)
   - libidn (1.35)
-  - xmpp_plugin (1.1.6):
+  - path_provider_ios (0.0.1):
+    - Flutter
+  - "permission_handler (5.1.0+2)":
+    - Flutter
+  - share (0.0.1):
+    - Flutter
+  - shared_preferences_ios (0.0.1):
+    - Flutter
+  - xmpp_plugin (1.1.12):
     - Flutter
     - XMPPFramework/Swift
   - XMPPFramework/default (4.0.0):
@@ -28,7 +38,12 @@ PODS:
     - XMPPFramework/default
 
 DEPENDENCIES:
+  - device_info (from `.symlinks/plugins/device_info/ios`)
   - Flutter (from `Flutter`)
+  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
+  - share (from `.symlinks/plugins/share/ios`)
+  - shared_preferences_ios (from `.symlinks/plugins/shared_preferences_ios/ios`)
   - xmpp_plugin (from `.symlinks/plugins/xmpp_plugin/ios`)
 
 SPEC REPOS:
@@ -40,20 +55,35 @@ SPEC REPOS:
     - XMPPFramework
 
 EXTERNAL SOURCES:
+  device_info:
+    :path: ".symlinks/plugins/device_info/ios"
   Flutter:
     :path: Flutter
+  path_provider_ios:
+    :path: ".symlinks/plugins/path_provider_ios/ios"
+  permission_handler:
+    :path: ".symlinks/plugins/permission_handler/ios"
+  share:
+    :path: ".symlinks/plugins/share/ios"
+  shared_preferences_ios:
+    :path: ".symlinks/plugins/shared_preferences_ios/ios"
   xmpp_plugin:
     :path: ".symlinks/plugins/xmpp_plugin/ios"
 
 SPEC CHECKSUMS:
   CocoaAsyncSocket: 065fd1e645c7abab64f7a6a2007a48038fdc6a99
   CocoaLumberjack: b7e05132ff94f6ae4dfa9d5bce9141893a21d9da
-  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   KissXML: 5c8e0f2e8b9f071d3e1ae123dec3eb5da615c10c
   libidn: e4576a956b797c584c77aaedfc6e3dd639b61bdc
-  xmpp_plugin: 80b22da8f71758c53342b14025aed27e9f8b7c9b
+  path_provider_ios: 7d7ce634493af4477d156294792024ec3485acd5
+  permission_handler: ccb20a9fad0ee9b1314a52b70b76b473c5f8dab0
+  share: 0b2c3e82132f5888bccca3351c504d0003b3b410
+  shared_preferences_ios: aef470a42dc4675a1cdd50e3158b42e3d1232b32
+  xmpp_plugin: 6ae2d3511fe80146b65cd49c89bc65bafa47f4b3
   XMPPFramework: 5d31ff9f73dce031b24bc49bcf88093627a3a86e
 
 PODFILE CHECKSUM: 9be9b641a35438b4176d8396dbc76c709ae823ae
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.2

@@ -60,6 +60,8 @@ struct xmppChatType {
     static let NORMAL : String = "normal"
 }
 struct xmppConstants {
+    static let Conference : String = "conference"
+    
     static let ERROR : String = "ERROR"
     static let SUCCESS : String = "SUCCESS"
     
@@ -70,6 +72,8 @@ struct xmppConstants {
     static let FROM : String = "from"
     
     static let DataNil : String = "Data nil"
+    
+    static let errorMessOfMUC : String = "Owner privileges required"
 }
 struct xmppConnStatus {
     static let Processing : String = "Processing"
@@ -190,5 +194,9 @@ extension String {
     
     func trim() -> String {
         self.trimmingCharacters(in: .whitespaces)
+    }
+    
+    var containsWhitespace : Bool {
+        return(self.rangeOfCharacter(from: .whitespacesAndNewlines) != nil)
     }
 }
