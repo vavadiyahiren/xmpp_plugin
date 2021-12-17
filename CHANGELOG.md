@@ -64,3 +64,8 @@
 * Added response back to the create muc methods
 * Added single group join capabilies with synchronous response
 * Added resource name capabilites to the ios login 
+
+## 1.1.13
+
+* Fixed ios resource name problem
+* Fixed response error for ios group creation and joining
