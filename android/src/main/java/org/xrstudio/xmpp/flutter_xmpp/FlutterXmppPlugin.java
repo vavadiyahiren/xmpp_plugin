@@ -37,7 +37,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin,Activ
     private BroadcastReceiver mBroadcastReceiver = null;
     private String current_stat = "STOP";
 
-    private MethodChannel method_channel;
+             private MethodChannel method_channel;
     private EventChannel event_channel ;
 
 //    public static void registerWith(Registrar registrar) {

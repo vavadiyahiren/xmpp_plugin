@@ -1,18 +1,56 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_xmpp_example/constants.dart';
 import 'package:flutter_xmpp_example/event.dart';
 import 'package:flutter_xmpp_example/homepage.dart';
+import 'package:workmanager/workmanager.dart';
 import 'package:flutter_xmpp_example/native_log_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share/share.dart';
 import 'package:xmpp_plugin/custom_element.dart';
 import 'package:xmpp_plugin/xmpp_plugin.dart';
 
+const myTask = "syncWithTheBackEnd";
 void main() {
   runApp(MyApp());
+  Workmanager().initialize(callbackDispatcher);
+  Workmanager().registerOneOffTask(
+    "1",
+    myTask,
+    initialDelay: Duration(seconds: 30),
+    constraints: Constraints(
+      requiresCharging: true,
+      networkType: NetworkType.connected,
+    ),
+  );
+}
+
+void callbackDispatcher() {
+  Workmanager().executeTask((task, inputData) async {
+    switch (task) {
+      case myTask:
+        log("this method was called from native!");
+        final auth = {
+          "user_jid":
+          "test4@xrstudio.in/${Platform.isAndroid ? "Android" : "iOS"}",
+          "password": "test4",
+          "host": "xrstudio.in",
+          "port": '5222'
+        };
+
+        XmppConnection flutterXmpp = XmppConnection(auth);
+        // await flutterXmpp.start(_onReceiveMessage, _onError);
+        await flutterXmpp.login();
+        break;
+      case Workmanager.iOSBackgroundTask:
+        log("iOS background fetch delegate ran");
+        break;
+    }
+    return Future.value(true);
+  });
 }
 
 class MyApp extends StatefulWidget {
@@ -20,10 +58,39 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   static late XmppConnection flutterXmpp;
   List<Event> events = [];
   String connectionStatus = "Disconnected";
+
+  @override
+  void initState() {
+    super.initState();
+    log('didChangeAppLifecycleState() initState');
+    WidgetsBinding.instance!.addObserver(this);
+  }
+  @override
+  void dispose() {
+    WidgetsBinding.instance!.removeObserver(this);
+    log('didChangeAppLifecycleState() dispose');
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    log('didChangeAppLifecycleState()');
+    switch (state) {
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+        log('detachedCallBack()');
+        break;
+      case AppLifecycleState.resumed:
+        log('resumed detachedCallBack()');
+        break;
+    }
+
+  }
 
   Future<void> connect() async {
     final auth = {
