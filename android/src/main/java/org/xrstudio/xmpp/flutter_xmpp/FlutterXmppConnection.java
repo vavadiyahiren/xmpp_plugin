@@ -154,7 +154,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         conf.setCustomSSLContext(context);
 
         conf.setKeystoreType(null);
-        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.required);
+        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
 
         Log.d("loginTest", "connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + mPort + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource);
         //Set up the ui thread broadcast message receiver.
@@ -260,7 +260,6 @@ public class FlutterXmppConnection implements ConnectionListener {
                         DeliveryReceipt dr = DeliveryReceipt.from((Message) message);
                         msgId = dr.getId();
                         META_TEXT = Constants.DELIVERY_ACK;
-                        System.out.println("Delivery receipt received" + dr.getId());
                     }
 
                     String mediaURL = "";

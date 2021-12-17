@@ -12,13 +12,17 @@ import java.util.List;
 import java.util.Map;
 
 import io.flutter.app.FlutterActivity;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.EventChannel;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import androidx.annotation.NonNull;
 
-public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHandler, EventChannel.StreamHandler {
+public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin,ActivityAware ,EventChannel.StreamHandler {
 
     public static final Boolean DEBUG = true;
 
@@ -33,22 +37,85 @@ public class FlutterXmppPlugin extends FlutterActivity implements MethodCallHand
     private BroadcastReceiver mBroadcastReceiver = null;
     private String current_stat = "STOP";
 
-    FlutterXmppPlugin(Context activity) {
-        this.activity = activity;
+    private MethodChannel method_channel;
+    private EventChannel event_channel ;
+
+//    public static void registerWith(Registrar registrar) {
+//
+//        //method channel
+//        final MethodChannel method_channel = new MethodChannel(registrar.messenger(), CHANNEL);
+//        method_channel.setMethodCallHandler(new FlutterXmppPlugin(registrar.context()));
+//
+//        //event channel
+//        final EventChannel event_channel = new EventChannel(registrar.messenger(), CHANNEL_STREAM);
+//        event_channel.setStreamHandler(new FlutterXmppPlugin(registrar.context()));
+//
+//    }
+
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        method_channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), CHANNEL);
+        method_channel.setMethodCallHandler(this);
+
+        event_channel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), CHANNEL_STREAM);
+        event_channel.setStreamHandler(this);
+    }
+
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+        // The Activity your plugin was associated with has been
+        // destroyed due to config changes. It will be right back
+        // but your plugin must clean up any references to that
+        // Activity and associated resources.
+    }
+    @Override
+    public void onReattachedToActivityForConfigChanges(
+            ActivityPluginBinding binding
+    ) {
+        // Your plugin is now associated with a new Activity instance
+        // after config changes took place. You may now re-establish
+        // a reference to the Activity and associated resources.
+    }
+    @Override
+    public void onDetachedFromActivity() {
+        // Your plugin is no longer associated with an Activity.
+        // You must clean up all resources and references. Your
+        // plugin may, or may not ever be associated with an Activity
+        // again.
     }
 
 
-    public static void registerWith(Registrar registrar) {
+    @Override
+    public void onAttachedToActivity(ActivityPluginBinding binding) {
+        // Your plugin is now associated with an Android Activity.
+        //
+        // If this method is invoked, it is always invoked after
+        // onAttachedToFlutterEngine().
+        //
+        // You can obtain an Activity reference with
 
-        //method channel
-        final MethodChannel method_channel = new MethodChannel(registrar.messenger(), CHANNEL);
-        method_channel.setMethodCallHandler(new FlutterXmppPlugin(registrar.context()));
+            this.activity = binding.getActivity();
 
-        //event channel
-        final EventChannel event_channel = new EventChannel(registrar.messenger(), CHANNEL_STREAM);
-        event_channel.setStreamHandler(new FlutterXmppPlugin(registrar.context()));
 
+
+        //
+        // You can listen for Lifecycle changes with
+        // binding.getLifecycle()
+        //
+        // You can listen for Activity results, new Intents, user
+        // leave hints, and state saving callbacks by using the
+        // appropriate methods on the binding.
     }
+
+
+
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+        method_channel.setMethodCallHandler(null);
+        System.out.println("onDetachedFromEngine");
+    }
+
 
     private static BroadcastReceiver get_message(final EventChannel.EventSink events) {
         return new BroadcastReceiver() {
