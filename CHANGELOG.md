@@ -69,3 +69,8 @@
 
 * Fixed ios resource name problem
 * Fixed response error for ios group creation and joining
+
+
+## 1.1.14
+
+* Optimised the android code and processes
