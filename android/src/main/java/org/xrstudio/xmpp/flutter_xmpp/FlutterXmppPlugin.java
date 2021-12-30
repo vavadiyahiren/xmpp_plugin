@@ -4,14 +4,21 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.util.Log;
+
+import androidx.annotation.NonNull;
+
+import org.xrstudio.xmpp.flutter_xmpp.Connection.FlutterXmppConnection;
+import org.xrstudio.xmpp.flutter_xmpp.Connection.FlutterXmppConnectionService;
+import org.xrstudio.xmpp.flutter_xmpp.Enum.ConnectionState;
+import org.xrstudio.xmpp.flutter_xmpp.Enum.GROUP_ROLE;
+import org.xrstudio.xmpp.flutter_xmpp.Utils.Constants;
+import org.xrstudio.xmpp.flutter_xmpp.Utils.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import io.flutter.app.FlutterActivity;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
@@ -20,25 +27,26 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import androidx.annotation.NonNull;
 
-public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin,ActivityAware ,EventChannel.StreamHandler {
+public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware, EventChannel.StreamHandler {
 
     public static final Boolean DEBUG = true;
-
-    private static final String TAG = "flutter_xmpp";
-    private static final String CHANNEL = "flutter_xmpp/method";
-    private static final String CHANNEL_STREAM = "flutter_xmpp/stream";
     private static Context activity;
+    private String id;
+    private String time;
+    private String body;
+    private String to_jid;
+    private String userJid;
+    private String groupName;
+    private String host = "";
+    private String customString;
+    private List<String> jidList;
     private String jid_user = "";
     private String password = "";
-    private String host = "";
-    private Integer port = 5222;
+    private EventChannel event_channel;
+    private ArrayList<String> membersJid;
+    private MethodChannel method_channel;
     private BroadcastReceiver mBroadcastReceiver = null;
-    private String current_stat = "STOP";
-
-             private MethodChannel method_channel;
-    private EventChannel event_channel ;
 
 //    public static void registerWith(Registrar registrar) {
 //
@@ -52,71 +60,6 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin,Activ
 //
 //    }
 
-    @Override
-    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        method_channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), CHANNEL);
-        method_channel.setMethodCallHandler(this);
-
-        event_channel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), CHANNEL_STREAM);
-        event_channel.setStreamHandler(this);
-    }
-
-    @Override
-    public void onDetachedFromActivityForConfigChanges() {
-        // The Activity your plugin was associated with has been
-        // destroyed due to config changes. It will be right back
-        // but your plugin must clean up any references to that
-        // Activity and associated resources.
-    }
-    @Override
-    public void onReattachedToActivityForConfigChanges(
-            ActivityPluginBinding binding
-    ) {
-        // Your plugin is now associated with a new Activity instance
-        // after config changes took place. You may now re-establish
-        // a reference to the Activity and associated resources.
-    }
-    @Override
-    public void onDetachedFromActivity() {
-        // Your plugin is no longer associated with an Activity.
-        // You must clean up all resources and references. Your
-        // plugin may, or may not ever be associated with an Activity
-        // again.
-    }
-
-
-    @Override
-    public void onAttachedToActivity(ActivityPluginBinding binding) {
-        // Your plugin is now associated with an Android Activity.
-        //
-        // If this method is invoked, it is always invoked after
-        // onAttachedToFlutterEngine().
-        //
-        // You can obtain an Activity reference with
-
-            this.activity = binding.getActivity();
-
-
-
-        //
-        // You can listen for Lifecycle changes with
-        // binding.getLifecycle()
-        //
-        // You can listen for Activity results, new Intents, user
-        // leave hints, and state saving callbacks by using the
-        // appropriate methods on the binding.
-    }
-
-
-
-
-    @Override
-    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-        method_channel.setMethodCallHandler(null);
-        System.out.println("onDetachedFromEngine");
-    }
-
-
     private static BroadcastReceiver get_message(final EventChannel.EventSink events) {
         return new BroadcastReceiver() {
             @Override
@@ -125,11 +68,11 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin,Activ
                 switch (action) {
 
                     // Handle the connection events.
-                    case FlutterXmppConnectionService.CONNECTION_MESSAGE:
+                    case Constants.CONNECTION_MESSAGE:
 
                         Map<String, Object> connectionBuild = new HashMap<>();
-                        connectionBuild.put("type", "connection");
-                        connectionBuild.put("status", "connected");
+                        connectionBuild.put(Constants.TYPE, Constants.CONNECTION);
+                        connectionBuild.put(Constants.STATUS, Constants.connected);
 
                         Utils.addLogInStorage("Action: sentMessageToFlutter, Content: " + connectionBuild.toString());
 
@@ -137,11 +80,11 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin,Activ
                         break;
 
                     // Handle the auth status events.
-                    case FlutterXmppConnectionService.AUTH_MESSAGE:
+                    case Constants.AUTH_MESSAGE:
 
                         Map<String, Object> authBuild = new HashMap<>();
-                        authBuild.put("type", "connection");
-                        authBuild.put("status", "authenticated");
+                        authBuild.put(Constants.TYPE, Constants.CONNECTION);
+                        authBuild.put(Constants.STATUS, Constants.authenticated);
 
                         Utils.addLogInStorage("Action: sentMessageToFlutter, Content: " + authBuild.toString());
 
@@ -149,28 +92,26 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin,Activ
                         break;
 
                     // Handle receiving message events.
-                    case FlutterXmppConnectionService.RECEIVE_MESSAGE:
+                    case Constants.RECEIVE_MESSAGE:
 
-                        String from = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_FROM_JID);
-                        String body = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY);
-                        String msgId = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS);
-                        String type = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_TYPE);
-                        String customText = intent.getStringExtra(FlutterXmppConnectionService.CUSTOM_TEXT);
-                        String metaInfo = intent.getStringExtra(FlutterXmppConnectionService.META_TEXT);
-                        String senderJid = intent.hasExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_JID)
-                                ? intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_JID) : "";
-                        String time = intent.hasExtra(FlutterXmppConnectionService.TIME)
-                                ? intent.getStringExtra(FlutterXmppConnectionService.TIME) : "0";
+                        String from = intent.getStringExtra(Constants.BUNDLE_FROM_JID);
+                        String body = intent.getStringExtra(Constants.BUNDLE_MESSAGE_BODY);
+                        String msgId = intent.getStringExtra(Constants.BUNDLE_MESSAGE_PARAMS);
+                        String type = intent.getStringExtra(Constants.BUNDLE_MESSAGE_TYPE);
+                        String customText = intent.getStringExtra(Constants.CUSTOM_TEXT);
+                        String metaInfo = intent.getStringExtra(Constants.META_TEXT);
+                        String senderJid = intent.hasExtra(Constants.BUNDLE_MESSAGE_SENDER_JID) ? intent.getStringExtra(Constants.BUNDLE_MESSAGE_SENDER_JID) : "";
+                        String time = intent.hasExtra(Constants.time) ? intent.getStringExtra(Constants.time) : Constants.ZERO;
 
                         Map<String, Object> build = new HashMap<>();
-                        build.put("type", metaInfo);
-                        build.put("id", msgId);
-                        build.put("from", from);
-                        build.put("body", body);
-                        build.put("msgtype", type);
-                        build.put("senderJid", senderJid);
-                        build.put("customText", customText);
-                        build.put("time", time);
+                        build.put(Constants.TYPE, metaInfo);
+                        build.put(Constants.ID, msgId);
+                        build.put(Constants.FROM, from);
+                        build.put(Constants.BODY, body);
+                        build.put(Constants.MSG_TYPE, type);
+                        build.put(Constants.SENDER_JID, senderJid);
+                        build.put(Constants.CUSTOM_TEXT, customText);
+                        build.put(Constants.TIME, time);
 
                         Utils.addLogInStorage("Action: sentMessageToFlutter, Content: " + build.toString());
 
@@ -179,36 +120,36 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin,Activ
                         break;
 
                     // Handle the sending message events.
-                    case FlutterXmppConnectionService.OUTGOING_MESSAGE:
+                    case Constants.OUTGOING_MESSAGE:
 
-                        String to = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_TO_JID);
-                        String bodyTo = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY);
-                        String idOutgoing = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS);
-                        String typeTo = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_TYPE);
+                        String to = intent.getStringExtra(Constants.BUNDLE_TO_JID);
+                        String bodyTo = intent.getStringExtra(Constants.BUNDLE_MESSAGE_BODY);
+                        String idOutgoing = intent.getStringExtra(Constants.BUNDLE_MESSAGE_PARAMS);
+                        String typeTo = intent.getStringExtra(Constants.BUNDLE_MESSAGE_TYPE);
 
                         Map<String, Object> buildTo = new HashMap<>();
-                        buildTo.put("type", "outgoing");
-                        buildTo.put("id", idOutgoing);
-                        buildTo.put("to", to);
-                        buildTo.put("body", bodyTo);
-                        buildTo.put("msgtype", typeTo);
+                        buildTo.put(Constants.TYPE, Constants.OUTGOING);
+                        buildTo.put(Constants.ID, idOutgoing);
+                        buildTo.put(Constants.TO, to);
+                        buildTo.put(Constants.BODY, bodyTo);
+                        buildTo.put(Constants.MSG_TYPE, typeTo);
 
                         events.success(buildTo);
 
                         break;
 
                     // Handle the auth status events.
-                    case FlutterXmppConnectionService.PRESENCE_MESSAGE:
+                    case Constants.PRESENCE_MESSAGE:
 
-                        String jid = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_TO_JID);
-                        String presence = intent.getStringExtra(FlutterXmppConnectionService.BUNDLE_PRESENCE);
+                        String jid = intent.getStringExtra(Constants.BUNDLE_TO_JID);
+                        String presence = intent.getStringExtra(Constants.BUNDLE_PRESENCE);
 
                         Map<String, Object> presenceBuild = new HashMap<>();
-                        presenceBuild.put("type", "presence");
-                        presenceBuild.put("from", jid);
-                        presenceBuild.put("presence", presence);
+                        presenceBuild.put(Constants.TYPE, Constants.PRESENCE);
+                        presenceBuild.put(Constants.FROM, jid);
+                        presenceBuild.put(Constants.PRESENCE, presence);
 
-                        Log.d("presenceTest", "presenceBuild: " + presenceBuild);
+                        Utils.printLog(" presenceBuild: " + presenceBuild);
 
                         events.success(presenceBuild);
                         break;
@@ -219,55 +160,106 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin,Activ
     }
 
     // Sending a message to one-one chat.
-    public static void send_message(String body, String toUser, String msgId, String method, String time) {
+    public static void sendMessage(String body, String toUser, String msgId, String method, String time) {
 
-        if (FlutterXmppConnectionService.getState().equals(FlutterXmppConnection.ConnectionState.CONNECTED)) {
+        if (FlutterXmppConnectionService.getState().equals(ConnectionState.CONNECTED)) {
 
-            if (method.equals("send_group_message")) {
-                Intent intent = new Intent(FlutterXmppConnectionService.GROUP_SEND_MESSAGE);
-                intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY, body);
-                intent.putExtra(FlutterXmppConnectionService.BUNDLE_TO, toUser);
-                intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS, msgId);
-                intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_TIME, time);
+            if (method.equals(Constants.SEND_GROUP_MESSAGE)) {
+                Intent intent = new Intent(Constants.GROUP_SEND_MESSAGE);
+                intent.putExtra(Constants.BUNDLE_MESSAGE_BODY, body);
+                intent.putExtra(Constants.BUNDLE_TO, toUser);
+                intent.putExtra(Constants.BUNDLE_MESSAGE_PARAMS, msgId);
+                intent.putExtra(Constants.BUNDLE_MESSAGE_SENDER_TIME, time);
 
                 activity.sendBroadcast(intent);
             } else {
-                Intent intent = new Intent(FlutterXmppConnectionService.SEND_MESSAGE);
-                intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_BODY, body);
-                intent.putExtra(FlutterXmppConnectionService.BUNDLE_TO, toUser);
-                intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_PARAMS, msgId);
-                intent.putExtra(FlutterXmppConnectionService.BUNDLE_MESSAGE_SENDER_TIME, time);
+                Intent intent = new Intent(Constants.X_SEND_MESSAGE);
+                intent.putExtra(Constants.BUNDLE_MESSAGE_BODY, body);
+                intent.putExtra(Constants.BUNDLE_TO, toUser);
+                intent.putExtra(Constants.BUNDLE_MESSAGE_PARAMS, msgId);
+                intent.putExtra(Constants.BUNDLE_MESSAGE_SENDER_TIME, time);
 
                 activity.sendBroadcast(intent);
             }
-        } else {
-            //TODO : handle connection failure events.
         }
     }
 
-    public static void send_custom_message(String body, String toUser, String msgId, String customText, String time) {
+    public static void sendCustomMessage(String body, String toUser, String msgId, String customText, String time) {
         FlutterXmppConnection.sendCustomMessage(body, toUser, msgId, customText, true, time);
     }
 
-    public static void send_customgroup_message(String body, String toUser, String msgId, String customText, String time) {
+    public static void sendCustomGroupMessage(String body, String toUser, String msgId, String customText, String time) {
         FlutterXmppConnection.sendCustomMessage(body, toUser, msgId, customText, false, time);
     }
 
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        method_channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), Constants.CHANNEL);
+        method_channel.setMethodCallHandler(this);
+        event_channel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), Constants.CHANNEL_STREAM);
+        event_channel.setStreamHandler(this);
+    }
 
-    // ****************************************
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+        // The Activity your plugin was associated with has been
+        // destroyed due to config changes. It will be right back
+        // but your plugin must clean up any references to that
+        // Activity and associated resources.
+    }
+
+    @Override
+    public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
+        // Your plugin is now associated with a new Activity instance
+        // after config changes took place. You may now re-establish
+        // a reference to the Activity and associated resources.
+    }
+
+    @Override
+    public void onDetachedFromActivity() {
+        // Your plugin is no longer associated with an Activity.
+        // You must clean up all resources and references. Your
+        // plugin may, or may not ever be associated with an Activity
+        // again.
+    }
+
+    @Override
+    public void onAttachedToActivity(ActivityPluginBinding binding) {
+        // Your plugin is now associated with an Android Activity.
+        //
+        // If this method is invoked, it is always invoked after
+        // onAttachedToFlutterEngine().
+        //
+        // You can obtain an Activity reference with
+
+        activity = binding.getActivity();
+
+        //
+        // You can listen for Lifecycle changes with
+        // binding.getLifecycle()
+        //
+        // You can listen for Activity results, new Intents, user
+        // leave hints, and state saving callbacks by using the
+        // appropriate methods on the binding.
+    }
+
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+        method_channel.setMethodCallHandler(null);
+        Utils.printLog(" onDetachedFromEngine: ");
+    }
+
     // stream
     @Override
     public void onListen(Object auth, EventChannel.EventSink eventSink) {
 
         if (mBroadcastReceiver == null) {
-            if (DEBUG) {
-                Log.w(TAG, "adding listener");
-            }
+            Utils.printLog(" adding listener: ");
             mBroadcastReceiver = get_message(eventSink);
             IntentFilter filter = new IntentFilter();
-            filter.addAction(FlutterXmppConnectionService.RECEIVE_MESSAGE);
-            filter.addAction(FlutterXmppConnectionService.OUTGOING_MESSAGE);
-            filter.addAction(FlutterXmppConnectionService.PRESENCE_MESSAGE);
+            filter.addAction(Constants.RECEIVE_MESSAGE);
+            filter.addAction(Constants.OUTGOING_MESSAGE);
+            filter.addAction(Constants.PRESENCE_MESSAGE);
             activity.registerReceiver(mBroadcastReceiver, filter);
         }
 
@@ -275,324 +267,328 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin,Activ
 
     @Override
     public void onCancel(Object o) {
+
         if (mBroadcastReceiver != null) {
-            if (DEBUG) {
-                Log.w(TAG, "cancelling listener");
-            }
+            Utils.printLog(" cancelling listener: ");
             activity.unregisterReceiver(mBroadcastReceiver);
             mBroadcastReceiver = null;
         }
+
     }
 
     // Handles the call invocation from the flutter plugin
     @Override
     public void onMethodCall(MethodCall call, Result result) {
-        Log.d("loginTest", "onMethodCall call: " + call.method);
+
+        Utils.printLog(" onMethodCall call: " + call.method);
         // Check if login method was called.
+
         Utils.addLogInStorage("Action: methodReceiveFromFlutter, NativeMethod: " + call.method.toString() + " Content: " + call.arguments + "");
-        if (call.method.equals("login")) {
-            if (!call.hasArgument("user_jid") || !call.hasArgument("password") || !call.hasArgument("host")) {
-                result.error("MISSING", "Missing auth.", null);
-            }
-            this.jid_user = call.argument("user_jid").toString();
-            this.password = call.argument("password").toString();
-            this.host = call.argument("host").toString();
-            if (call.hasArgument("port")) {
-                this.port = Integer.parseInt(call.argument("port").toString());
-            }
-
-            if (call.hasArgument("nativeLogFilePath")) {
-                Utils.logFilePath = call.argument("nativeLogFilePath").toString();
-            }
-
-            // Start authentication.
-            doLogin();
-
-            result.success("SUCCESS");
-
-        } else if (call.method.equals("logout")) {
-
-            // Doing logout from xmpp.
-            logout();
-            result.success("SUCCESS");
-
-        } else if (call.method.equals("send_message") || call.method.equals("send_group_message")) {
-
-            // Handle sending message.
-            if (!call.hasArgument("to_jid") || !call.hasArgument("body") || !call.hasArgument("id")) {
-                result.error("MISSING", "Missing argument to_jid / body / id chat.", null);
-            }
-
-            String to_jid = call.argument("to_jid");
-            String body = call.argument("body");
-            String id = call.argument("id");
-            String time = "0";
-
-            if (call.hasArgument("time")) {
-                time = call.argument("time");
-            }
-
-            send_message(body, to_jid, id, call.method, time);
 
-            result.success("SUCCESS");
+        switch (call.method) {
+
+            case Constants.LOGIN:
+
+                if (!call.hasArgument(Constants.USER_JID) || !call.hasArgument(Constants.PASSWORD) || !call.hasArgument(Constants.HOST)) {
+                    result.error("MISSING", "Missing auth.", null);
+                }
+
+                jid_user = call.argument(Constants.USER_JID).toString();
+                password = call.argument(Constants.PASSWORD).toString();
+                host = call.argument(Constants.HOST).toString();
+                if (call.hasArgument(Constants.PORT)) {
+                    Constants.PORT_NUMBER = Integer.parseInt(call.argument(Constants.PORT).toString());
+                }
+
+                if (call.hasArgument(Constants.NAVIGATE_FILE_PATH)) {
+                    Utils.logFilePath = call.argument(Constants.NAVIGATE_FILE_PATH).toString();
+                }
+
+                // Start authentication.
+                doLogin();
+
+                result.success(Constants.SUCCESS);
+                break;
+
+            case Constants.LOGOUT:
+                // Doing logout from xmpp.
+                logout();
+                result.success(Constants.SUCCESS);
+                break;
+
+            case Constants.SEND_MESSAGE:
+            case Constants.SEND_GROUP_MESSAGE:
+                // Handle sending message.
+                if (!call.hasArgument(Constants.TO_JID) || !call.hasArgument(Constants.BODY) || !call.hasArgument(Constants.ID)) {
+                    result.error("MISSING", "Missing argument to_jid / body / id chat.", null);
+                }
+
+                to_jid = call.argument(Constants.TO_JID);
+                body = call.argument(Constants.BODY);
+                id = call.argument(Constants.ID);
+                time = Constants.ZERO;
+
+                if (call.hasArgument(Constants.time)) {
+                    time = call.argument(Constants.time);
+                }
+
+                sendMessage(body, to_jid, id, call.method, time);
+
+                result.success(Constants.SUCCESS);
+                break;
+
+            case Constants.CURRENT_STATE:
+
+                String state = Constants.STATE_UNKNOWN;
+                switch (FlutterXmppConnectionService.getState()) {
+                    case CONNECTED:
+                        state = Constants.STATE_CONNECTED;
+                        break;
+                    case AUTHENTICATED:
+                        state = Constants.STATE_AUTHENTICATED;
+                        break;
+                    case CONNECTING:
+                        state = Constants.STATE_CONNECTING;
+                        break;
+                    case DISCONNECTING:
+                        state = Constants.STATE_DISCONNECTING;
+                        break;
+                    case DISCONNECTED:
+                        state = Constants.STATE_DISCONNECTED;
+                        break;
+                }
+
+                result.success(state);
+                break;
 
-            // still development for group message
-        } else if (call.method.equals("current_state")) {
-            String state = "UNKNOWN";
-            switch (FlutterXmppConnectionService.getState()) {
-                case CONNECTED:
-                    state = "CONNECTED";
-                    break;
-                case AUTHENTICATED:
-                    state = "AUTHENTICATED";
-                    break;
-                case CONNECTING:
-                    state = "CONNECTING";
-                    break;
-                case DISCONNECTING:
-                    state = "DISCONNECTING";
-                    break;
-                case DISCONNECTED:
-                    state = "DISCONNECTED";
-                    break;
-            }
+            case Constants.JOIN_MUC_GROUPS:
 
-            result.success(state);
+                if (!call.hasArgument(Constants.ALL_GROUPS_IDS)) {
+                    result.error("MISSING", "Missing argument all_groups_ids.", null);
+                }
+                ArrayList<String> allGroupsIds = call.argument(Constants.ALL_GROUPS_IDS);
 
-        } else if (call.method.equals("join_muc_groups")) {
+                String response = FlutterXmppConnection.joinAllGroups(allGroupsIds);
+                result.success(response);
+                break;
 
-            if (!call.hasArgument("all_groups_ids")) {
-                result.error("MISSING", "Missing argument all_groups_ids.", null);
-            }
-            ArrayList<String> allGroupsIds = call.argument("all_groups_ids");
+            case Constants.JOIN_MUC_GROUP:
 
-            String response = joinAllGroups(allGroupsIds);
-            result.success(response);
+                boolean isJoined = false;
+                if (!call.hasArgument(Constants.GROUP_ID)) {
+                    result.error("MISSING", "Missing argument group_id.", null);
+                }
+                String group_id = call.argument(Constants.GROUP_ID);
 
+                if (!group_id.isEmpty()) {
+                    isJoined = FlutterXmppConnection.joinGroupWithResponse(group_id);
+                }
+                result.success(isJoined);
+                break;
 
-        } else if (call.method.equals("join_muc_group")) {
+            case Constants.CREATE_MUC:
 
-            boolean isJoined = false;
-            if (!call.hasArgument("group_id")) {
-                result.error("MISSING", "Missing argument group_id.", null);
-            }
-            String group_id = call.argument("group_id");
+                String group_name = call.argument(Constants.GROUP_NAME);
+                String persistent = call.argument(Constants.PERSISTENT);
 
-            if (!group_id.isEmpty()) {
-                isJoined = joinGroup(group_id);
-            }
-            result.success(isJoined);
+                boolean responses = FlutterXmppConnection.createMUC(group_name, persistent);
+                result.success(responses);
+                break;
 
-        } else if (call.method.equals(Constants.CREATE_MUC)) {
+            case Constants.CUSTOM_MESSAGE:
+                // Handle sending message.
+                if (!call.hasArgument(Constants.TO_JID) || !call.hasArgument(Constants.BODY) || !call.hasArgument(Constants.ID)) {
+                    result.error("MISSING", "Missing argument to_jid / body / id chat.", null);
+                }
 
-            String group_name = call.argument("group_name");
-            String persistent = call.argument("persistent");
+                to_jid = call.argument(Constants.TO_JID);
+                body = call.argument(Constants.BODY);
+                id = call.argument(Constants.ID);
+                customString = call.argument(Constants.CUSTOM_TEXT);
+                time = Constants.ZERO;
 
-            boolean response = createMUC(group_name, persistent);
-            result.success(response);
+                if (call.hasArgument(Constants.time)) {
+                    time = call.argument(Constants.time);
+                }
 
-        } else if (call.method.equals(Constants.CUSTOM_MESSAGE)) {
+                sendCustomMessage(body, to_jid, id, customString, time);
 
-            // Handle sending message.
-            if (!call.hasArgument("to_jid") || !call.hasArgument("body") || !call.hasArgument("id")) {
-                result.error("MISSING", "Missing argument to_jid / body / id chat.", null);
-            }
+                result.success(Constants.SUCCESS);
+                break;
 
-            String to_jid = call.argument("to_jid");
-            String body = call.argument("body");
-            String id = call.argument("id");
-            String customString = call.argument("customText");
-            String time = "0";
+            case Constants.CUSTOM_GROUP_MESSAGE:
+                // Handle sending message.
+                if (!call.hasArgument(Constants.TO_JID) || !call.hasArgument(Constants.BODY) || !call.hasArgument(Constants.ID)) {
+                    result.error("MISSING", "Missing argument to_jid / body / id chat.", null);
+                }
 
-            if (call.hasArgument("time")) {
-                time = call.argument("time");
-            }
+                to_jid = call.argument(Constants.TO_JID);
+                body = call.argument(Constants.BODY);
+                id = call.argument(Constants.ID);
+                customString = call.argument(Constants.CUSTOM_TEXT);
+                time = Constants.ZERO;
 
-            send_custom_message(body, to_jid, id, customString, time);
+                if (call.hasArgument(Constants.time)) {
+                    time = call.argument(Constants.time);
+                }
 
-            result.success("SUCCESS");
+                sendCustomGroupMessage(body, to_jid, id, customString, time);
 
-        } else if (call.method.equals(Constants.CUSTOM_GROUP_MESSAGE)) {
+                result.success(Constants.SUCCESS);
+                break;
 
-            // Handle sending message.
-            if (!call.hasArgument("to_jid") || !call.hasArgument("body") || !call.hasArgument("id")) {
-                result.error("MISSING", "Missing argument to_jid / body / id chat.", null);
-            }
+            case Constants.SEND_DELIVERY_ACK:
 
-            String to_jid = call.argument("to_jid");
-            String body = call.argument("body");
-            String id = call.argument("id");
-            String customString = call.argument("customText");
-            String time = "0";
+                String toJid = call.argument(Constants.TO_JID_1);
+                String msgId = call.argument(Constants.MESSAGE_ID);
+                String receiptId = call.argument(Constants.RECEIPT_ID);
 
-            if (call.hasArgument("time")) {
-                time = call.argument("time");
-            }
+                FlutterXmppConnection.send_delivery_receipt(toJid, msgId, receiptId);
 
-            send_customgroup_message(body, to_jid, id, customString, time);
+                result.success(Constants.SUCCESS);
+                break;
 
-            result.success("SUCCESS");
+            case Constants.ADD_MEMBERS_IN_GROUP:
 
-        } else if (call.method.equals(Constants.SEND_DELIVERY_ACK)) {
+                groupName = call.argument(Constants.GROUP_NAME);
+                membersJid = call.argument(Constants.MEMBERS_JID);
 
-            String toJid = call.argument("toJid");
-            String msgId = call.argument("msgId");
-            String receiptId = call.argument("receiptId");
+                FlutterXmppConnection.manageAddMembersInGroup(GROUP_ROLE.MEMBER, groupName, membersJid);
 
-            FlutterXmppConnection.send_delivery_receipt(toJid, msgId, receiptId);
+                result.success(Constants.SUCCESS);
+                break;
 
-            result.success("SUCCESS");
+            case Constants.ADD_ADMINS_IN_GROUP:
 
-        } else if (call.method.equals(Constants.ADD_MEMBERS_IN_GROUP)) {
+                groupName = call.argument(Constants.GROUP_NAME);
+                membersJid = call.argument(Constants.MEMBERS_JID);
 
-            String groupName = call.argument("group_name");
-            ArrayList<String> membersJid = call.argument("members_jid");
+                FlutterXmppConnection.manageAddMembersInGroup(GROUP_ROLE.ADMIN, groupName, membersJid);
 
-            FlutterXmppConnection.manageAddMembersInGroup(GROUP_ROLE.MEMBER, groupName, membersJid);
+                result.success(Constants.SUCCESS);
+                break;
 
-            result.success("SUCCESS");
+            case Constants.REMOVE_MEMBERS_FROM_GROUP:
 
-        } else if (call.method.equals(Constants.ADD_ADMINS_IN_GROUP)) {
+                groupName = call.argument(Constants.GROUP_NAME);
+                membersJid = call.argument(Constants.MEMBERS_JID);
 
-            String groupName = call.argument("group_name");
-            ArrayList<String> membersJid = call.argument("members_jid");
+                FlutterXmppConnection.manageRemoveFromGroup(GROUP_ROLE.MEMBER, groupName, membersJid);
 
-            FlutterXmppConnection.manageAddMembersInGroup(GROUP_ROLE.ADMIN, groupName, membersJid);
+                result.success(Constants.SUCCESS);
+                break;
 
-            result.success("SUCCESS");
+            case Constants.REMOVE_ADMINS_FROM_GROUP:
 
-        } else if (call.method.equals(Constants.REMOVE_MEMBERS_FROM_GROUP)) {
+                groupName = call.argument(Constants.GROUP_NAME);
+                membersJid = call.argument(Constants.MEMBERS_JID);
 
-            String groupName = call.argument("group_name");
-            ArrayList<String> membersJid = call.argument("members_jid");
+                FlutterXmppConnection.manageRemoveFromGroup(GROUP_ROLE.ADMIN, groupName, membersJid);
 
-            FlutterXmppConnection.manageRemoveFromGroup(GROUP_ROLE.MEMBER, groupName, membersJid);
+                result.success(Constants.SUCCESS);
+                break;
 
-            result.success("SUCCESS");
+            case Constants.ADD_OWNERS_IN_GROUP:
 
-        } else if (call.method.equals(Constants.REMOVE_ADMINS_FROM_GROUP)) {
+                groupName = call.argument(Constants.GROUP_NAME);
+                membersJid = call.argument(Constants.MEMBERS_JID);
 
-            String groupName = call.argument("group_name");
-            ArrayList<String> membersJid = call.argument("members_jid");
+                FlutterXmppConnection.manageAddMembersInGroup(GROUP_ROLE.OWNER, groupName, membersJid);
 
-            FlutterXmppConnection.manageRemoveFromGroup(GROUP_ROLE.ADMIN, groupName, membersJid);
+                result.success(Constants.SUCCESS);
+                break;
 
-            result.success("SUCCESS");
+            case Constants.REMOVE_OWNERS_FROM_GROUP:
 
-        } else if (call.method.equals(Constants.ADD_OWNERS_IN_GROUP)) {
+                groupName = call.argument(Constants.GROUP_NAME);
+                membersJid = call.argument(Constants.MEMBERS_JID);
 
-            String groupName = call.argument("group_name");
-            ArrayList<String> membersJid = call.argument("members_jid");
+                FlutterXmppConnection.manageRemoveFromGroup(GROUP_ROLE.OWNER, groupName, membersJid);
 
-            FlutterXmppConnection.manageAddMembersInGroup(GROUP_ROLE.OWNER, groupName, membersJid);
+                result.success(Constants.SUCCESS);
+                break;
 
-            result.success("SUCCESS");
+            case Constants.GET_OWNERS:
 
-        } else if (call.method.equals(Constants.REMOVE_OWNERS_FROM_GROUP)) {
+                groupName = call.argument(Constants.GROUP_NAME);
+                jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.OWNER, groupName);
+                result.success(jidList);
+                break;
 
-            String groupName = call.argument("group_name");
-            ArrayList<String> membersJid = call.argument("members_jid");
+            case Constants.GET_ADMINS:
 
-            FlutterXmppConnection.manageRemoveFromGroup(GROUP_ROLE.OWNER, groupName, membersJid);
+                groupName = call.argument(Constants.GROUP_NAME);
+                jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.ADMIN, groupName);
+                result.success(jidList);
+                break;
 
-            result.success("SUCCESS");
+            case Constants.GET_MEMBERS:
 
-        } else if (call.method.equals(Constants.GET_OWNERS)) {
+                groupName = call.argument(Constants.GROUP_NAME);
+                jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.MEMBER, groupName);
+                result.success(jidList);
+                break;
 
-            String groupName = call.argument("group_name");
+            case Constants.GET_ONLINE_MEMBER_COUNT:
 
-            List<String> jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.OWNER, groupName);
+                groupName = call.argument(Constants.GROUP_NAME);
+                int occupantsSize = FlutterXmppConnection.getOnlineMemberCount(groupName);
+                result.success(occupantsSize);
+                break;
 
-            result.success(jidList);
+            case Constants.GET_LAST_SEEN:
 
-        } else if (call.method.equals(Constants.GET_ADMINS)) {
+                userJid = call.argument(Constants.USER_JID);
+                long userLastActivity = FlutterXmppConnection.getLastSeen(userJid);
+                result.success(userLastActivity + "");
+                break;
 
-            String groupName = call.argument("group_name");
+            case Constants.GET_PRESENCE:
 
-            List<String> jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.ADMIN, groupName);
+                userJid = call.argument(Constants.USER_JID);
+                HashMap<String, String> getPresence = FlutterXmppConnection.getPresence(userJid);
+                result.success(getPresence.toString());
+                break;
 
-            result.success(jidList);
+            case Constants.GET_MY_ROSTERS:
 
-        } else if (call.method.equals(Constants.GET_MEMBERS)) {
+                List<String> getMyRosters = FlutterXmppConnection.getMyRosters();
+                result.success(getMyRosters);
+                break;
 
-            String groupName = call.argument("group_name");
+            case Constants.CREATE_ROSTER:
 
-            List<String> jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.MEMBER, groupName);
+                userJid = call.argument(Constants.USER_JID);
+                FlutterXmppConnection.createRosterEntry(userJid);
+                result.success(Constants.SUCCESS);
+                break;
 
-            result.success(jidList);
-
-        } else if (call.method.equals(Constants.GET_ONLINE_MEMBER_COUNT)) {
-
-            String groupName = call.argument("group_name");
-
-            int occupantsSize = FlutterXmppConnection.getOnlineMemberCount(groupName);
-
-            result.success(occupantsSize);
-
-        } else if (call.method.equals(Constants.GET_LAST_SEEN)) {
-
-            String userJid = call.argument("user_jid");
-
-            long userLastActivity = FlutterXmppConnection.getLastSeen(userJid);
-            result.success(userLastActivity + "");
-
-        } else if (call.method.equals(Constants.GET_PRESENCE)) {
-
-            String userJid = call.argument("user_jid");
-
-            HashMap<String, String> getPresence = FlutterXmppConnection.getPresence(userJid);
-            result.success(getPresence.toString());
-
-        } else if (call.method.equals(Constants.GET_MY_ROSTERS)) {
-            List<String> getMyRosters = FlutterXmppConnection.getMyRosters();
-            result.success(getMyRosters);
-
-        } else if (call.method.equals(Constants.CREATE_ROSTER)) {
-
-            String userJid = call.argument("user_jid");
-
-            FlutterXmppConnection.createRosterEntry(userJid);
-
-            result.success("SUCCESS");
-
-        } else {
-            result.notImplemented();
+            default:
+                result.notImplemented();
+                break;
         }
-    }
 
-    private boolean createMUC(String group_name, String persistent) {
-        return FlutterXmppConnection.createMUC(group_name, persistent);
-    }
-
-    private String joinAllGroups(ArrayList<String> allGroupsIds) {
-        return FlutterXmppConnection.joinAllGroups(allGroupsIds);
     }
 
     // login
     private void doLogin() {
-
         // Check if the user is already connected or not ? if not then start login process.
-        if (FlutterXmppConnectionService.getState().equals(FlutterXmppConnection.ConnectionState.DISCONNECTED)) {
+        if (FlutterXmppConnectionService.getState().equals(ConnectionState.DISCONNECTED)) {
             Intent i = new Intent(activity, FlutterXmppConnectionService.class);
-            i.putExtra("jid_user", jid_user);
-            i.putExtra("password", password);
-            i.putExtra("host", host);
-            i.putExtra("port", port);
+            i.putExtra(Constants.JID_USER, jid_user);
+            i.putExtra(Constants.PASSWORD, password);
+            i.putExtra(Constants.HOST, host);
+            i.putExtra(Constants.PORT, Constants.PORT_NUMBER);
             activity.startService(i);
         }
     }
 
     private void logout() {
         // Check if user is connected to xmpp ? if yes then break connection.
-        if (FlutterXmppConnectionService.getState().equals(FlutterXmppConnection.ConnectionState.CONNECTED)) {
+        if (FlutterXmppConnectionService.getState().equals(ConnectionState.CONNECTED)) {
             Intent i1 = new Intent(activity, FlutterXmppConnectionService.class);
             activity.stopService(i1);
         }
-    }
-
-    // Join the muc.
-    private boolean joinGroup(String groupID) {
-        return FlutterXmppConnection.joinGroupWithResponse(groupID);
     }
 
 }
