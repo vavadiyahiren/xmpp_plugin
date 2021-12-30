@@ -1,7 +1,9 @@
-package org.xrstudio.xmpp.flutter_xmpp;
+package org.xrstudio.xmpp.flutter_xmpp.Utils;
 
 import android.os.Environment;
 import android.util.Log;
+
+import org.xrstudio.xmpp.flutter_xmpp.FlutterXmppPlugin;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -13,7 +15,7 @@ import java.util.Locale;
 
 public class Utils {
 
-    static String logFilePath = "";
+    public static String logFilePath = "";
     static String logFileName = "xmpp_logs.txt";
 
     public static String getValidJid(String Jid) {
@@ -35,7 +37,7 @@ public class Utils {
     public static String getRoomIdWithDomainName(String groupName, String host) {
         String roomId = groupName;
         if (!groupName.contains(Constants.CONFERENCE)) {
-            roomId = groupName + "@" + Constants.CONFERENCE + "." + host;
+            roomId = groupName + Constants.SYMBOL_COMPARE_JID + Constants.CONFERENCE + Constants.DOT + host;
         }
         return roomId;
     }
@@ -82,12 +84,41 @@ public class Utils {
     }
 
     public static String getTimeMillisecondFormat() {
-        return convertDate(new Date().getTime(), "dd-MM-yyyy HH:mm:ss.SSS");
+        return convertDate(new Date().getTime(), Constants.DATE_FORMAT);
     }
 
     public static String convertDate(long dateToConvert, String ddMmFormat) {
         Date date = new Date(dateToConvert);
         SimpleDateFormat df2 = new SimpleDateFormat(ddMmFormat, Locale.getDefault());
         return df2.format(date);
+    }
+
+    public static boolean validIP(String ip) {
+        try {
+            if (ip == null || ip.isEmpty()) {
+                return false;
+            }
+
+            String[] parts = ip.split("\\.");
+            if (parts.length != 4) {
+                return false;
+            }
+
+            for (String s : parts) {
+                int i = Integer.parseInt(s);
+                if ((i < 0) || (i > 255)) {
+                    return false;
+                }
+            }
+            return !ip.endsWith(Constants.DOT);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+    }
+
+    public static void printLog(String message) {
+        if (FlutterXmppPlugin.DEBUG) {
+            Log.d(Constants.TAG, message);
+        }
     }
 }
