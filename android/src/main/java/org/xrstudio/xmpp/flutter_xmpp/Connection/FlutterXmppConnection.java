@@ -76,7 +76,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         mPassword = password;
         Constants.PORT_NUMBER = port;
         mHost = host;
-        if (jid_user != null) {
+        if (jid_user != null && jid_user.contains(Constants.SYMBOL_COMPARE_JID)) {
             String[] jid_list = jid_user.split(Constants.SYMBOL_COMPARE_JID);
             mUsername = jid_list[0];
             if (jid_list[1].contains(Constants.SYMBOL_FORWARD_SLASH)) {
@@ -670,9 +670,14 @@ public class FlutterXmppConnection implements ConnectionListener {
         for (String groupId : allGroupsIds) {
             try {
 
-                String[] groupData = groupId.split(",");
-                String groupName = groupData[0];
-                String lastMsgTime = groupData[1];
+                String groupName = groupId;
+                String lastMsgTime = "0";
+
+                if (groupName.contains(",")) {
+                    String[] groupData = groupName.split(",");
+                    groupName = groupData[0];
+                    lastMsgTime = groupData[1];
+                }
 
                 MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
                 Resourcepart resourcepart = Resourcepart.from(mUsername);
@@ -702,9 +707,15 @@ public class FlutterXmppConnection implements ConnectionListener {
 
         boolean isJoinedSuccessfully = false;
         try {
-            String[] groupData = groupId.split(",");
-            String groupName = groupData[0];
-            String lastMsgTime = groupData[1];
+
+            String groupName = groupId;
+            String lastMsgTime = "0";
+
+            if (groupName.contains(",")) {
+                String[] groupData = groupName.split(",");
+                groupName = groupData[0];
+                lastMsgTime = groupData[1];
+            }
 
             MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
             Resourcepart resourcepart = Resourcepart.from(mUsername);
