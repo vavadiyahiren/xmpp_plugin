@@ -102,7 +102,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
       "password": "${_passwordController.text}",
       "host": "${_hostController.text}",
       "port": '5222',
-      "nativeLogFilePath": NativeLogHelper.logFilePath
+      "nativeLogFilePath": NativeLogHelper.logFilePath,
+      "requireSSLConnection": true,
+      "autoDeliveryReceipt": true,
     };
 
     flutterXmpp = XmppConnection(auth);
