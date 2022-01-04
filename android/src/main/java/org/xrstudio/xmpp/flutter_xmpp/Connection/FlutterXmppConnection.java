@@ -59,16 +59,17 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     private static String mHost;
     private static String mPassword;
-    private Context mApplicationContext;
     private static String mUsername = "";
     private static String mResource = "";
     private static Roster rosterConnection;
     private static String mServiceName = "";
     private static XMPPTCPConnection mConnection;
     private static MultiUserChatManager multiUserChatManager;
+    private static boolean mRequireSSLConnection, mAutoDeliveryReceipt;
+    private Context mApplicationContext;
     private BroadcastReceiver uiThreadMessageReceiver;//Receives messages from the ui thread.
 
-    public FlutterXmppConnection(Context context, String jid_user, String password, String host, Integer port) {
+    public FlutterXmppConnection(Context context, String jid_user, String password, String host, Integer port, boolean requireSSLConnection, boolean autoDeliveryReceipt) {
 
         Utils.printLog(" Connection Constructor called: ");
 
@@ -76,6 +77,8 @@ public class FlutterXmppConnection implements ConnectionListener {
         mPassword = password;
         Constants.PORT_NUMBER = port;
         mHost = host;
+        mRequireSSLConnection = requireSSLConnection;
+        mAutoDeliveryReceipt = autoDeliveryReceipt;
         if (jid_user != null && jid_user.contains(Constants.SYMBOL_COMPARE_JID)) {
             String[] jid_list = jid_user.split(Constants.SYMBOL_COMPARE_JID);
             mUsername = jid_list[0];
@@ -88,6 +91,317 @@ public class FlutterXmppConnection implements ConnectionListener {
                 mResource = Constants.ANDROID;
             }
         }
+    }
+
+    public static void sendCustomMessage(String body, String toJid, String msgId, String customText, boolean isDm, String time) {
+
+        try {
+
+            Message xmppMessage = new Message();
+            xmppMessage.setStanzaId(msgId);
+
+            xmppMessage.setBody(body);
+            xmppMessage.setType(isDm ? Message.Type.chat : Message.Type.groupchat);
+
+            if (mAutoDeliveryReceipt) {
+                DeliveryReceiptRequest.addTo(xmppMessage);
+            }
+
+            StandardExtensionElement timeElement = StandardExtensionElement.builder(Constants.TIME, Constants.URN_XMPP_TIME)
+                    .addElement(Constants.TS, time).build();
+            xmppMessage.addExtension(timeElement);
+
+            StandardExtensionElement element = StandardExtensionElement.builder(Constants.CUSTOM, Constants.URN_XMPP_CUSTOM)
+                    .addElement(Constants.custom, customText).build();
+            xmppMessage.addExtension(element);
+
+            if (isDm) {
+                xmppMessage.setTo(JidCreate.from(toJid));
+                mConnection.sendStanza(xmppMessage);
+            } else {
+                EntityBareJid jid = JidCreate.entityBareFrom(toJid);
+                xmppMessage.setTo(jid);
+                EntityBareJid mucJid = (EntityBareJid) JidCreate.bareFrom(Utils.getRoomIdWithDomainName(toJid, mHost));
+                MultiUserChat muc = multiUserChatManager.getMultiUserChat(mucJid);
+                muc.sendMessage(xmppMessage);
+            }
+
+            Utils.addLogInStorage("Action: sentCustomMessageToServer, Content: " + xmppMessage.toXML(null).toString());
+
+            Utils.printLog(" Sent custom message from: " + xmppMessage.toXML(null) + "  sent.");
+
+        } catch (SmackException.NotConnectedException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void send_delivery_receipt(String toJid, String msgId, String receiptId) {
+
+        try {
+
+            if (!toJid.contains(mHost)) {
+                toJid = toJid + Constants.SYMBOL_COMPARE_JID + mHost;
+            }
+
+            Message deliveryMessage = new Message();
+            deliveryMessage.setStanzaId(receiptId);
+            deliveryMessage.setTo(JidCreate.from(toJid));
+
+            DeliveryReceipt deliveryReceipt = new DeliveryReceipt(msgId);
+            deliveryMessage.addExtension(deliveryReceipt);
+
+            mConnection.sendStanza(deliveryMessage);
+
+            Utils.addLogInStorage("Action: sentDeliveryReceiptToServer, Content: " + deliveryMessage.toXML(null).toString());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void manageAddMembersInGroup(GROUP_ROLE groupRole, String groupName, ArrayList<String> membersJid) {
+
+        try {
+
+            List<Jid> jidList = new ArrayList<>();
+            for (String memberJid : membersJid) {
+                if (!memberJid.contains(mHost)) {
+                    memberJid = memberJid + Constants.SYMBOL_COMPARE_JID + mHost;
+                }
+                Jid jid = JidCreate.from(memberJid);
+                jidList.add(jid);
+            }
+
+            MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
+            if (groupRole == GROUP_ROLE.ADMIN) {
+                muc.grantAdmin(jidList);
+            } else if (groupRole == GROUP_ROLE.MEMBER) {
+                muc.grantMembership(jidList);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void manageRemoveFromGroup(GROUP_ROLE groupRole, String groupName, ArrayList<String> membersJid) {
+
+        try {
+
+            List<Jid> jidList = new ArrayList<>();
+            for (String memberJid : membersJid) {
+                if (!memberJid.contains(mHost)) {
+                    memberJid = memberJid + Constants.SYMBOL_COMPARE_JID + mHost;
+                }
+                Jid jid = JidCreate.from(memberJid);
+                jidList.add(jid);
+            }
+
+            MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
+            if (groupRole == GROUP_ROLE.ADMIN) {
+
+                for (Jid jid : jidList) {
+                    muc.revokeAdmin(jid.asEntityJidOrThrow());
+                }
+
+            } else if (groupRole == GROUP_ROLE.MEMBER) {
+                muc.revokeMembership(jidList);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static List<String> getMembersOrAdminsOrOwners(GROUP_ROLE groupRole, String groupName) {
+        List<String> jidList = new ArrayList<>();
+
+        try {
+            List<Affiliate> affiliates;
+
+            MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
+            if (groupRole == GROUP_ROLE.ADMIN) {
+                affiliates = muc.getAdmins();
+            } else if (groupRole == GROUP_ROLE.MEMBER) {
+                affiliates = muc.getMembers();
+            } else if (groupRole == GROUP_ROLE.OWNER) {
+                affiliates = muc.getOwners();
+            } else {
+                affiliates = new ArrayList<>();
+            }
+            if (affiliates.size() > 0) {
+                for (Affiliate affiliate : affiliates) {
+                    String jid = affiliate.getJid().toString();
+                    jidList.add(jid);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return jidList;
+    }
+
+    public static int getOnlineMemberCount(String groupName) {
+        try {
+
+            MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
+            return muc.getOccupants().size();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public static long getLastSeen(String userJid) {
+        long userLastActivity = Constants.RESULT_DEFAULT;
+        try {
+            LastActivityManager lastActivityManager = LastActivityManager.getInstanceFor(mConnection);
+            LastActivity lastActivity = lastActivityManager.getLastActivity(JidCreate.from(Utils.getJidWithDomainName(userJid, mHost)));
+            userLastActivity = lastActivity.lastActivity;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return userLastActivity;
+    }
+
+    public static HashMap<String, String> getPresence(String userJid) {
+        HashMap<String, String> presenceMap = new HashMap<>();
+        try {
+
+            Presence presence = rosterConnection.getPresence(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)));
+            presenceMap.put(Constants.TYPE, presence.getType().toString());
+            presenceMap.put(Constants.MODE, presence.getMode().toString());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return presenceMap;
+    }
+
+    public static List<String> getMyRosters() {
+        List<String> muRosterList = new ArrayList<>();
+        try {
+            Set<RosterEntry> allRoster = rosterConnection.getEntries();
+            for (RosterEntry rosterEntry : allRoster) {
+                muRosterList.add(rosterEntry.toString());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return muRosterList;
+    }
+
+    public static void createRosterEntry(String userJid) {
+        try {
+            rosterConnection.createEntry(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)), userJid, null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static boolean createMUC(String groupName, String persistent) {
+
+        boolean isGroupCreatedSuccessfully = false;
+        try {
+
+            MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
+            multiUserChat.create(Resourcepart.from(mUsername));
+
+            if (persistent.equals(Constants.TRUE)) {
+                Form form = multiUserChat.getConfigurationForm();
+                Form answerForm = form.createAnswerForm();
+                answerForm.setAnswer(Constants.MUC_PERSISTENT_ROOM, true);
+                answerForm.setAnswer(Constants.MUC_MEMBER_ONLY, true);
+                multiUserChat.sendConfigurationForm(answerForm);
+            }
+
+            isGroupCreatedSuccessfully = true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return isGroupCreatedSuccessfully;
+
+    }
+
+    public static String joinAllGroups(ArrayList<String> allGroupsIds) {
+        String response = "FAIL";
+        for (String groupId : allGroupsIds) {
+            try {
+
+                String groupName = groupId;
+                String lastMsgTime = "0";
+
+                if (groupName.contains(",")) {
+                    String[] groupData = groupName.split(",");
+                    groupName = groupData[0];
+                    lastMsgTime = groupData[1];
+                }
+
+                MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
+                Resourcepart resourcepart = Resourcepart.from(mUsername);
+
+                long currentTime = new Date().getTime();
+                long lastMessageTime = Long.valueOf(lastMsgTime);
+                long diff = currentTime - lastMessageTime;
+
+                MucEnterConfiguration mucEnterConfiguration = multiUserChat.getEnterConfigurationBuilder(resourcepart)
+                        .requestHistorySince((int) diff)
+                        .build();
+
+                if (!multiUserChat.isJoined()) {
+                    multiUserChat.join(mucEnterConfiguration);
+                }
+            } catch (Exception e) {
+                Utils.printLog(" exception: " + e.getLocalizedMessage());
+                e.printStackTrace();
+            }
+
+        }
+        response = Constants.SUCCESS;
+        return response;
+    }
+
+    public static boolean joinGroupWithResponse(String groupId) {
+
+        boolean isJoinedSuccessfully = false;
+        try {
+
+            String groupName = groupId;
+            String lastMsgTime = "0";
+
+            if (groupName.contains(",")) {
+                String[] groupData = groupName.split(",");
+                groupName = groupData[0];
+                lastMsgTime = groupData[1];
+            }
+
+            MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
+            Resourcepart resourcepart = Resourcepart.from(mUsername);
+
+            long currentTime = new Date().getTime();
+            long lastMessageTime = Long.valueOf(lastMsgTime);
+            long diff = currentTime - lastMessageTime;
+
+            MucEnterConfiguration mucEnterConfiguration = multiUserChat.getEnterConfigurationBuilder(resourcepart)
+                    .requestHistorySince((int) diff)
+                    .build();
+
+            if (!multiUserChat.isJoined()) {
+                multiUserChat.join(mucEnterConfiguration);
+            }
+
+            isJoinedSuccessfully = true;
+        } catch (Exception e) {
+            Utils.printLog(" groupID : exception: " + e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+
+        return isJoinedSuccessfully;
     }
 
     public void connect() throws IOException, XMPPException, SmackException {
@@ -119,19 +433,21 @@ public class FlutterXmppConnection implements ConnectionListener {
         conf.setCompressionEnabled(true);
 
 
-        SSLContext context = null;
-        try {
-            context = SSLContext.getInstance(Constants.TLS);
-            context.init(null, new TrustManager[]{new TLSUtils.AcceptAllTrustManager()}, new SecureRandom());
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (KeyManagementException e) {
-            e.printStackTrace();
-        }
-        conf.setCustomSSLContext(context);
+        if (mRequireSSLConnection) {
+            SSLContext context = null;
+            try {
+                context = SSLContext.getInstance(Constants.TLS);
+                context.init(null, new TrustManager[]{new TLSUtils.AcceptAllTrustManager()}, new SecureRandom());
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            }
+            conf.setCustomSSLContext(context);
 
-        conf.setKeystoreType(null);
-        conf.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+            conf.setKeystoreType(null);
+            conf.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+        }
 
         Utils.printLog(" connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + Constants.PORT + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource);
         //Set up the ui thread broadcast message receiver.
@@ -317,7 +633,9 @@ public class FlutterXmppConnection implements ConnectionListener {
                     .addElement(Constants.TS, time).build();
             xmppMessage.addExtension(timeElement);
 
-            DeliveryReceiptRequest.addTo(xmppMessage);
+            if (mAutoDeliveryReceipt) {
+                DeliveryReceiptRequest.addTo(xmppMessage);
+            }
 
             if (isDm) {
                 xmppMessage.setTo(JidCreate.from(toJid));
@@ -338,217 +656,6 @@ public class FlutterXmppConnection implements ConnectionListener {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void sendCustomMessage(String body, String toJid, String msgId, String customText, boolean isDm, String time) {
-
-        try {
-
-            Message xmppMessage = new Message();
-            xmppMessage.setStanzaId(msgId);
-
-            xmppMessage.setBody(body);
-            xmppMessage.setType(isDm ? Message.Type.chat : Message.Type.groupchat);
-            DeliveryReceiptRequest.addTo(xmppMessage);
-
-            StandardExtensionElement timeElement = StandardExtensionElement.builder(Constants.TIME, Constants.URN_XMPP_TIME)
-                    .addElement(Constants.TS, time).build();
-            xmppMessage.addExtension(timeElement);
-
-            StandardExtensionElement element = StandardExtensionElement.builder(Constants.CUSTOM, Constants.URN_XMPP_CUSTOM)
-                    .addElement(Constants.custom, customText).build();
-            xmppMessage.addExtension(element);
-
-            if (isDm) {
-                xmppMessage.setTo(JidCreate.from(toJid));
-                mConnection.sendStanza(xmppMessage);
-            } else {
-                EntityBareJid jid = JidCreate.entityBareFrom(toJid);
-                xmppMessage.setTo(jid);
-                EntityBareJid mucJid = (EntityBareJid) JidCreate.bareFrom(Utils.getRoomIdWithDomainName(toJid, mHost));
-                MultiUserChat muc = multiUserChatManager.getMultiUserChat(mucJid);
-                muc.sendMessage(xmppMessage);
-            }
-
-            Utils.addLogInStorage("Action: sentCustomMessageToServer, Content: " + xmppMessage.toXML(null).toString());
-
-            Utils.printLog(" Sent custom message from: " + xmppMessage.toXML(null) + "  sent.");
-
-        } catch (SmackException.NotConnectedException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void send_delivery_receipt(String toJid, String msgId, String receiptId) {
-
-        try {
-
-            if (!toJid.contains(mHost)) {
-                toJid = toJid + Constants.SYMBOL_COMPARE_JID + mHost;
-            }
-
-            Message deliveryMessage = new Message();
-            deliveryMessage.setStanzaId(receiptId);
-            deliveryMessage.setTo(JidCreate.from(toJid));
-
-            DeliveryReceipt deliveryReceipt = new DeliveryReceipt(msgId);
-            deliveryMessage.addExtension(deliveryReceipt);
-
-            mConnection.sendStanza(deliveryMessage);
-
-            Utils.addLogInStorage("Action: sentDeliveryReceiptToServer, Content: " + deliveryMessage.toXML(null).toString());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void manageAddMembersInGroup(GROUP_ROLE groupRole, String groupName, ArrayList<String> membersJid) {
-
-        try {
-
-            List<Jid> jidList = new ArrayList<>();
-            for (String memberJid : membersJid) {
-                if (!memberJid.contains(mHost)) {
-                    memberJid = memberJid + Constants.SYMBOL_COMPARE_JID + mHost;
-                }
-                Jid jid = JidCreate.from(memberJid);
-                jidList.add(jid);
-            }
-
-            MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
-            if (groupRole == GROUP_ROLE.ADMIN) {
-                muc.grantAdmin(jidList);
-            } else if (groupRole == GROUP_ROLE.MEMBER) {
-                muc.grantMembership(jidList);
-            } else {
-
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void manageRemoveFromGroup(GROUP_ROLE groupRole, String groupName, ArrayList<String> membersJid) {
-
-        try {
-
-            List<Jid> jidList = new ArrayList<>();
-            for (String memberJid : membersJid) {
-                if (!memberJid.contains(mHost)) {
-                    memberJid = memberJid + Constants.SYMBOL_COMPARE_JID + mHost;
-                }
-                Jid jid = JidCreate.from(memberJid);
-                jidList.add(jid);
-            }
-
-            MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
-            if (groupRole == GROUP_ROLE.ADMIN) {
-
-                for (Jid jid : jidList) {
-                    muc.revokeAdmin(jid.asEntityJidOrThrow());
-                }
-
-            } else if (groupRole == GROUP_ROLE.MEMBER) {
-                muc.revokeMembership(jidList);
-            } else {
-                // OWNERS
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static List<String> getMembersOrAdminsOrOwners(GROUP_ROLE groupRole, String groupName) {
-        List<String> jidList = new ArrayList<>();
-
-        try {
-            List<Affiliate> affiliates;
-
-            MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
-            if (groupRole == GROUP_ROLE.ADMIN) {
-                affiliates = muc.getAdmins();
-            } else if (groupRole == GROUP_ROLE.MEMBER) {
-                affiliates = muc.getMembers();
-            } else if (groupRole == GROUP_ROLE.OWNER) {
-                affiliates = muc.getOwners();
-            } else {
-                affiliates = new ArrayList<>();
-            }
-            if (affiliates.size() > 0) {
-                for (Affiliate affiliate : affiliates) {
-                    String jid = affiliate.getJid().toString();
-                    jidList.add(jid);
-                }
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return jidList;
-    }
-
-    public static int getOnlineMemberCount(String groupName) {
-        try {
-
-            MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
-            return muc.getOccupants().size();
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    public static long getLastSeen(String userJid) {
-        long userLastActivity = Constants.RESULT_DEFAULT;
-        try {
-            LastActivityManager lastActivityManager = LastActivityManager.getInstanceFor(mConnection);
-            LastActivity lastActivity = lastActivityManager.getLastActivity(JidCreate.from(Utils.getJidWithDomainName(userJid, mHost)));
-            userLastActivity = lastActivity.lastActivity;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return userLastActivity;
-    }
-
-    public static HashMap<String, String> getPresence(String userJid) {
-        HashMap<String, String> presenceMap = new HashMap<>();
-        try {
-
-            Presence presence = rosterConnection.getPresence(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)));
-            presenceMap.put(Constants.TYPE, presence.getType().toString());
-            presenceMap.put(Constants.MODE, presence.getMode().toString());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return presenceMap;
-    }
-
-    public static List<String> getMyRosters() {
-        List<String> muRosterList = new ArrayList<>();
-        try {
-            Set<RosterEntry> allRoster = rosterConnection.getEntries();
-            for (RosterEntry rosterEntry : allRoster) {
-                muRosterList.add(rosterEntry.toString());
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return muRosterList;
-    }
-
-    public static void createRosterEntry(String userJid) {
-        try {
-            rosterConnection.createEntry(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)), userJid, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -638,107 +745,6 @@ public class FlutterXmppConnection implements ConnectionListener {
         intent.putExtra(Constants.BUNDLE_MESSAGE_TYPE, Constants.DISCONNECTED);
         mApplicationContext.sendBroadcast(intent);
 
-    }
-
-    public static boolean createMUC(String groupName, String persistent) {
-
-        boolean isGroupCreatedSuccessfully = false;
-        try {
-
-            MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
-            multiUserChat.create(Resourcepart.from(mUsername));
-
-            if (persistent.equals(Constants.TRUE)) {
-                Form form = multiUserChat.getConfigurationForm();
-                Form answerForm = form.createAnswerForm();
-                answerForm.setAnswer(Constants.MUC_PERSISTENT_ROOM, true);
-                answerForm.setAnswer(Constants.MUC_MEMBER_ONLY, true);
-                multiUserChat.sendConfigurationForm(answerForm);
-            }
-
-            isGroupCreatedSuccessfully = true;
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return isGroupCreatedSuccessfully;
-
-    }
-
-    public static String joinAllGroups(ArrayList<String> allGroupsIds) {
-        String response = "FAIL";
-        for (String groupId : allGroupsIds) {
-            try {
-
-                String groupName = groupId;
-                String lastMsgTime = "0";
-
-                if (groupName.contains(",")) {
-                    String[] groupData = groupName.split(",");
-                    groupName = groupData[0];
-                    lastMsgTime = groupData[1];
-                }
-
-                MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
-                Resourcepart resourcepart = Resourcepart.from(mUsername);
-
-                long currentTime = new Date().getTime();
-                long lastMessageTime = Long.valueOf(lastMsgTime);
-                long diff = currentTime - lastMessageTime;
-
-                MucEnterConfiguration mucEnterConfiguration = multiUserChat.getEnterConfigurationBuilder(resourcepart)
-                        .requestHistorySince((int) diff)
-                        .build();
-
-                if (!multiUserChat.isJoined()) {
-                    multiUserChat.join(mucEnterConfiguration);
-                }
-            } catch (Exception e) {
-                Utils.printLog(" exception: " + e.getLocalizedMessage());
-                e.printStackTrace();
-            }
-
-        }
-        response = Constants.SUCCESS;
-        return response;
-    }
-
-    public static boolean joinGroupWithResponse(String groupId) {
-
-        boolean isJoinedSuccessfully = false;
-        try {
-
-            String groupName = groupId;
-            String lastMsgTime = "0";
-
-            if (groupName.contains(",")) {
-                String[] groupData = groupName.split(",");
-                groupName = groupData[0];
-                lastMsgTime = groupData[1];
-            }
-
-            MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
-            Resourcepart resourcepart = Resourcepart.from(mUsername);
-
-            long currentTime = new Date().getTime();
-            long lastMessageTime = Long.valueOf(lastMsgTime);
-            long diff = currentTime - lastMessageTime;
-
-            MucEnterConfiguration mucEnterConfiguration = multiUserChat.getEnterConfigurationBuilder(resourcepart)
-                    .requestHistorySince((int) diff)
-                    .build();
-
-            if (!multiUserChat.isJoined()) {
-                multiUserChat.join(mucEnterConfiguration);
-            }
-
-            isJoinedSuccessfully = true;
-        } catch (Exception e) {
-            Utils.printLog(" groupID : exception: " + e.getLocalizedMessage());
-            e.printStackTrace();
-        }
-
-        return isJoinedSuccessfully;
     }
 
 }
