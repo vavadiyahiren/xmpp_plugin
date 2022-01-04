@@ -209,7 +209,8 @@ extension XMPPController : XMPPRoomDelegate {
         
         sendMUCJoinStatus(true)
         /// No needs for update  alredy join room setting updates
-        //self.updateGroupInfoIntoXMPPRoomCreatedAndJoined(withXMPPRoomObj: sender, roomName: vRoom)
+        // Why Uncomment line : Not getting xmppRoom object for getting memeber list.
+        self.updateGroupInfoIntoXMPPRoomCreatedAndJoined(withXMPPRoomObj: sender, roomName: vRoom)
     }
     
     func xmppRoom(_ sender: XMPPRoom, didFetchConfigurationForm configForm: DDXMLElement) {
@@ -410,7 +411,7 @@ extension XMPPController : XMPPRoomDelegate {
         var vHost : String = ""
         if let value = withStrem.hostName { vHost = value.trim() }
         
-        let valueConference : String = "conference"
+        let valueConference : String = xmppConstants.Conference.trim()
         if roomName.contains(valueConference) { return roomName }
         return [roomName, "@", valueConference, ".", vHost].joined(separator: "")
     }
@@ -469,17 +470,25 @@ extension XMPPController : XMPPRoomDelegate {
 
 extension XMPPController {
     /// Get All Members in XMPPRoom based on Memeber-role
-    func getRoomMember(withUserType vType : xmppMUCUserType, forRoomName roomName: String, withStrem : XMPPStream) {
-        if roomName.trim().isEmpty {
+    func getRoomMember(withUserType vType : xmppMUCUserType,
+                       forRoomName roomName: String,
+                       withStrem : XMPPStream,
+                       objXMPP : XMPPController) {
+        var vOnlyRoomName : String = roomName
+        if roomName.contains(xmppConstants.Conference) {
+            vOnlyRoomName = roomName.components(separatedBy: "@").first ?? roomName
+        }
+        if vOnlyRoomName.trim().isEmpty {
             print("\(#function) | roomName nil/empty")
             
             self.sendMemberList(withUsers: [])
             return
         }
+        
         guard let index = self.arrGroups.firstIndex(where: { (objGroup) -> Bool in
-            return objGroup.name == roomName
+            return objGroup.name == vOnlyRoomName
         }) else {
-            print("\(#function) | Not found XMPPRoom object in user created/join GroupList")
+            print("\(#function) | Not found XMPPRoom object in user created/joined GroupList")
             
             self.sendMemberList(withUsers: [])
             return
@@ -487,7 +496,7 @@ extension XMPPController {
         
         let objRoom = self.arrGroups[index]
         guard let objXMPPRoom = objRoom.objRoomXMPP else {
-            print("\(#function) | User not succesfully created/join XMPPRoom")
+            print("\(#function) | Not found XMPPRoom object in user created/joined GroupList")
             
             self.sendMemberList(withUsers: [])
             return

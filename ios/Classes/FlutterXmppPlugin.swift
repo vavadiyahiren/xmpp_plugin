@@ -348,7 +348,8 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         APP_DELEGATE.singalCallBack = result
         APP_DELEGATE.objXMPP.getRoomMember(withUserType: type,
                                            forRoomName: vGroupName,
-                                           withStrem: self.objXMPP.xmppStream)
+                                           withStrem: self.objXMPP.xmppStream,
+                                           objXMPP: self.objXMPP)
     }
     
     func performLastActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
