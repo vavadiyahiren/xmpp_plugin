@@ -17,6 +17,8 @@ public var xmpp_HostPort: Int16 = 0
 public var xmpp_UserId: String = ""
 public var xmpp_UserPass: String = ""
 public var xmpp_Resource: String = ""
+public var xmpp_RequireSSLConnection: Bool = false
+public var xmpp_AutoDeliveryReceipt: Bool = false
 
 let default_isPersistent : Bool = false
 

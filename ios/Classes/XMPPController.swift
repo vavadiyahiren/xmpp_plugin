@@ -51,7 +51,11 @@ class XMPPController : NSObject {
         self.xmppStream.hostName = hostName
         self.xmppStream.hostPort = UInt16(hostPort)
         self.xmppStream.myJID = userJID
-        self.xmppStream.startTLSPolicy = XMPPStreamStartTLSPolicy.required
+        
+        //SSL Connection
+        if xmpp_RequireSSLConnection {
+            self.xmppStream.startTLSPolicy = XMPPStreamStartTLSPolicy.required
+        }
         self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
         
         /// xmppReconnect Configuration
@@ -671,7 +675,6 @@ extension XMPPController : XMPPStreamManagementDelegate {
     
     func xmppStreamManagement(_ sender: XMPPStreamManagement, didReceiveAckForStanzaIds stanzaIds: [Any]) {
         addLogger(.receiveStanzaAckFromServer, stanzaIds)
-        
         if APP_DELEGATE.objEventData == nil {
             print("\(#function) | Nil data of APP_DELEGATE.objEventData")
             return

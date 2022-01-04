@@ -143,11 +143,25 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             addLogger(.receiveFromFlutter, call)
         }
         
+        // autoDeliveryReceipt
+        var vRequiSSLConn : Bool = false
+        if let value = vData["requireSSLConnection"] as? Int {
+            vRequiSSLConn = (value == 1)
+        }
+        
+        // requireSSLConnection
+        var vAutoDelivReceipt : Bool = false
+        if let value = vData["autoDeliveryReceipt"] as? Int {
+            vAutoDelivReceipt = (value == 1)
+        }
+        
         xmpp_HostName = vHost
         xmpp_HostPort = Int16(vPort) ?? 0
         xmpp_UserId = vUserJid
         xmpp_UserPass = vPassword
         xmpp_Resource = vResource
+        xmpp_RequireSSLConnection = vRequiSSLConn
+        xmpp_AutoDeliveryReceipt = vAutoDelivReceipt
         
         self.performXMPPConnectionActivity()
         result(xmppConstants.SUCCESS)

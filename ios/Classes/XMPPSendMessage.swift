@@ -36,7 +36,10 @@ extension XMPPController {
             xmppMessage.addChild(ele)
             isCustom = true
         }
-        xmppMessage.addReceiptRequest()
+        
+        if xmpp_AutoDeliveryReceipt {
+            xmppMessage.addReceiptRequest()
+        }
         withStrem.send(xmppMessage)
         
         addLogger(isCustom ? .sentCustomMessageToServer : .sentMessageToServer, xmppMessage)
