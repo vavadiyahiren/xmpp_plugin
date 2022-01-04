@@ -305,11 +305,11 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                     Utils.logFilePath = call.argument(Constants.NAVIGATE_FILE_PATH).toString();
                 }
 
-                if (call.call.hasArgument(Constants.AUTO_DELIVERY_RECEIPT)) {
+                if (call.hasArgument(Constants.AUTO_DELIVERY_RECEIPT)) {
                     autoDeliveryReceipt = call.argument(Constants.AUTO_DELIVERY_RECEIPT);
                 }
 
-                if (call.call.hasArgument(Constants.REQUIRE_SSL_CONNECTION)) {
+                if (call.hasArgument(Constants.REQUIRE_SSL_CONNECTION)) {
                     requireSSLConnection = call.argument(Constants.REQUIRE_SSL_CONNECTION);
                 }
 
