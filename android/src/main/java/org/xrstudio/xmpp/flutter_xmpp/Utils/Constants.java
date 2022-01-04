@@ -47,7 +47,6 @@ public class Constants {
     public static final String URN_XMPP_CUSTOM = "urn:xmpp:custom";
 
     public static final String TO = "to";
-    public static int PORT_NUMBER = 5222;
     public static final String FROM = "from";
     public static final String STOP = "STOP";
     public static final String STATUS = "status";
@@ -68,61 +67,48 @@ public class Constants {
     public static final String ALL_GROUPS_IDS = "all_groups_ids";
     public static final String CHANNEL_STREAM = "flutter_xmpp/stream";
     public static final String DATE_FORMAT = "dd-MM-yyyy HH:mm:ss.SSS";
+    public static final String AUTO_DELIVERY_RECEIPT = "autoDeliveryReceipt";
     public static final String MUC_MEMBER_ONLY = "muc#roomconfig_membersonly";
+    public static final String REQUIRE_SSL_CONNECTION = "requireSSLConnection";
     public static final String MUC_PERSISTENT_ROOM = "muc#roomconfig_persistentroom";
-
     // Broadcast Parameters
     public static final String GROUP_NAME = "group_name";
     public static final String PERSISTENT = "persistent";
-
     // MsgType
     public static final String ACK = "Ack";
     public static final String CHAT = "chat";
     public static final String READ_ACK = "Read-Ack";
     public static final String GROUP_CHAT = "groupchat";
     public static final String DELIVERY_ACK = "Delivery-Ack";
-
     //Static values
     public static final String TRUE = "true";
-
     //Presence values
     public static final String ONLINE = "online";
     public static final String OFFLINE = "offline";
-
     public static final String HOST = "host";
     public static final String PORT = "port";
     public static final String JID_USER = "jid_user";
     public static final String USER_JID = "user_jid";
     public static final String PASSWORD = "password";
-
     public static final String SEND_MESSAGE = "send_message";
     public static final String SEND_GROUP_MESSAGE = "send_group_message";
-
-
     public static final String LOGIN = "login";
     public static final String TO_JID = "to_jid";
     public static final String TO_JID_1 = "toJid";
     public static final String NAVIGATE_FILE_PATH = "nativeLogFilePath";
-
-
     public static final String ID = "id";
     public static final String BODY = "body";
     public static final String time = "time";
     public static final String LOGOUT = "logout";
-
-
     public static final String STATE_UNKNOWN = "UNKNOWN";
     public static final String CURRENT_STATE = "current_state";
     public static final String STATE_CONNECTED = "CONNECTED";
-
     public static final String STATE_CONNECTING = "CONNECTING";
     public static final String STATE_DISCONNECTED = "DISCONNECTED";
     public static final String STATE_AUTHENTICATED = "AUTHENTICATED";
     public static final String STATE_DISCONNECTING = "DISCONNECTING";
-
     public static final String JOIN_MUC_GROUP = "join_muc_group";
     public static final String JOIN_MUC_GROUPS = "join_muc_groups";
-
     public static final String BUNDLE_TO = "b_to";
     public static final String GROUP_IDS = "group_ids";
     public static final String MEDIA_URL = "media_url";
@@ -144,5 +130,6 @@ public class Constants {
     public static final String OUTGOING_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.outgoinmessage";
     public static final String PRESENCE_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.presencemessage";
     public static final String GROUP_SEND_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.sendGroupMessage";
+    public static int PORT_NUMBER = 5222;
 
 }

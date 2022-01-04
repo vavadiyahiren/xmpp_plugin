@@ -18,6 +18,8 @@ import java.io.IOException;
 
 public class FlutterXmppConnectionService extends Service {
 
+    public static LoggedInState sLoggedInState;
+    public static ConnectionState sConnectionState;
     private Integer port;
     private Thread mThread;
     private boolean mActive;
@@ -25,9 +27,8 @@ public class FlutterXmppConnectionService extends Service {
     private Handler mTHandler;
     private String jid_user = "";
     private String password = "";
+    private boolean requireSSLConnection = false, autoDeliveryReceipt = false;
     private FlutterXmppConnection mConnection;
-    public static LoggedInState sLoggedInState;
-    public static ConnectionState sConnectionState;
 
     public FlutterXmppConnectionService() {
     }
@@ -65,7 +66,7 @@ public class FlutterXmppConnectionService extends Service {
             Utils.printLog(" initConnection(): ");
 
             if (mConnection == null) {
-                mConnection = new FlutterXmppConnection(this, this.jid_user, this.password, this.host, this.port);
+                mConnection = new FlutterXmppConnection(this, this.jid_user, this.password, this.host, this.port, requireSSLConnection, autoDeliveryReceipt);
             }
 
             mConnection.connect();
@@ -134,6 +135,8 @@ public class FlutterXmppConnectionService extends Service {
             this.password = (String) extras.get(Constants.PASSWORD);
             this.host = (String) extras.get(Constants.HOST);
             this.port = (Integer) extras.get(Constants.PORT);
+            this.requireSSLConnection = (boolean) extras.get(Constants.REQUIRE_SSL_CONNECTION);
+            this.autoDeliveryReceipt = (boolean) extras.get(Constants.AUTO_DELIVERY_RECEIPT);
         }
         start();
         return Service.START_STICKY;

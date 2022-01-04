@@ -46,6 +46,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
     private EventChannel event_channel;
     private ArrayList<String> membersJid;
     private MethodChannel method_channel;
+    private boolean requireSSLConnection = false, autoDeliveryReceipt = false;
     private BroadcastReceiver mBroadcastReceiver = null;
 
 //    public static void registerWith(Registrar registrar) {
@@ -302,6 +303,14 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
 
                 if (call.hasArgument(Constants.NAVIGATE_FILE_PATH)) {
                     Utils.logFilePath = call.argument(Constants.NAVIGATE_FILE_PATH).toString();
+                }
+
+                if (call.hasArgument(Constants.AUTO_DELIVERY_RECEIPT)) {
+                    autoDeliveryReceipt = call.argument(Constants.AUTO_DELIVERY_RECEIPT);
+                }
+
+                if (call.hasArgument(Constants.REQUIRE_SSL_CONNECTION)) {
+                    requireSSLConnection = call.argument(Constants.REQUIRE_SSL_CONNECTION);
                 }
 
                 // Start authentication.
@@ -579,6 +588,8 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
             i.putExtra(Constants.PASSWORD, password);
             i.putExtra(Constants.HOST, host);
             i.putExtra(Constants.PORT, Constants.PORT_NUMBER);
+            i.putExtra(Constants.AUTO_DELIVERY_RECEIPT, autoDeliveryReceipt);
+            i.putExtra(Constants.REQUIRE_SSL_CONNECTION, requireSSLConnection);
             activity.startService(i);
         }
     }
