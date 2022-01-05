@@ -4,13 +4,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_xmpp_example/constants.dart';
-import 'package:flutter_xmpp_example/event.dart';
 import 'package:flutter_xmpp_example/homepage.dart';
 import 'package:flutter_xmpp_example/native_log_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share/share.dart';
 import 'package:xmpp_plugin/custom_element.dart';
 import 'package:xmpp_plugin/xmpp_plugin.dart';
+import 'package:xmpp_plugin/message_event.dart';
 
 const myTask = "syncWithTheBackEnd";
 void main() {
@@ -62,7 +62,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   static late XmppConnection flutterXmpp;
-  List<Event> events = [];
+  List<MessageEvent> events = [];
   String connectionStatus = "Disconnected";
 
   @override
@@ -131,12 +131,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     }
   }
 
-  Future<void> _onReceiveMessage(dynamic event) async {
+  Future<void> _onReceiveMessage(MessageEvent e) async {
     // TODO : Handle the receive event
-    print("Event $event");
-    events.add(Event.fromJson(event));
-
-    Event e = Event.fromJson(event);
+    print("Event $e");
+    events.add(e);
 
     if (e.msgtype == "Connected") {
       connectionStatus = "Connected";
@@ -656,7 +654,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
   }
 
   _buildMessage(int index) {
-    Event event = events[index];
+    MessageEvent event = events[index];
 
     return Container(
       child: Column(

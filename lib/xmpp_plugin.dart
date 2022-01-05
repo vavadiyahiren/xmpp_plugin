@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/services.dart';
+import 'package:xmpp_plugin/message_event.dart';
 
 import 'custom_element.dart';
 
@@ -99,10 +100,13 @@ class XmppConnection {
     return state;
   }
 
-  Future<void> start(void Function(dynamic) _onEvent, Function _onError) async {
+  Future<void> start(Function(MessageEvent) _onEvent, Function _onError) async {
     streamGetMsg = _eventChannel
         .receiveBroadcastStream()
-        .listen(_onEvent, onError: _onError);
+        .listen((dataEvent) {
+      MessageEvent eventModel = MessageEvent.fromJson(dataEvent);
+      _onEvent.call(eventModel);
+    }, onError: _onError);
   }
 
   Future<void> stop() async {

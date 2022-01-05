@@ -5,18 +5,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="9717c6fe-375f-4a4d-9a38-2bf156488b4e" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/FlutterXmppConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/FlutterXmppConnection.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/FlutterXmppConnectionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/FlutterXmppConnectionService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/FlutterXmppPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/FlutterXmppPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/Podfile.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/lib/event.dart" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/example/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/example/pubspec.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/xmpp_plugin.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/xmpp_plugin.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[]" />
   <component name="Git.Pull.Settings">
     <option name="BRANCH" value="master" />
   </component>
@@ -31,12 +35,24 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="dart.analysis.tool.window.visible" value="false" />
     <property name="io.flutter.reload.alreadyRun" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/lib" />
+    <property name="settings.editor.selected.configurable" value="flutter.settings" />
     <property name="show.migrate.to.gradle.popup" value="false" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/lib" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="main.dart" type="FlutterRunConfigurationType" factoryName="Flutter">
+      <option name="filePath" value="$PROJECT_DIR$/example/lib/main.dart" />
+      <method v="2" />
+    </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -47,41 +63,19 @@
       <option name="presentableId" value="Default" />
       <updated>1635492409154</updated>
     </task>
+    <task id="LOCAL-00001" summary="# added configuration for SSL connection and auto delivery receipt">
+      <created>1641294021262</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1641294021262</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
-  <component name="WindowStateProjectService">
-    <state x="743" y="298" width="424" height="491" key="FileChooserDialogImpl" timestamp="1639654672649">
-      <screen x="0" y="27" width="1920" height="1053" />
-    </state>
-    <state x="743" y="298" width="424" height="491" key="FileChooserDialogImpl/1920.0.1920.1080/0.27.1920.1053@0.27.1920.1053" timestamp="1639654672649" />
-    <state width="1806" height="275" key="GridCell.Tab.0.bottom" timestamp="1635580770183">
-      <screen x="1920" y="0" width="1920" height="1080" />
-    </state>
-    <state width="1806" height="275" key="GridCell.Tab.0.bottom/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1635580770183" />
-    <state width="1806" height="275" key="GridCell.Tab.0.center" timestamp="1635580770183">
-      <screen x="1920" y="0" width="1920" height="1080" />
-    </state>
-    <state width="1806" height="275" key="GridCell.Tab.0.center/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1635580770183" />
-    <state width="1806" height="275" key="GridCell.Tab.0.left" timestamp="1635580770183">
-      <screen x="1920" y="0" width="1920" height="1080" />
-    </state>
-    <state width="1806" height="275" key="GridCell.Tab.0.left/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1635580770183" />
-    <state width="1806" height="275" key="GridCell.Tab.0.right" timestamp="1635580770183">
-      <screen x="1920" y="0" width="1920" height="1080" />
-    </state>
-    <state width="1806" height="275" key="GridCell.Tab.0.right/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1635580770183" />
-    <state x="2403" y="188" width="1022" height="737" key="SettingsEditor" timestamp="1635507520504">
-      <screen x="1920" y="0" width="1920" height="1080" />
-    </state>
-    <state x="2403" y="188" width="1022" height="737" key="SettingsEditor/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1635507520504" />
-    <state x="476" y="280" width="1026" height="554" key="new project wizard" timestamp="1636268638245">
-      <screen x="68" y="27" width="1852" height="1053" />
-    </state>
-    <state x="476" y="280" width="1026" height="554" key="new project wizard/68.27.1852.1053@68.27.1852.1053" timestamp="1636268638245" />
-    <state x="2577" y="259" width="672" height="678" key="search.everywhere.popup" timestamp="1635597757091">
-      <screen x="1920" y="0" width="1920" height="1080" />
-    </state>
-    <state x="2577" y="259" width="672" height="678" key="search.everywhere.popup/1920.0.1920.1080/0.27.1920.1053@1920.0.1920.1080" timestamp="1635597757091" />
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="# added configuration for SSL connection and auto delivery receipt" />
+    <option name="LAST_COMMIT_MESSAGE" value="# added configuration for SSL connection and auto delivery receipt" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
