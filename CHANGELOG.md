@@ -74,3 +74,10 @@
 ## 1.1.14
 
 * Optimised the android code and processes
+
+## 1.1.15
+
+* Configurable SSL turn on/off capabilities are added
+* Delivery Receipt extensions are made configurable
+* Bug fixes for group joining with full group jid on android
+
