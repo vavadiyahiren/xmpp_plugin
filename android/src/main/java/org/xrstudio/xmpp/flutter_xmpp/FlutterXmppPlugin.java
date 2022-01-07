@@ -103,6 +103,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                         String metaInfo = intent.getStringExtra(Constants.META_TEXT);
                         String senderJid = intent.hasExtra(Constants.BUNDLE_MESSAGE_SENDER_JID) ? intent.getStringExtra(Constants.BUNDLE_MESSAGE_SENDER_JID) : "";
                         String time = intent.hasExtra(Constants.time) ? intent.getStringExtra(Constants.time) : Constants.ZERO;
+                        String chatStateType = intent.hasExtra(Constants.CHATSTATE_TYPE) ? intent.getStringExtra(Constants.CHATSTATE_TYPE) : Constants.EMPTY;
 
                         Map<String, Object> build = new HashMap<>();
                         build.put(Constants.TYPE, metaInfo);
@@ -113,6 +114,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                         build.put(Constants.SENDER_JID, senderJid);
                         build.put(Constants.CUSTOM_TEXT, customText);
                         build.put(Constants.TIME, time);
+                        build.put(Constants.CHATSTATE_TYPE, chatStateType);
 
                         Utils.addLogInStorage("Action: sentMessageToFlutter, Content: " + build.toString());
 
@@ -529,6 +531,27 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 groupName = call.argument(Constants.GROUP_NAME);
                 jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.ADMIN, groupName);
                 result.success(jidList);
+                break;
+
+            case Constants.GET_MAM:
+
+                String userJid = call.argument(Constants.userJid);
+                String requestBefore = call.argument(Constants.requestBefore);
+                String requestSince = call.argument(Constants.requestSince);
+                String limit = call.argument(Constants.limit);
+                Utils.printLog("userJId " + userJid + " Before : " + requestBefore + " since " + requestSince + " limit " + limit);
+                FlutterXmppConnection.requestMAM(userJid, requestBefore, requestSince, limit);
+                result.success("SUCCESS");
+
+                break;
+
+            case Constants.GET_TYPING_STATUS:
+
+                String typingJid = call.argument(Constants.userJid);
+                String typingStatus = call.argument(Constants.typingStatus);
+                Utils.printLog("userJId " + typingJid + " Typing Status : " + typingStatus);
+                FlutterXmppConnection.updateChatState(typingJid, typingStatus);
+                result.success("SUCCESS");
                 break;
 
             case Constants.GET_MEMBERS:

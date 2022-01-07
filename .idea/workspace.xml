@@ -4,14 +4,24 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9717c6fe-375f-4a4d-9a38-2bf156488b4e" name="Default Changelist" comment="">
+    <list default="true" id="9717c6fe-375f-4a4d-9a38-2bf156488b4e" name="Default Changelist" comment="# configuration for ssl connnection and auto delivery receipt">
+      <change afterPath="$PROJECT_DIR$/.idea/piyushbhai_xmpp.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Enum/TypingStatus.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/example/lib/mamExamples.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/android/.idea/gradle.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Connection/FlutterXmppConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Connection/FlutterXmppConnection.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/FlutterXmppPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/FlutterXmppPlugin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Utils/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Utils/Constants.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Utils/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Utils/Utils.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/Podfile.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/xcshareddata/xcschemes/Runner.xcscheme" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/lib/event.dart" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/example/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/main.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/example/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flutter_xmpp.iml" beforeDir="false" afterPath="$PROJECT_DIR$/flutter_xmpp.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/message_event.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/message_event.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/xmpp_plugin.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/xmpp_plugin.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
     </list>
@@ -20,12 +30,27 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[/Users/xrstudio/.android/avd/Pixel_3a_API_30_x86.avd]" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Dart File" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Pull.Settings">
     <option name="BRANCH" value="master" />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
   </component>
   <component name="ProjectId" id="20AfeVPJ6SfXbpGXmLRUmPQHE4C" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -35,12 +60,11 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="dart.analysis.tool.window.visible" value="false" />
     <property name="io.flutter.reload.alreadyRun" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/lib" />
-    <property name="settings.editor.selected.configurable" value="flutter.settings" />
+    <property name="settings.editor.selected.configurable" value="Errors" />
     <property name="show.migrate.to.gradle.popup" value="false" />
   </component>
   <component name="RecentsManager">
@@ -63,19 +87,7 @@
       <option name="presentableId" value="Default" />
       <updated>1635492409154</updated>
     </task>
-    <task id="LOCAL-00001" summary="# added configuration for SSL connection and auto delivery receipt">
-      <created>1641294021262</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1641294021262</updated>
-    </task>
-    <option name="localTasksCounter" value="2" />
     <servers />
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="# added configuration for SSL connection and auto delivery receipt" />
-    <option name="LAST_COMMIT_MESSAGE" value="# added configuration for SSL connection and auto delivery receipt" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

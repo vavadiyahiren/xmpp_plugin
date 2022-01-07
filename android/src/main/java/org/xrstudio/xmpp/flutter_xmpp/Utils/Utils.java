@@ -3,6 +3,10 @@ package org.xrstudio.xmpp.flutter_xmpp.Utils;
 import android.os.Environment;
 import android.util.Log;
 
+import org.jxmpp.jid.Jid;
+import org.jxmpp.jid.impl.JidCreate;
+import org.jxmpp.stringprep.XmppStringprepException;
+import org.xrstudio.xmpp.flutter_xmpp.Connection.FlutterXmppConnection;
 import org.xrstudio.xmpp.flutter_xmpp.FlutterXmppPlugin;
 
 import java.io.BufferedWriter;
@@ -24,6 +28,23 @@ public class Utils {
             Jid = Jid.split(Constants.SYMBOL_COMPARE_JID)[0];
         }
         return Jid != null ? Jid : "";
+    }
+
+    public static Jid getFullJid(String Jid) {
+
+        Jid fullJid = null;
+
+        try {
+
+            if (Jid != null && !Jid.contains(Constants.SYMBOL_COMPARE_JID)) {
+                Jid = Jid + "@" + FlutterXmppConnection.mHost;
+            }
+
+            fullJid = JidCreate.from(Jid);
+        } catch (XmppStringprepException e) {
+            e.printStackTrace();
+        }
+        return fullJid;
     }
 
     public static long getLongDate() {

@@ -10,6 +10,7 @@ class MessageEvent {
   String? bubbleType;
   String? mediaURL;
   String? presence;
+  String? chatStateType;
 
   MessageEvent({
     this.customText,
@@ -23,6 +24,7 @@ class MessageEvent {
     this.bubbleType,
     this.mediaURL,
     this.presence,
+    this.chatStateType
   });
 
   Map<String, dynamic> toEventData() {
@@ -37,6 +39,7 @@ class MessageEvent {
       'msgtype': msgtype,
       'bubbleType': bubbleType,
       'mediaURL': mediaURL,
+      'chatStateType': chatStateType
     };
   }
 
@@ -53,6 +56,7 @@ class MessageEvent {
       bubbleType: eventData['bubbleType'] ?? '',
       mediaURL: eventData['mediaURL'] ?? '',
       presence: eventData['presence'] ?? '',
+      chatStateType: eventData['chatStateType'] ?? '',
     );
   }
 }

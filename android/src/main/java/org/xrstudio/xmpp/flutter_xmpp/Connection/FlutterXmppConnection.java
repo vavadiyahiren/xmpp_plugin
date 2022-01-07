@@ -22,8 +22,11 @@ import org.jivesoftware.smack.roster.RosterEntry;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smack.util.TLSUtils;
+import org.jivesoftware.smackx.chatstates.ChatState;
+import org.jivesoftware.smackx.chatstates.packet.ChatStateExtension;
 import org.jivesoftware.smackx.iqlast.LastActivityManager;
 import org.jivesoftware.smackx.iqlast.packet.LastActivity;
+import org.jivesoftware.smackx.mam.MamManager;
 import org.jivesoftware.smackx.muc.Affiliate;
 import org.jivesoftware.smackx.muc.MucEnterConfiguration;
 import org.jivesoftware.smackx.muc.MultiUserChat;
@@ -37,7 +40,6 @@ import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.jid.parts.Resourcepart;
 import org.xrstudio.xmpp.flutter_xmpp.Enum.ConnectionState;
 import org.xrstudio.xmpp.flutter_xmpp.Enum.GROUP_ROLE;
-import org.xrstudio.xmpp.flutter_xmpp.FlutterXmppPlugin;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Constants;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Utils;
 
@@ -57,7 +59,7 @@ import javax.net.ssl.TrustManager;
 
 public class FlutterXmppConnection implements ConnectionListener {
 
-    private static String mHost;
+    public static String mHost;
     private static String mPassword;
     private static String mUsername = "";
     private static String mResource = "";
@@ -66,7 +68,7 @@ public class FlutterXmppConnection implements ConnectionListener {
     private static XMPPTCPConnection mConnection;
     private static MultiUserChatManager multiUserChatManager;
     private static boolean mRequireSSLConnection, mAutoDeliveryReceipt;
-    private Context mApplicationContext;
+    private static Context mApplicationContext;
     private BroadcastReceiver uiThreadMessageReceiver;//Receives messages from the ui thread.
 
     public FlutterXmppConnection(Context context, String jid_user, String password, String host, Integer port, boolean requireSSLConnection, boolean autoDeliveryReceipt) {
@@ -404,6 +406,141 @@ public class FlutterXmppConnection implements ConnectionListener {
         return isJoinedSuccessfully;
     }
 
+    public static void requestMAM(String userJid, String requestBefore, String requestSince, String limit) {
+        try {
+
+            MamManager mamManager = MamManager.getInstanceFor(mConnection);
+            MamManager.MamQueryArgs.Builder queryArgs = MamManager.MamQueryArgs.builder();
+
+            if (requestBefore != null && !requestBefore.isEmpty()) {
+                long requestBeforets = Long.parseLong(requestBefore);
+                if (requestBeforets > 0)
+                    queryArgs.limitResultsBefore(new Date(requestBeforets));
+            }
+            if (requestSince != null && !requestSince.isEmpty()) {
+                long requestAfterts = Long.parseLong(requestSince);
+                if (requestAfterts > 0)
+                    queryArgs.limitResultsSince(new Date(requestAfterts));
+            }
+            if (limit != null && !limit.isEmpty()) {
+
+                int limitMessage = Integer.parseInt(limit);
+                if (limitMessage > 0) {
+                    queryArgs.setResultPageSizeTo(limitMessage);
+                } else {
+                    queryArgs.setResultPageSizeTo(Integer.MAX_VALUE);
+                }
+
+            }
+            userJid = Utils.getValidJid(userJid);
+
+            if (userJid != null && !userJid.isEmpty()) {
+                Jid jid = Utils.getFullJid(userJid);
+                queryArgs.limitResultsToJid(jid);
+            }
+
+            Utils.printLog("MAM query Args " + queryArgs.toString());
+            MamManager.MamQuery query = mamManager.queryArchive(queryArgs.build());
+            List<Message> messageList = query.getMessages();
+
+            for (Message message : messageList) {
+                Utils.printLog("Received Message " + message.toXML(null));
+                broadcastMessageToFlutter(message);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void updateChatState(String jid, String status) {
+
+        Jid toJid = Utils.getFullJid(jid);
+
+        if (status != null && !status.isEmpty()) {
+
+            try {
+
+                Message message = new Message(toJid);
+                ChatStateExtension extension = null;
+
+                if (status.equals("composing")) {
+                    extension = new ChatStateExtension(ChatState.composing);
+                } else if (status.equals("paused")) {
+                    extension = new ChatStateExtension(ChatState.paused);
+                }
+
+                if (extension != null) {
+                    message.addExtension(extension);
+                }
+                Utils.printLog("Sending Typing status " + message.toXML(null));
+                mConnection.sendStanza(message);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private static void broadcastMessageToFlutter(Message message) {
+        Utils.addLogInStorage(" Action: receiveMessageFromServer, Content: " + message.toXML(null).toString());
+
+        String META_TEXT = Constants.MESSAGE;
+        String body = message.getBody();
+        String from = message.getFrom().toString();
+        String msgId = message.getStanzaId();
+        String customText = "";
+        StandardExtensionElement customElement = (StandardExtensionElement) message
+                .getExtension(Constants.URN_XMPP_CUSTOM);
+        if (customElement != null && customElement.getFirstElement(Constants.custom) != null) {
+            customText = customElement.getFirstElement(Constants.custom).getText();
+        }
+
+        String time = Constants.ZERO;
+        if (message.getExtension(Constants.URN_XMPP_TIME) != null) {
+            StandardExtensionElement timeElement = (StandardExtensionElement) message
+                    .getExtension(Constants.URN_XMPP_TIME);
+            if (timeElement != null && timeElement.getFirstElement(Constants.TS) != null) {
+                time = timeElement.getFirstElement(Constants.TS).getText();
+            }
+        }
+
+        if (message.hasExtension(DeliveryReceipt.ELEMENT, DeliveryReceipt.NAMESPACE)) {
+            DeliveryReceipt dr = DeliveryReceipt.from((Message) message);
+            msgId = dr.getId();
+            META_TEXT = Constants.DELIVERY_ACK;
+        }
+        ChatState chatState = null;
+
+        if (message.hasExtension(ChatStateExtension.NAMESPACE)) {
+            META_TEXT = Constants.CHATSTATE;
+            ChatStateExtension chatStateExtension = (ChatStateExtension) message.getExtension(ChatStateExtension.NAMESPACE);
+            chatState = chatStateExtension.getChatState();
+        }
+
+        String mediaURL = "";
+
+        if (!from.equals(mUsername)) {
+            //Bundle up the intent and send the broadcast.
+            Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
+            intent.setPackage(mApplicationContext.getPackageName());
+            intent.putExtra(Constants.BUNDLE_FROM_JID, from);
+            intent.putExtra(Constants.BUNDLE_MESSAGE_BODY, body);
+            intent.putExtra(Constants.BUNDLE_MESSAGE_PARAMS, msgId);
+            intent.putExtra(Constants.BUNDLE_MESSAGE_TYPE, message.getType().toString());
+            intent.putExtra(Constants.BUNDLE_MESSAGE_SENDER_JID, from);
+            intent.putExtra(Constants.MEDIA_URL, mediaURL);
+            intent.putExtra(Constants.CUSTOM_TEXT, customText);
+            intent.putExtra(Constants.META_TEXT, META_TEXT);
+            intent.putExtra(Constants.time, time);
+            if (chatState != null) {
+                intent.putExtra(Constants.CHATSTATE_TYPE, chatState.toString());
+            }
+
+            mApplicationContext.sendBroadcast(intent);
+        }
+    }
+
     public void connect() throws IOException, XMPPException, SmackException {
 
         XMPPTCPConnectionConfiguration.Builder conf = XMPPTCPConnectionConfiguration.builder();
@@ -413,7 +550,6 @@ public class FlutterXmppConnection implements ConnectionListener {
         if (Utils.validIP(mHost)) {
 
             Utils.printLog(" connecting via ip: " + Utils.validIP(mHost));
-
             InetAddress address = InetAddress.getByName(mHost);
             conf.setHostAddress(address);
             conf.setHost(mHost);
@@ -431,6 +567,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         conf.setUsernameAndPassword(mUsername, mPassword);
         conf.setResource(mResource);
         conf.setCompressionEnabled(true);
+        conf.enableDefaultDebugger();
 
 
         if (mRequireSSLConnection) {
@@ -491,26 +628,25 @@ public class FlutterXmppConnection implements ConnectionListener {
         mConnection.addStanzaAcknowledgedListener(new StanzaListener() {
             @Override
             public void processStanza(Stanza packet) throws SmackException.NotConnectedException, InterruptedException, SmackException.NotLoggedInException {
-                if (FlutterXmppPlugin.DEBUG) {
 
-                    if (packet instanceof Message) {
+                if (packet instanceof Message) {
 
-                        Message ackMessage = (Message) packet;
+                    Message ackMessage = (Message) packet;
 
-                        Utils.addLogInStorage(" Action: receiveStanzaAckFromServer, Content: " + ackMessage.toXML(null).toString());
+                    Utils.addLogInStorage(" Action: receiveStanzaAckFromServer, Content: " + ackMessage.toXML(null).toString());
 
-                        //Bundle up the intent and send the broadcast.
-                        Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
-                        intent.setPackage(mApplicationContext.getPackageName());
-                        intent.putExtra(Constants.BUNDLE_FROM_JID, ackMessage.getTo().toString());
-                        intent.putExtra(Constants.BUNDLE_MESSAGE_BODY, ackMessage.getBody());
-                        intent.putExtra(Constants.BUNDLE_MESSAGE_PARAMS, ackMessage.getStanzaId());
-                        intent.putExtra(Constants.BUNDLE_MESSAGE_TYPE, ackMessage.getType().toString());
-                        intent.putExtra(Constants.META_TEXT, Constants.ACK);
-                        mApplicationContext.sendBroadcast(intent);
-                    }
-
+                    //Bundle up the intent and send the broadcast.
+                    Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
+                    intent.setPackage(mApplicationContext.getPackageName());
+                    intent.putExtra(Constants.BUNDLE_FROM_JID, ackMessage.getTo().toString());
+                    intent.putExtra(Constants.BUNDLE_MESSAGE_BODY, ackMessage.getBody());
+                    intent.putExtra(Constants.BUNDLE_MESSAGE_PARAMS, ackMessage.getStanzaId());
+                    intent.putExtra(Constants.BUNDLE_MESSAGE_TYPE, ackMessage.getType().toString());
+                    intent.putExtra(Constants.META_TEXT, Constants.ACK);
+                    mApplicationContext.sendBroadcast(intent);
                 }
+
+
             }
         });
 
@@ -523,53 +659,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                 try {
 
                     Message message = (Message) packet;
-
-                    Utils.addLogInStorage(" Action: receiveMessageFromServer, Content: " + message.toXML(null).toString());
-
-                    String META_TEXT = Constants.MESSAGE;
-                    String body = message.getBody();
-                    String from = message.getFrom().toString();
-                    String msgId = message.getStanzaId();
-                    String customText = "";
-                    StandardExtensionElement customElement = (StandardExtensionElement) message
-                            .getExtension(Constants.URN_XMPP_CUSTOM);
-                    if (customElement != null && customElement.getFirstElement(Constants.custom) != null) {
-                        customText = customElement.getFirstElement(Constants.custom).getText();
-                    }
-
-                    String time = Constants.ZERO;
-                    if (message.getExtension(Constants.URN_XMPP_TIME) != null) {
-                        StandardExtensionElement timeElement = (StandardExtensionElement) message
-                                .getExtension(Constants.URN_XMPP_TIME);
-                        if (timeElement != null && timeElement.getFirstElement(Constants.TS) != null) {
-                            time = timeElement.getFirstElement(Constants.TS).getText();
-                        }
-                    }
-
-                    if (message.hasExtension(DeliveryReceipt.ELEMENT, DeliveryReceipt.NAMESPACE)) {
-                        DeliveryReceipt dr = DeliveryReceipt.from((Message) message);
-                        msgId = dr.getId();
-                        META_TEXT = Constants.DELIVERY_ACK;
-                    }
-
-                    String mediaURL = "";
-
-                    if (!from.equals(mUsername)) {
-                        //Bundle up the intent and send the broadcast.
-                        Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
-                        intent.setPackage(mApplicationContext.getPackageName());
-                        intent.putExtra(Constants.BUNDLE_FROM_JID, from);
-                        intent.putExtra(Constants.BUNDLE_MESSAGE_BODY, body);
-                        intent.putExtra(Constants.BUNDLE_MESSAGE_PARAMS, msgId);
-                        intent.putExtra(Constants.BUNDLE_MESSAGE_TYPE, message.getType().toString());
-                        intent.putExtra(Constants.BUNDLE_MESSAGE_SENDER_JID, from);
-                        intent.putExtra(Constants.MEDIA_URL, mediaURL);
-                        intent.putExtra(Constants.CUSTOM_TEXT, customText);
-                        intent.putExtra(Constants.META_TEXT, META_TEXT);
-                        intent.putExtra(Constants.time, time);
-
-                        mApplicationContext.sendBroadcast(intent);
-                    }
+                    broadcastMessageToFlutter(message);
 
                 } catch (Exception e) {
                     Utils.printLog(" Main Exception : " + e.getLocalizedMessage());

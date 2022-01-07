@@ -9,13 +9,16 @@ import 'package:flutter_xmpp_example/native_log_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share/share.dart';
 import 'package:xmpp_plugin/custom_element.dart';
-import 'package:xmpp_plugin/xmpp_plugin.dart';
 import 'package:xmpp_plugin/message_event.dart';
+import 'package:xmpp_plugin/xmpp_plugin.dart';
+
+import 'mamExamples.dart';
 
 const myTask = "syncWithTheBackEnd";
+
 void main() {
   runApp(MyApp());
-  if(Platform.isAndroid){
+  if (Platform.isAndroid) {
     // Workmanager().initialize(callbackDispatcher);
     // Workmanager().registerOneOffTask(
     //   "1",
@@ -27,7 +30,6 @@ void main() {
     //   ),
     // );
   }
-
 }
 
 // void callbackDispatcher() {
@@ -60,7 +62,7 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   static late XmppConnection flutterXmpp;
   List<MessageEvent> events = [];
   String connectionStatus = "Disconnected";
@@ -72,6 +74,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     log('didChangeAppLifecycleState() initState');
     WidgetsBinding.instance!.addObserver(this);
   }
+
   @override
   void dispose() {
     WidgetsBinding.instance!.removeObserver(this);
@@ -92,7 +95,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
         log('resumed detachedCallBack()');
         break;
     }
-
   }
 
   Future<void> connect() async {
@@ -112,13 +114,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     await flutterXmpp.login();
   }
 
-
-
   void checkStoragePermission() async {
     var status = await Permission.storage.status;
     if (!status.isGranted) {
-      final PermissionStatus _permissionStatus =
-          await Permission.storage.request();
+      final PermissionStatus _permissionStatus = await Permission.storage.request();
       if (_permissionStatus.isGranted) {
         String filePath = await NativeLogHelper().getDefaultLogFilePath();
         print('logFilePath: $filePath');
@@ -169,8 +168,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
     await flutterXmpp.addMembersInGroup(groupName, members);
   }
 
-  Future<void> addAdminsInGroup(
-      String groupName, List<String> adminMembers) async {
+  Future<void> addAdminsInGroup(String groupName, List<String> adminMembers) async {
     await flutterXmpp.addAdminsInGroup(groupName, adminMembers);
   }
 
@@ -229,10 +227,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
 
   List<CustomElement> customElements = [
     CustomElement(
-        childBody: "test",
-        childElement: "elem",
-        elementName: "Name",
-        elementNameSpace: "space")
+        childBody: "test", childElement: "elem", elementName: "Name", elementNameSpace: "space")
   ];
 
   @override
@@ -256,8 +251,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                   Share.shareFiles([NativeLogHelper.logFilePath]);
                 } else {
                   if (_scaffoldKey.currentState != null) {
-                    _scaffoldKey.currentState!.showSnackBar(
-                        new SnackBar(content: new Text('File not found!')));
+                    _scaffoldKey.currentState!
+                        .showSnackBar(new SnackBar(content: new Text('File not found!')));
                   }
                 }
               },
@@ -269,8 +264,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                   NativeLogHelper().deleteLogFile();
                 } else {
                   if (_scaffoldKey.currentState != null) {
-                    _scaffoldKey.currentState!.showSnackBar(
-                        new SnackBar(content: new Text('File not found!')));
+                    _scaffoldKey.currentState!
+                        .showSnackBar(new SnackBar(content: new Text('File not found!')));
                   }
                 }
               },
@@ -319,9 +314,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                           await connect();
                         }
                       },
-                      child: Text(connectionStatus == 'Authenticated'
-                          ? "Disconnect"
-                          : "Connect"),
+                      child: Text(connectionStatus == 'Authenticated' ? "Disconnect" : "Connect"),
                       style: ElevatedButton.styleFrom(
                         primary: Colors.black,
                       ),
@@ -331,6 +324,25 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                     ),
                     Text('$connectionStatus'),
                   ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Builder(
+                  builder: (context) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => mamExamples(flutterXmpp)),
+                        );
+                      },
+                      child: Text("MAM Modules"),
+                      style: ElevatedButton.styleFrom(
+                        primary: Colors.black,
+                      ),
+                    );
+                  },
                 ),
                 SizedBox(
                   height: 10,
@@ -347,8 +359,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                     Flexible(
                       child: ElevatedButton(
                         onPressed: () async {
-                          await createMUC(
-                              "${_createMUCNamecontroller.text}", true);
+                          await createMUC("${_createMUCNamecontroller.text}", true);
                         },
                         child: Text('Create Group'),
                         style: ElevatedButton.styleFrom(
@@ -363,14 +374,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                       return Flexible(
                         child: ElevatedButton(
                           onPressed: () async {
-                            await createMUC(
-                                "${_createMUCNamecontroller.text}", true);
+                            await createMUC("${_createMUCNamecontroller.text}", true);
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                   builder: (context) => HomePage(
-                                        groupName:
-                                            _createMUCNamecontroller.text,
+                                        groupName: _createMUCNamecontroller.text,
                                         addMembersInGroup: addMembersInGroup,
                                         addAdminsInGroup: addAdminsInGroup,
                                         removeMember: removeMember,
@@ -380,8 +389,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                                         getAdmins: getAdmins,
                                         getMembers: getMembers,
                                         getOwners: getOwners,
-                                        getOnlineMemberCount:
-                                            getOnlineMemberCount,
+                                        getOnlineMemberCount: getOnlineMemberCount,
                                       )),
                             );
                           },
@@ -413,8 +421,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    _joinGroup("${_joinMUCTextController.text}",
-                        "${_joinTimeController.text}");
+                    _joinGroup("${_joinMUCTextController.text}", "${_joinTimeController.text}");
                   },
                   child: Text('Join Group'),
                   style: ElevatedButton.styleFrom(
@@ -486,9 +493,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                       },
                       child: Text(" Send "),
                       style: ElevatedButton.styleFrom(
-                        primary: (dropdownvalue == "Chat")
-                            ? Colors.black
-                            : Colors.deepPurple,
+                        primary: (dropdownvalue == "Chat") ? Colors.black : Colors.deepPurple,
                       ),
                     ),
                     ElevatedButton(
@@ -510,9 +515,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                       },
                       child: Text(" Send Custom Message "),
                       style: ElevatedButton.styleFrom(
-                        primary: (dropdownvalue == "Chat")
-                            ? Colors.black
-                            : Colors.deepPurple,
+                        primary: (dropdownvalue == "Chat") ? Colors.black : Colors.deepPurple,
                       ),
                     ),
                   ],
@@ -567,8 +570,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    String lastSeenTime =
-                        await flutterXmpp.getLastSeen(_userJidController.text);
+                    String lastSeenTime = await flutterXmpp.getLastSeen(_userJidController.text);
                     print('lastSeen lastSeenTime: $lastSeenTime');
                     if (lastSeenTime.isNotEmpty) {
                       int last = int.parse(lastSeenTime);
@@ -577,8 +579,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                         // online
                       } else if (last > Constants.RESULT_EMPTY) {
                         // not online but need to pass time
-                        DateTime dateTime =
-                            DateTime.fromMillisecondsSinceEpoch(last);
+                        DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(last);
                       } else {
                         // away
                       }
@@ -626,8 +627,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver{
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    await flutterXmpp
-                        .createRoster(_createRostersController.text);
+                    await flutterXmpp.createRoster(_createRostersController.text);
                   },
                   child: Text("Create MyRosters"),
                   style: ElevatedButton.styleFrom(primary: Colors.black),

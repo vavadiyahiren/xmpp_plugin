@@ -25,7 +25,7 @@ PODS:
     - Flutter
   - shared_preferences_ios (0.0.1):
     - Flutter
-  - xmpp_plugin (1.1.12):
+  - xmpp_plugin (1.1.13):
     - Flutter
     - XMPPFramework/Swift
   - XMPPFramework/default (4.0.0):
@@ -81,7 +81,7 @@ SPEC CHECKSUMS:
   permission_handler: ccb20a9fad0ee9b1314a52b70b76b473c5f8dab0
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
   shared_preferences_ios: aef470a42dc4675a1cdd50e3158b42e3d1232b32
-  xmpp_plugin: 6ae2d3511fe80146b65cd49c89bc65bafa47f4b3
+  xmpp_plugin: 620b1529ac2b20955fef6e408184a22c1d87bf38
   XMPPFramework: 5d31ff9f73dce031b24bc49bcf88093627a3a86e
 
 PODFILE CHECKSUM: 9be9b641a35438b4176d8396dbc76c709ae823ae

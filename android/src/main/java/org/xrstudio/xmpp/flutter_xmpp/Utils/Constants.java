@@ -7,6 +7,8 @@ public class Constants {
     final public static int RESULT_DEFAULT = -1;
 
     public static final String ZERO = "0";
+    public static final String GET_MAM = "request_mam";
+    public static final String GET_TYPING_STATUS = "typing_status";
     public static final String SYMBOL_COMPARE_JID = "@";
     public static final String CREATE_MUC = "create_muc";
     public static final String CONFERENCE = "conference";
@@ -46,6 +48,13 @@ public class Constants {
     public static final String AUTHENTICATED = "Authenticated";
     public static final String URN_XMPP_CUSTOM = "urn:xmpp:custom";
 
+    // Params
+    public static final String userJid = "userJid";
+    public static final String requestBefore = "requestBefore";
+    public static final String requestSince = "requestSince";
+    public static final String limit = "limit";
+    public static final String typingStatus = "typingStatus";
+
     public static final String TO = "to";
     public static final String FROM = "from";
     public static final String STOP = "STOP";
@@ -71,6 +80,7 @@ public class Constants {
     public static final String MUC_MEMBER_ONLY = "muc#roomconfig_membersonly";
     public static final String REQUIRE_SSL_CONNECTION = "requireSSLConnection";
     public static final String MUC_PERSISTENT_ROOM = "muc#roomconfig_persistentroom";
+
     // Broadcast Parameters
     public static final String GROUP_NAME = "group_name";
     public static final String PERSISTENT = "persistent";
@@ -80,6 +90,7 @@ public class Constants {
     public static final String READ_ACK = "Read-Ack";
     public static final String GROUP_CHAT = "groupchat";
     public static final String DELIVERY_ACK = "Delivery-Ack";
+    public static final String CHATSTATE = "chatstate";
     //Static values
     public static final String TRUE = "true";
     //Presence values
@@ -113,6 +124,7 @@ public class Constants {
     public static final String GROUP_IDS = "group_ids";
     public static final String MEDIA_URL = "media_url";
     public static final String META_TEXT = "meta_text";
+    public static final String CHATSTATE_TYPE = "chatStateType";
     public static final String BUNDLE_TO_JID = "c_from";
     public static final String BUNDLE_FROM_JID = "b_from";
     public static final String BUNDLE_MESSAGE_BODY = "b_body";
@@ -132,4 +144,5 @@ public class Constants {
     public static final String GROUP_SEND_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.sendGroupMessage";
     public static int PORT_NUMBER = 5222;
 
+    public static String EMPTY = "";
 }

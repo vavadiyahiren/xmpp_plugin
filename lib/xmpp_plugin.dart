@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/services.dart';
 import 'package:xmpp_plugin/message_event.dart';
-
-import 'custom_element.dart';
 
 class XmppConnection {
   static const MethodChannel _channel = MethodChannel('flutter_xmpp/method');
@@ -17,7 +14,6 @@ class XmppConnection {
   XmppConnection(this.auth);
 
   Future<void> login() async {
-    print("futurelogin${auth}");
     await _channel.invokeMethod('login', auth);
   }
 
@@ -25,8 +21,7 @@ class XmppConnection {
     await _channel.invokeMethod('logout');
   }
 
-  Future<String> sendMessage(
-      String toJid, String body, String id, int time) async {
+  Future<String> sendMessage(String toJid, String body, String id, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -55,8 +50,7 @@ class XmppConnection {
     return status;
   }
 
-  Future<String> sendGroupMessage(
-      String toJid, String body, String id, int time) async {
+  Future<String> sendGroupMessage(String toJid, String body, String id, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -64,8 +58,7 @@ class XmppConnection {
       "time": time.toString(),
     };
     printLogForMethodCall('send_group_message', params);
-    final String status =
-        await _channel.invokeMethod('send_group_message', params);
+    final String status = await _channel.invokeMethod('send_group_message', params);
     return status;
   }
 
@@ -82,8 +75,7 @@ class XmppConnection {
       "time": time.toString(),
     };
     printLogForMethodCall('send_group_message', params);
-    final String status =
-        await _channel.invokeMethod('send_group_message', params);
+    final String status = await _channel.invokeMethod('send_group_message', params);
     return status;
   }
 
@@ -101,9 +93,7 @@ class XmppConnection {
   }
 
   Future<void> start(Function(MessageEvent) _onEvent, Function _onError) async {
-    streamGetMsg = _eventChannel
-        .receiveBroadcastStream()
-        .listen((dataEvent) {
+    streamGetMsg = _eventChannel.receiveBroadcastStream().listen((dataEvent) {
       MessageEvent eventModel = MessageEvent.fromJson(dataEvent);
       _onEvent.call(eventModel);
     }, onError: _onError);
@@ -144,8 +134,8 @@ class XmppConnection {
     return await _channel.invokeMethod('join_muc_group', params);
   }
 
-  Future<void> sendCustomMessage(String toJid, String body, String id,
-      String customString, int time) async {
+  Future<void> sendCustomMessage(
+      String toJid, String body, String id, String customString, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -160,8 +150,8 @@ class XmppConnection {
     log('call method to app from flutter methodName: $methodName: params: $params');
   }
 
-  Future<void> sendCustomGroupMessage(String toJid, String body, String id,
-      String customString, int time) async {
+  Future<void> sendCustomGroupMessage(
+      String toJid, String body, String id, String customString, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -172,8 +162,7 @@ class XmppConnection {
     await _channel.invokeMethod('send_customgroup_message', params);
   }
 
-  Future<void> sendDelieveryReceipt(
-      String toJid, String msgId, String receiptID) async {
+  Future<void> sendDelieveryReceipt(String toJid, String msgId, String receiptID) async {
     final params = {"toJid": toJid, "msgId": msgId, "receiptId": receiptID};
     await _channel.invokeMethod('send_delivery_receipt', params);
   }
@@ -183,8 +172,7 @@ class XmppConnection {
     await _channel.invokeMethod('add_members_in_group', params);
   }
 
-  Future<void> addAdminsInGroup(
-      String groupName, List<String> adminMembers) async {
+  Future<void> addAdminsInGroup(String groupName, List<String> adminMembers) async {
     final params = {"group_name": groupName, "members_jid": adminMembers};
     await _channel.invokeMethod('add_admins_in_group', params);
   }
@@ -223,8 +211,7 @@ class XmppConnection {
 
   Future<int> getOnlineMemberCount(String groupName) async {
     final params = {"group_name": groupName};
-    int memberCount =
-        await _channel.invokeMethod('get_online_member_count', params);
+    int memberCount = await _channel.invokeMethod('get_online_member_count', params);
     print('checkGroups getOccupantsSize: $memberCount');
     return memberCount;
   }
@@ -268,5 +255,30 @@ class XmppConnection {
     List<dynamic> admins = await _channel.invokeMethod('get_admins', params);
     print('checkGroups getAdmins admins: $admins');
     return admins;
+  }
+
+  Future<void> requestMamMessages(
+      String userJid, String requestSince, String requestBefore, String limit) async {
+    print(
+        " Plugin : User Jid : $userJid , Request since : $requestSince , Request Before : $requestBefore, Limit : $limit ");
+    final params = {
+      "userJid": userJid,
+      "requestBefore": requestBefore,
+      "requestSince": requestSince,
+      "limit": limit
+    };
+    await _channel.invokeMethod('request_mam', params);
+  }
+
+  Future<void> getTypingStatus(
+    String userJid,
+    String typingstatus,
+  ) async {
+    print(" Plugin : User Jid : $userJid , Typing Status : $typingstatus ");
+    final params = {
+      "userJid": userJid,
+      "typingStatus": typingstatus,
+    };
+    await _channel.invokeMethod('typing_status', params);
   }
 }
