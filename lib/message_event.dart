@@ -9,7 +9,8 @@ class MessageEvent {
   String? msgtype;
   String? bubbleType;
   String? mediaURL;
-  String? presence;
+  String? presenceType;
+  String? presenceMode;
   String? chatStateType;
 
   MessageEvent({
@@ -23,7 +24,8 @@ class MessageEvent {
     this.msgtype,
     this.bubbleType,
     this.mediaURL,
-    this.presence,
+    this.presenceType,
+    this.presenceMode,
     this.chatStateType
   });
 
@@ -39,6 +41,8 @@ class MessageEvent {
       'msgtype': msgtype,
       'bubbleType': bubbleType,
       'mediaURL': mediaURL,
+      'presenceType': presenceType,
+      'presenceMode': presenceMode,
       'chatStateType': chatStateType
     };
   }
@@ -55,7 +59,8 @@ class MessageEvent {
       msgtype: eventData['msgtype'] ?? '',
       bubbleType: eventData['bubbleType'] ?? '',
       mediaURL: eventData['mediaURL'] ?? '',
-      presence: eventData['presence'] ?? '',
+      presenceType: eventData['presenceType'] ?? '',
+      presenceMode: eventData['presenceMode'] ?? '',
       chatStateType: eventData['chatStateType'] ?? '',
     );
   }

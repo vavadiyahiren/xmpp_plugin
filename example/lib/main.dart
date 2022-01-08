@@ -132,7 +132,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   Future<void> _onReceiveMessage(MessageEvent e) async {
     // TODO : Handle the receive event
-    print("Event $e");
+    print('receiveEvent: ${e.toEventData().toString()}');
     events.add(e);
 
     if (e.msgtype == "Connected") {

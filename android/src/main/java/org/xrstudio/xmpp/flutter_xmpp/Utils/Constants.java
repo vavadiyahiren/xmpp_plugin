@@ -57,6 +57,8 @@ public class Constants {
 
     public static final String TO = "to";
     public static final String FROM = "from";
+    public static final String PRESENCE_TYPE = "presenceType";
+    public static final String PRESENCE_MODE = "presenceMode";
     public static final String STOP = "STOP";
     public static final String STATUS = "status";
     public static final String MESSAGE_ID = "msgId";
@@ -128,7 +130,8 @@ public class Constants {
     public static final String BUNDLE_TO_JID = "c_from";
     public static final String BUNDLE_FROM_JID = "b_from";
     public static final String BUNDLE_MESSAGE_BODY = "b_body";
-    public static final String BUNDLE_PRESENCE = "b_presence";
+    public static final String BUNDLE_PRESENCE_TYPE = "b_presence_type";
+    public static final String BUNDLE_PRESENCE_MODE = "b_presence_mode";
     public static final String BUNDLE_MESSAGE_TYPE = "b_body_type";
     public static final String BUNDLE_MESSAGE_PARAMS = "b_body_params";
     public static final String BUNDLE_MESSAGE_SENDER_JID = "b_sender_jid";

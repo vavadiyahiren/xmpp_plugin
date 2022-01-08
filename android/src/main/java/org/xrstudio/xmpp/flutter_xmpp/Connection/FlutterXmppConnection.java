@@ -612,10 +612,12 @@ public class FlutterXmppConnection implements ConnectionListener {
                 Presence presence = (Presence) packet;
                 String jid = presence.getFrom().toString();
                 Presence.Type type = presence.getType();
+                Presence.Mode mode = presence.getMode();
                 Intent intent = new Intent(Constants.PRESENCE_MESSAGE);
                 intent.setPackage(mApplicationContext.getPackageName());
                 intent.putExtra(Constants.BUNDLE_FROM_JID, jid);
-                intent.putExtra(Constants.BUNDLE_PRESENCE, type == Presence.Type.available ? Constants.ONLINE : Constants.OFFLINE);
+                intent.putExtra(Constants.BUNDLE_PRESENCE_TYPE, type.toString().toLowerCase());
+                intent.putExtra(Constants.BUNDLE_PRESENCE_MODE, mode.toString().toLowerCase());
                 mApplicationContext.sendBroadcast(intent);
             }
         }, new StanzaFilter() {

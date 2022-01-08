@@ -145,14 +145,16 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                     case Constants.PRESENCE_MESSAGE:
 
                         String jid = intent.getStringExtra(Constants.BUNDLE_TO_JID);
-                        String presence = intent.getStringExtra(Constants.BUNDLE_PRESENCE);
+                        String presenceType = intent.getStringExtra(Constants.BUNDLE_PRESENCE_TYPE);
+                        String presenceMode = intent.getStringExtra(Constants.BUNDLE_PRESENCE_MODE);
 
                         Map<String, Object> presenceBuild = new HashMap<>();
                         presenceBuild.put(Constants.TYPE, Constants.PRESENCE);
                         presenceBuild.put(Constants.FROM, jid);
-                        presenceBuild.put(Constants.PRESENCE, presence);
+                        presenceBuild.put(Constants.PRESENCE_TYPE, presenceType);
+                        presenceBuild.put(Constants.PRESENCE_MODE, presenceMode);
 
-                        Utils.printLog(" presenceBuild: " + presenceBuild);
+                        Utils.printLog("presenceBuild: " + presenceBuild);
 
                         events.success(presenceBuild);
                         break;
