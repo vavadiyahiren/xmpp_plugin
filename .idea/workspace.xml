@@ -4,17 +4,9 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9717c6fe-375f-4a4d-9a38-2bf156488b4e" name="Default Changelist" comment="# get presence mode and type in android running">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Connection/FlutterXmppConnection.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Connection/FlutterXmppConnection.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/FlutterXmppPlugin.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/FlutterXmppPlugin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Utils/Constants.java" beforeDir="false" afterPath="$PROJECT_DIR$/android/src/main/java/org/xrstudio/xmpp/flutter_xmpp/Utils/Constants.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/ios/Podfile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/Podfile.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/lib/homepage.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/homepage.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/main.dart" afterDir="false" />
+    <list default="true" id="9717c6fe-375f-4a4d-9a38-2bf156488b4e" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/ios/Classes/XMPPController.swift" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Classes/XMPPController.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Classes/XMPPReceiveMessage.swift" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Classes/XMPPReceiveMessage.swift" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/xmpp_plugin.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/xmpp_plugin.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Classes/utilityFunctions.swift" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Classes/utilityFunctions.swift" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -101,13 +93,21 @@
       <option name="project" value="LOCAL" />
       <updated>1641634966578</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="# receive messages from request MAM">
+      <created>1641649621106</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1641649621106</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="# get presence mode and type in android running" />
     <MESSAGE value="# get messages from MAM iOS running" />
-    <option name="LAST_COMMIT_MESSAGE" value="# get messages from MAM iOS running" />
+    <MESSAGE value="# receive messages from request MAM" />
+    <option name="LAST_COMMIT_MESSAGE" value="# receive messages from request MAM" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
