@@ -204,6 +204,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     await flutterXmpp.getAdmins(groupName);
   }
 
+  Future<void> changePresenceType(presenceType) async {
+    await flutterXmpp.changePresenceType(presenceType);
+  }
+
   String dropdownvalue = 'Chat';
   var items = ['Chat', 'Group Chat'];
 
@@ -330,17 +334,53 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 ),
                 Builder(
                   builder: (context) {
-                    return ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => mamExamples(flutterXmpp)),
-                        );
-                      },
-                      child: Text("MAM Modules"),
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.black,
-                      ),
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => mamExamples(flutterXmpp)),
+                            );
+                          },
+                          child: Text("MAM Modules"),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.black,
+                          ),
+                        ),
+                        Spacer(),
+                        Column(
+                          mainAxisSize:MainAxisSize.min,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () {
+                                changePresenceType('available');
+                              },
+                              child: Text(
+                                "ChangePresence\nAvailable",
+                                style: TextStyle(fontSize: 10),
+                              ),
+                              //available
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.black,
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () {
+                                changePresenceType('unavailable');
+                              },
+                              child: Text(
+                                "ChangePresence\nUnAvailable",
+                                style: TextStyle(fontSize: 10),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                primary: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     );
                   },
                 ),

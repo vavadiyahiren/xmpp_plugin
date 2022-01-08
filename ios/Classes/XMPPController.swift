@@ -793,28 +793,7 @@ func getMAMMessage(withDMChatJid jid:String,
                    limit : Int,
                    withStrem : XMPPStream,
                    objXMPP : XMPPController) {
-    
-    //let vJid : XMPPJID? = XMPPJID(string: getUser) (jid, withStrem: withStrem))
-    /*
-    let strJID : String = "\(jid)@\(serverName)"
-    let vJID =  XMPPJID(string: strJID)
-            
-    let date = Date(timeIntervalSince1970: Double(timeStamp)/1000.0)
-    let xmppDateString = date.xmppDateTimeString
-    
-    let aParticularDate = XMPPMessageArchiveManagement.field(withVar: "end", type: nil, andValue: xmppDateString)
-    let aJIDField = XMPPMessageArchiveManagement.field(withVar: "with", type: nil, andValue: strJID)
-    var fields: [XMLElement] = []
-    fields.append(aParticularDate)
-    fields.append(aJIDField)
-    
-    //let xmppRS = XMPPResultSet(max: kCOUNTGetHistoryMess)
-    //let xmppRS : XMPPResultSet = XMPPResultSet.init(max: kCOUNTGetHistoryMess, before: messId)
-    let xmppRS : XMPPResultSet = XMPPResultSet.init(max: kCOUNTGetHistoryMess, before: "")
-            
-    xmppMAM?.retrieveMessageArchive(at: vJID, withFields: fields, with: xmppRS)
-    printLog("\(#function) | xmppMAM | jid: \(jid) | time : \(timeStamp) | xmppDateString: \(xmppDateString) | fields: \(fields) | xmppRS: \(xmppRS)", addLogger: true)
-    */
+  
     let onlyJID : String = jid.components(separatedBy: "@").first ?? ""
     let vJIDString : String = getJIDNameForUser(onlyJID, withStrem: withStrem)
     let vJID = XMPPJID(string: vJIDString)
@@ -822,7 +801,7 @@ func getMAMMessage(withDMChatJid jid:String,
     //let vType : String? = "text-single"
     let vType : String? = nil
     var fields: [XMLElement] = []
-    1
+    //1
     // Before
     if tsBefore > 0 {
         let date = Date(timeIntervalSince1970: Double(tsBefore)/1000.0)
@@ -845,19 +824,19 @@ func getMAMMessage(withDMChatJid jid:String,
         fields.append(dateSince)
     }
     
-    let aJIDField = XMPPMessageArchiveManagement.field(withVar: "with",
-                                                       type: nil,
-                                                       andValue: vJIDString)
-    fields.append(aJIDField)
+    //let aJIDField = XMPPMessageArchiveManagement.field(withVar: "with",
+    //                                                   type: nil,
+  //                                                     andValue: vJIDString)
+  //  fields.append(aJIDField)
     
-    // Limit
+    printLog("\(#function) | req mam: since \(tsSince) | vJIDString: \(vJIDString)")    // Limit
     if limit > 0 {
         let xmppRS : XMPPResultSet = XMPPResultSet(max: limit)
-        //self.xmppMAM?.retrieveMessageArchive(at: vJID, withFields: fields, with: xmppRS)
-        objXMPP.xmppMAM?.retrieveMessageArchive(at: vJID, withFields: fields, with: xmppRS)
+       // self.xmppMAM?.retrieveMessageArchiveWithFields( withFields: fields, with: xmppRS)
+        objXMPP.xmppMAM?.retrieveMessageArchive (at: nil, withFields: fields, with:xmppRS)
     }
     else {
-        objXMPP.xmppMAM?.retrieveMessageArchive(at: vJID, withFields: fields, with: nil)
+        objXMPP.xmppMAM?.retrieveMessageArchive(at:nil, withFields: fields, with: nil)
     }
 }
     

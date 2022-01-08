@@ -556,6 +556,14 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 result.success("SUCCESS");
                 break;
 
+            case Constants.CHANGE_PRESENCE_TYPE:
+
+                String presenceType = call.argument(Constants.PRESENCE_TYPE);
+                Utils.printLog("presenceType : " + presenceType);
+                FlutterXmppConnection.updatePresence(presenceType);
+                result.success("SUCCESS");
+                break;
+
             case Constants.GET_MEMBERS:
 
                 groupName = call.argument(Constants.GROUP_NAME);

@@ -9,6 +9,7 @@ public class Constants {
     public static final String ZERO = "0";
     public static final String GET_MAM = "request_mam";
     public static final String GET_TYPING_STATUS = "typing_status";
+    public static final String CHANGE_PRESENCE_TYPE = "change_presence_type";
     public static final String SYMBOL_COMPARE_JID = "@";
     public static final String CREATE_MUC = "create_muc";
     public static final String CONFERENCE = "conference";
@@ -54,6 +55,7 @@ public class Constants {
     public static final String requestSince = "requestSince";
     public static final String limit = "limit";
     public static final String typingStatus = "typingStatus";
+    public static final String ChangePresenceType = "changePresenceType";
 
     public static final String TO = "to";
     public static final String FROM = "from";

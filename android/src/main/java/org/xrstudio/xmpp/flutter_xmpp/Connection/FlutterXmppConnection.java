@@ -482,6 +482,31 @@ public class FlutterXmppConnection implements ConnectionListener {
         }
     }
 
+    public static void updatePresence(String presenceType) {
+        //presenceType is String of ("available" and "unavailable")
+        if (presenceType != null && !presenceType.isEmpty()) {
+
+            try {
+
+                Presence presence = null;
+
+                if (presenceType.equals("unavailable")) {
+                    presence = new Presence(Presence.Type.unavailable);
+                } else if (presenceType.equals("available")) {
+                    presence = new Presence(Presence.Type.available, Constants.ONLINE, 0, Presence.Mode.available);
+                }
+
+                Utils.printLog("Update presence type presenceType: " + presenceType);
+                if (presence != null) {
+                    mConnection.sendStanza(presence);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     private static void broadcastMessageToFlutter(Message message) {
         Utils.addLogInStorage(" Action: receiveMessageFromServer, Content: " + message.toXML(null).toString());
 

@@ -281,4 +281,15 @@ class XmppConnection {
     };
     await _channel.invokeMethod('typing_status', params);
   }
+
+  Future<void> changePresenceType(
+    String presenceType,
+  ) async {
+    print(" Plugin : presenceType : $presenceType ");
+    final params = {
+      "presenceType": presenceType,
+    };
+    await _channel.invokeMethod('change_presence_type', params);
+  }
+
 }
