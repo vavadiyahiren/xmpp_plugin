@@ -25,7 +25,7 @@ public func getCurretTime() -> String {
 }
 
 func printLog<T>(_ message : T) {
-    print(message)
+//    print(message)
 }
 
 func addLogger(_ logType : LogType, _ value : Any) {

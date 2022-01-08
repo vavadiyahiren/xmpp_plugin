@@ -632,6 +632,15 @@ extension XMPPController {
         addLogger(.receiveMessageFromServer, message)
         printLog("\(#function) | didReceive message: \(message)")
         
+        //------------------------------------------------------------------------
+        // Manange MAM Message
+        if let objMessMAM = message.mamResult?.forwardedMessage  {
+            self.manageMAMMessage(message: objMessMAM)
+            return
+        }
+        
+        //------------------------------------------------------------------------
+        //Other Chat message received
         let vMessType : String = (message.type ?? xmppChatType.NORMAL).trim()
         switch vMessType {
         case xmppChatType.NORMAL:
@@ -787,58 +796,93 @@ extension XMPPController : XMPPLastActivityDelegate {
 
 //MARK: - MAM
 extension XMPPController {
-func getMAMMessage(withDMChatJid jid:String,
-                   tsBefore : Int64,
-                   tsSince : Int64,
-                   limit : Int,
-                   withStrem : XMPPStream,
-                   objXMPP : XMPPController) {
-  
-    let onlyJID : String = jid.components(separatedBy: "@").first ?? ""
-    let vJIDString : String = getJIDNameForUser(onlyJID, withStrem: withStrem)
-    let vJID = XMPPJID(string: vJIDString)
+    func getMAMMessage(withDMChatJid jid:String,
+                       tsBefore : Int64,
+                       tsSince : Int64,
+                       limit : Int,
+                       withStrem : XMPPStream,
+                       objXMPP : XMPPController) {
         
-    //let vType : String? = "text-single"
-    let vType : String? = nil
-    var fields: [XMLElement] = []
-    //1
-    // Before
-    if tsBefore > 0 {
-        let date = Date(timeIntervalSince1970: Double(tsBefore)/1000.0)
-        let xmppDateString = date.xmppDateTimeString
+        // If set value nil, system taken default value is - 'text-single'
+        //let vType : String? = "text-single"
+        let vType : String? = nil
+        var fields: [XMLElement] = []
+        //1
+        // Before
+        if tsBefore > 0 {
+            let date = Date(timeIntervalSince1970: Double(tsBefore)/1000.0)
+            let xmppDateString = date.xmppDateTimeString
+            
+            let dateBefore = XMPPMessageArchiveManagement.field(withVar: "end",
+                                                                type: vType,
+                                                                andValue: xmppDateString)
+            fields.append(dateBefore)
+        }
         
-        let dateBefore = XMPPMessageArchiveManagement.field(withVar: "end",
-                                                                 type: vType,
-                                                                 andValue: xmppDateString)
-        fields.append(dateBefore)
+        // Since
+        if tsSince > 0 {
+            let date = Date(timeIntervalSince1970: Double(tsSince)/1000.0)
+            let xmppDateString = date.xmppDateTimeString
+            
+            let dateSince = XMPPMessageArchiveManagement.field(withVar: "start",
+                                                               type: vType,
+                                                               andValue: xmppDateString)
+            fields.append(dateSince)
+        }
+        
+        var jidString : String = jid
+        let isEmptyJid : Bool = jid.trim().isEmpty
+        if !isEmptyJid {
+            let isFullJid : Bool = (jid.components(separatedBy: "@").count == 2)
+            if !isFullJid {
+                jidString = getJIDNameForUser(jid, withStrem: withStrem)
+            }
+            let aJIDField = XMPPMessageArchiveManagement.field(withVar: "with",
+                                                               type: nil,
+                                                               andValue: jidString)
+            fields.append(aJIDField)
+        }
+        printLog("\(#function) | req mam: since \(tsSince) | JIDString: \(jidString)")
+        
+        // Limit
+        if limit > 0 {
+            //let xmppRS : XMPPResultSet = XMPPResultSet(max: limit)
+            //objXMPP.xmppMAM?.retrieveMessageArchive (at: nil, withFields: fields, with:xmppRS)
+            
+            let xmppRS : XMPPResultSet = XMPPResultSet(max: limit)
+            if isEmptyJid {
+                objXMPP.xmppMAM?.retrieveMessageArchive (at: nil, withFields: fields, with:xmppRS)
+            }
+            else {
+                let vJID = XMPPJID(string: jidString)
+                objXMPP.xmppMAM?.retrieveMessageArchive (at: vJID, withFields: fields, with:xmppRS)
+            }
+        }
+        else {
+            //objXMPP.xmppMAM?.retrieveMessageArchive(at:nil, withFields: fields, with: nil)
+            
+            if isEmptyJid {
+                objXMPP.xmppMAM?.retrieveMessageArchive (at: nil, withFields: fields, with:nil)
+            }
+            else {
+                let vJID = XMPPJID(string: jidString)
+                objXMPP.xmppMAM?.retrieveMessageArchive (at: vJID, withFields: fields, with:nil)
+            }
+        }
     }
     
-    // Since
-    if tsSince > 0 {
-        let date = Date(timeIntervalSince1970: Double(tsSince)/1000.0)
-        let xmppDateString = date.xmppDateTimeString
+    func manageMAMMessage(message: XMPPMessage) {
+        printLog("\(#function) | Manange MAMMessage | message: \(message)")
         
-        let dateSince = XMPPMessageArchiveManagement.field(withVar: "start",
-                                                           type: vType,
-                                                           andValue: xmppDateString)
-        fields.append(dateSince)
+        let vMessType : String = (message.type ?? xmppChatType.NORMAL).trim()
+        switch vMessType {
+        case xmppChatType.CHAT, xmppChatType.GROUPCHAT:
+            self.handel_ChatMessage(message, withType: vMessType, withStrem: self.xmppStream)
+            
+        default:
+            break
+        }
     }
-    
-    //let aJIDField = XMPPMessageArchiveManagement.field(withVar: "with",
-    //                                                   type: nil,
-  //                                                     andValue: vJIDString)
-  //  fields.append(aJIDField)
-    
-    printLog("\(#function) | req mam: since \(tsSince) | vJIDString: \(vJIDString)")    // Limit
-    if limit > 0 {
-        let xmppRS : XMPPResultSet = XMPPResultSet(max: limit)
-       // self.xmppMAM?.retrieveMessageArchiveWithFields( withFields: fields, with: xmppRS)
-        objXMPP.xmppMAM?.retrieveMessageArchive (at: nil, withFields: fields, with:xmppRS)
-    }
-    else {
-        objXMPP.xmppMAM?.retrieveMessageArchive(at:nil, withFields: fields, with: nil)
-    }
-}
     
     // MARK: - IQ
     func xmppStream(_ sender: XMPPStream, didSend iq: XMPPIQ) {
@@ -859,16 +903,11 @@ func getMAMMessage(withDMChatJid jid:String,
     }
     
     func xmppMessageArchiveManagement(_ xmppMessageArchiveManagement: XMPPMessageArchiveManagement, didReceiveMAMMessage message: XMPPMessage) {
-        printLog("\(#function) | xmppMAM | message: \(String(describing: message))")
-        
-        let vMessType : String = (message.type ?? xmppChatType.NORMAL).trim()
-        switch vMessType {
-        case xmppChatType.CHAT, xmppChatType.GROUPCHAT:
-            self.handel_ChatMessage(message, withType: vMessType, withStrem: self.xmppStream)
-            
-        default:
-            break
+        guard let objMessMAM = message.mamResult?.forwardedMessage else {
+            printLog("\(#function) | Not getting forwardedMessage in MAM | message: \(message)")
+            return
         }
+        self.manageMAMMessage(message: objMessMAM)
     }
     
     func xmppMessageArchiveManagement(_ xmppMessageArchiveManagement: XMPPMessageArchiveManagement, didFinishReceivingMessagesWith resultSet: XMPPResultSet) {
