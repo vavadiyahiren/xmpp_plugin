@@ -19,6 +19,9 @@ class XMPPController : NSObject {
     var xmppRosterStorage: XMPPRosterCoreDataStorage?
     var xmppLastActivity = XMPPLastActivity()
     
+    /// Using get chat Archive Messages
+    var xmppMAM: XMPPMessageArchiveManagement? // = XMPPMessageArchiveManagement.init()
+    
     internal var hostName: String = ""
     internal var hostPort: Int16 = 0
     internal var userId: String = ""
@@ -78,6 +81,12 @@ class XMPPController : NSObject {
         self.xmppLastActivity = XMPPLastActivity.init()
         self.xmppLastActivity.activate(self.xmppStream)
         self.xmppLastActivity.addDelegate(self, delegateQueue: DispatchQueue.main)
+        
+        //Archive Messge
+        self.xmppMAM = XMPPMessageArchiveManagement.init()
+        self.xmppMAM?.activate(self.xmppStream)
+        self.xmppMAM?.addDelegate(self, delegateQueue: DispatchQueue.main)
+        self.xmppMAM?.retrieveFormFields()
     }
         
     func connect() {
@@ -272,6 +281,7 @@ extension XMPPController : XMPPRoomDelegate {
         sender.configureRoom(usingOptions: newConfiguration)
     }
     
+    // MARK: - Room - IQ
     func xmppRoom(_ sender: XMPPRoom, didConfigure iqResult: XMPPIQ) {
         printLog("\(#function) | XMPPRoom: \(sender) | iqResult: \(iqResult)")
     }
@@ -283,24 +293,6 @@ extension XMPPController : XMPPRoomDelegate {
     func xmppStream(_ sender: XMPPStream, didReceive iq: XMPPIQ) -> Bool {
         printLog("\(#function) | XMPPRoom: \(sender) | iq: \(iq)")
         
-        // error of room joining
-        // room creation error
-        /**
-         <iq
-         xmlns="jabber:client" from="mytestingaabbccddqqwweerrrtttyyy@conference.xrstudio.in" to="test1@xrstudio.in/iOS" id="CB4C2C2C-47A2-4F99-9CE9-E3685CE98DC1" type="error">
-         <query
-         xmlns="http://jabber.org/protocol/muc#owner">
-         </query>
-         <error code="403" type="auth">
-         <forbidden
-         xmlns="urn:ietf:params:xml:ns:xmpp-stanzas">
-         </forbidden>
-         <text
-         xmlns="urn:ietf:params:xml:ns:xmpp-stanzas">Owner privileges required
-         </text>
-         </error>
-         </iq>
-         */
         if let eleError = iq.childErrorElement {
             var vCode : String = ""
             var vErrorMess : String = ""
@@ -790,6 +782,128 @@ extension XMPPController : XMPPLastActivityDelegate {
             return
         }
         objXMPP.xmppLastActivity.sendQuery(to: vJid)
+    }
+}
+
+//MARK: - MAM
+extension XMPPController {
+func getMAMMessage(withDMChatJid jid:String,
+                   tsBefore : Int64,
+                   tsSince : Int64,
+                   limit : Int,
+                   withStrem : XMPPStream,
+                   objXMPP : XMPPController) {
+    
+    //let vJid : XMPPJID? = XMPPJID(string: getUser) (jid, withStrem: withStrem))
+    /*
+    let strJID : String = "\(jid)@\(serverName)"
+    let vJID =  XMPPJID(string: strJID)
+            
+    let date = Date(timeIntervalSince1970: Double(timeStamp)/1000.0)
+    let xmppDateString = date.xmppDateTimeString
+    
+    let aParticularDate = XMPPMessageArchiveManagement.field(withVar: "end", type: nil, andValue: xmppDateString)
+    let aJIDField = XMPPMessageArchiveManagement.field(withVar: "with", type: nil, andValue: strJID)
+    var fields: [XMLElement] = []
+    fields.append(aParticularDate)
+    fields.append(aJIDField)
+    
+    //let xmppRS = XMPPResultSet(max: kCOUNTGetHistoryMess)
+    //let xmppRS : XMPPResultSet = XMPPResultSet.init(max: kCOUNTGetHistoryMess, before: messId)
+    let xmppRS : XMPPResultSet = XMPPResultSet.init(max: kCOUNTGetHistoryMess, before: "")
+            
+    xmppMAM?.retrieveMessageArchive(at: vJID, withFields: fields, with: xmppRS)
+    printLog("\(#function) | xmppMAM | jid: \(jid) | time : \(timeStamp) | xmppDateString: \(xmppDateString) | fields: \(fields) | xmppRS: \(xmppRS)", addLogger: true)
+    */
+    let onlyJID : String = jid.components(separatedBy: "@").first ?? ""
+    let vJIDString : String = getJIDNameForUser(onlyJID, withStrem: withStrem)
+    let vJID = XMPPJID(string: vJIDString)
+        
+    //let vType : String? = "text-single"
+    let vType : String? = nil
+    var fields: [XMLElement] = []
+    1
+    // Before
+    if tsBefore > 0 {
+        let date = Date(timeIntervalSince1970: Double(tsBefore)/1000.0)
+        let xmppDateString = date.xmppDateTimeString
+        
+        let dateBefore = XMPPMessageArchiveManagement.field(withVar: "end",
+                                                                 type: vType,
+                                                                 andValue: xmppDateString)
+        fields.append(dateBefore)
+    }
+    
+    // Since
+    if tsSince > 0 {
+        let date = Date(timeIntervalSince1970: Double(tsSince)/1000.0)
+        let xmppDateString = date.xmppDateTimeString
+        
+        let dateSince = XMPPMessageArchiveManagement.field(withVar: "start",
+                                                           type: vType,
+                                                           andValue: xmppDateString)
+        fields.append(dateSince)
+    }
+    
+    let aJIDField = XMPPMessageArchiveManagement.field(withVar: "with",
+                                                       type: nil,
+                                                       andValue: vJIDString)
+    fields.append(aJIDField)
+    
+    // Limit
+    if limit > 0 {
+        let xmppRS : XMPPResultSet = XMPPResultSet(max: limit)
+        //self.xmppMAM?.retrieveMessageArchive(at: vJID, withFields: fields, with: xmppRS)
+        objXMPP.xmppMAM?.retrieveMessageArchive(at: vJID, withFields: fields, with: xmppRS)
+    }
+    else {
+        objXMPP.xmppMAM?.retrieveMessageArchive(at: vJID, withFields: fields, with: nil)
+    }
+}
+    
+    // MARK: - IQ
+    func xmppStream(_ sender: XMPPStream, didSend iq: XMPPIQ) {
+        printLog("\(#function) | XMPPStream: \(sender) | iq: \(iq)")
+    }
+    
+    //MARK: -
+    func xmppMessageArchiveManagement(_ xmppMessageArchiveManagement: XMPPMessageArchiveManagement, didReceiveFormFields iq: XMPPIQ) {
+        printLog("\(#function) | xmppMAM | iq: \(String(describing: iq))")
+    }
+    
+    func xmppMessageArchiveManagement(_ xmppMessageArchiveManagement: XMPPMessageArchiveManagement, didFailToReceiveFormFields iq: XMPPIQ) {
+        printLog("\(#function) | xmppMAM | iq: \(String(describing: iq))")
+    }
+    
+    func xmppMessageArchiveManagement(_ xmppMessageArchiveManagement: XMPPMessageArchiveManagement, didFailToReceiveMessages error: XMPPIQ?) {
+        printLog("\(#function) | xmppMAM | error: \(String(describing: error))")
+    }
+    
+    func xmppMessageArchiveManagement(_ xmppMessageArchiveManagement: XMPPMessageArchiveManagement, didReceiveMAMMessage message: XMPPMessage) {
+        printLog("\(#function) | xmppMAM | message: \(String(describing: message))")
+        
+        let vMessType : String = (message.type ?? xmppChatType.NORMAL).trim()
+        switch vMessType {
+        case xmppChatType.CHAT, xmppChatType.GROUPCHAT:
+            self.handel_ChatMessage(message, withType: vMessType, withStrem: self.xmppStream)
+            
+        default:
+            break
+        }
+    }
+    
+    func xmppMessageArchiveManagement(_ xmppMessageArchiveManagement: XMPPMessageArchiveManagement, didFinishReceivingMessagesWith resultSet: XMPPResultSet) {
+        /**
+         result set logs | 06-Aug-2021 02:28 pm
+         <set
+         xmlns="http://jabber.org/protocol/rsm">
+         <count>2</count>
+         <first>1627725283801060</first>
+         <last>1627725313877160</last>
+         </set>
+         */
+        printLog("\(#function) | xmppMAM | resultSet: \(String(describing: resultSet))")
+        
     }
 }
 
