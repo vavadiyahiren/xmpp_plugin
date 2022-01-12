@@ -807,6 +807,7 @@ extension XMPPController {
         //let vType : String? = "text-single"
         let vType : String? = nil
         var fields: [XMLElement] = []
+        var defaultLimit : Int = 50
         //1
         // Before
         if tsBefore > 0 {
@@ -830,6 +831,10 @@ extension XMPPController {
             fields.append(dateSince)
         }
         
+        if(limit > 0) {
+            defaultLimit = limit
+        }
+        
         var jidString : String = jid
         let isEmptyJid : Bool = jid.trim().isEmpty
         if !isEmptyJid {
@@ -842,33 +847,11 @@ extension XMPPController {
                                                                andValue: jidString)
             fields.append(aJIDField)
         }
-        printLog("\(#function) | req mam: since \(tsSince) | JIDString: \(jidString)")
-        
-        // Limit
-        if limit > 0 {
-            //let xmppRS : XMPPResultSet = XMPPResultSet(max: limit)
-            //objXMPP.xmppMAM?.retrieveMessageArchive (at: nil, withFields: fields, with:xmppRS)
-            
-            let xmppRS : XMPPResultSet = XMPPResultSet(max: limit)
-            if isEmptyJid {
-                objXMPP.xmppMAM?.retrieveMessageArchive (at: nil, withFields: fields, with:xmppRS)
-            }
-            else {
-                let vJID = XMPPJID(string: jidString)
-                objXMPP.xmppMAM?.retrieveMessageArchive (at: vJID, withFields: fields, with:xmppRS)
-            }
-        }
-        else {
-            //objXMPP.xmppMAM?.retrieveMessageArchive(at:nil, withFields: fields, with: nil)
-            
-            if isEmptyJid {
-                objXMPP.xmppMAM?.retrieveMessageArchive (at: nil, withFields: fields, with:nil)
-            }
-            else {
-                let vJID = XMPPJID(string: jidString)
-                objXMPP.xmppMAM?.retrieveMessageArchive (at: vJID, withFields: fields, with:nil)
-            }
-        }
+        printLog("\(#function) | req mam: since \(tsSince) | JIDString: \(jidString) | Limit \(defaultLimit)")
+  
+         let xmppRS : XMPPResultSet = XMPPResultSet(max: defaultLimit)
+         objXMPP.xmppMAM?.retrieveMessageArchive (at: nil, withFields: fields, with:xmppRS)
+       
     }
     
     func manageMAMMessage(message: XMPPMessage) {
