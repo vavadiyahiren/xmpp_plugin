@@ -283,8 +283,8 @@ public class FlutterXmppConnection implements ConnectionListener {
         try {
 
             Presence presence = rosterConnection.getPresence(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)));
-            presenceMap.put(Constants.TYPE, presence.getType().toString());
-            presenceMap.put(Constants.MODE, presence.getMode().toString());
+            presenceMap.put(Constants.PRESENCE_TYPE, presence.getType().toString().toLowerCase());
+            presenceMap.put(Constants.PRESENCE_MODE, presence.getMode().toString().toLowerCase());
 
         } catch (Exception e) {
             e.printStackTrace();
