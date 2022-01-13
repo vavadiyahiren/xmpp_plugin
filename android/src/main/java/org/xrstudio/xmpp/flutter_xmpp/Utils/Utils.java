@@ -205,7 +205,7 @@ public class Utils {
             intent.putExtra(Constants.META_TEXT, META_TEXT);
             intent.putExtra(Constants.time, time);
             if (chatState != null) {
-                intent.putExtra(Constants.CHATSTATE_TYPE, chatState.toString());
+                intent.putExtra(Constants.CHATSTATE_TYPE, chatState.toString().toLowerCase());
             }
 
             mApplicationContext.sendBroadcast(intent);

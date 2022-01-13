@@ -82,7 +82,7 @@ class _MamExamplesState extends State<MamExamples> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  getTypingStatus(
+                  _changeTypingStatus(
                     _userJidController.text,
                     _chatStateController.text,
                   );
@@ -103,7 +103,7 @@ class _MamExamplesState extends State<MamExamples> {
     widget.flutterXmpp.requestMamMessages(userJid, requestSince, requestBefore, limit);
   }
 
-  void getTypingStatus(userJid, typingStatus) {
-    widget.flutterXmpp.getTypingStatus(userJid, typingStatus);
+  void _changeTypingStatus(userJid, typingStatus) {
+    widget.flutterXmpp.changeTypingStatus(userJid, typingStatus);
   }
 }

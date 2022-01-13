@@ -270,7 +270,7 @@ class XmppConnection {
     await _channel.invokeMethod('request_mam', params);
   }
 
-  Future<void> getTypingStatus(
+  Future<void> changeTypingStatus(
     String userJid,
     String typingstatus,
   ) async {
@@ -279,7 +279,7 @@ class XmppConnection {
       "userJid": userJid,
       "typingStatus": typingstatus,
     };
-    await _channel.invokeMethod('typing_status', params);
+    await _channel.invokeMethod('change_typing_status', params);
   }
 
   Future<void> changePresenceType(

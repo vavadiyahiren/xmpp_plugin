@@ -548,7 +548,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
 
                 break;
 
-            case Constants.GET_TYPING_STATUS:
+            case Constants.CHANGE_TYPING_STATUS:
 
                 String typingJid = call.argument(Constants.userJid);
                 String typingStatus = call.argument(Constants.typingStatus);
