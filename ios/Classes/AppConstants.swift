@@ -46,6 +46,7 @@ struct pluginMethod {
     static let getLastSeen : String                 = "get_last_seen"
     static let createRosters : String               = "create_roster"
     static let getMyRosters : String                = "get_my_rosters"
+    static let reqMAM : String                      = "request_mam"
 }
 
 struct pluginMessType {

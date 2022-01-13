@@ -9,14 +9,12 @@ import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.ReconnectionManager;
 import org.jivesoftware.smack.SmackException;
-import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.filter.StanzaFilter;
+import org.jivesoftware.smack.filter.StanzaTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.StandardExtensionElement;
-import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.roster.Roster;
 import org.jivesoftware.smack.roster.RosterEntry;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
@@ -26,7 +24,6 @@ import org.jivesoftware.smackx.chatstates.ChatState;
 import org.jivesoftware.smackx.chatstates.packet.ChatStateExtension;
 import org.jivesoftware.smackx.iqlast.LastActivityManager;
 import org.jivesoftware.smackx.iqlast.packet.LastActivity;
-import org.jivesoftware.smackx.mam.MamManager;
 import org.jivesoftware.smackx.muc.Affiliate;
 import org.jivesoftware.smackx.muc.MucEnterConfiguration;
 import org.jivesoftware.smackx.muc.MultiUserChat;
@@ -39,9 +36,12 @@ import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.jid.parts.Resourcepart;
 import org.xrstudio.xmpp.flutter_xmpp.Enum.ConnectionState;
-import org.xrstudio.xmpp.flutter_xmpp.Enum.GROUP_ROLE;
+import org.xrstudio.xmpp.flutter_xmpp.Enum.GroupRole;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Constants;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Utils;
+import org.xrstudio.xmpp.flutter_xmpp.listner.MessageListner;
+import org.xrstudio.xmpp.flutter_xmpp.listner.PresenceListnerAndFilter;
+import org.xrstudio.xmpp.flutter_xmpp.listner.StanzaAckListner;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -60,8 +60,8 @@ import javax.net.ssl.TrustManager;
 public class FlutterXmppConnection implements ConnectionListener {
 
     public static String mHost;
+    public static String mUsername = "";
     private static String mPassword;
-    private static String mUsername = "";
     private static String mResource = "";
     private static Roster rosterConnection;
     private static String mServiceName = "";
@@ -93,6 +93,14 @@ public class FlutterXmppConnection implements ConnectionListener {
                 mResource = Constants.ANDROID;
             }
         }
+    }
+
+    public static Context getApplicationContext() {
+        return mApplicationContext;
+    }
+
+    public static XMPPTCPConnection getConnection() {
+        return mConnection == null ? new XMPPTCPConnection(null) : mConnection;
     }
 
     public static void sendCustomMessage(String body, String toJid, String msgId, String customText, boolean isDm, String time) {
@@ -165,7 +173,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         }
     }
 
-    public static void manageAddMembersInGroup(GROUP_ROLE groupRole, String groupName, ArrayList<String> membersJid) {
+    public static void manageAddMembersInGroup(GroupRole groupRole, String groupName, ArrayList<String> membersJid) {
 
         try {
 
@@ -179,9 +187,9 @@ public class FlutterXmppConnection implements ConnectionListener {
             }
 
             MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
-            if (groupRole == GROUP_ROLE.ADMIN) {
+            if (groupRole == GroupRole.ADMIN) {
                 muc.grantAdmin(jidList);
-            } else if (groupRole == GROUP_ROLE.MEMBER) {
+            } else if (groupRole == GroupRole.MEMBER) {
                 muc.grantMembership(jidList);
             }
         } catch (Exception e) {
@@ -189,7 +197,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         }
     }
 
-    public static void manageRemoveFromGroup(GROUP_ROLE groupRole, String groupName, ArrayList<String> membersJid) {
+    public static void manageRemoveFromGroup(GroupRole groupRole, String groupName, ArrayList<String> membersJid) {
 
         try {
 
@@ -203,13 +211,13 @@ public class FlutterXmppConnection implements ConnectionListener {
             }
 
             MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
-            if (groupRole == GROUP_ROLE.ADMIN) {
+            if (groupRole == GroupRole.ADMIN) {
 
                 for (Jid jid : jidList) {
                     muc.revokeAdmin(jid.asEntityJidOrThrow());
                 }
 
-            } else if (groupRole == GROUP_ROLE.MEMBER) {
+            } else if (groupRole == GroupRole.MEMBER) {
                 muc.revokeMembership(jidList);
             }
         } catch (Exception e) {
@@ -217,18 +225,18 @@ public class FlutterXmppConnection implements ConnectionListener {
         }
     }
 
-    public static List<String> getMembersOrAdminsOrOwners(GROUP_ROLE groupRole, String groupName) {
+    public static List<String> getMembersOrAdminsOrOwners(GroupRole groupRole, String groupName) {
         List<String> jidList = new ArrayList<>();
 
         try {
             List<Affiliate> affiliates;
 
             MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
-            if (groupRole == GROUP_ROLE.ADMIN) {
+            if (groupRole == GroupRole.ADMIN) {
                 affiliates = muc.getAdmins();
-            } else if (groupRole == GROUP_ROLE.MEMBER) {
+            } else if (groupRole == GroupRole.MEMBER) {
                 affiliates = muc.getMembers();
-            } else if (groupRole == GROUP_ROLE.OWNER) {
+            } else if (groupRole == GroupRole.OWNER) {
                 affiliates = muc.getOwners();
             } else {
                 affiliates = new ArrayList<>();
@@ -275,8 +283,8 @@ public class FlutterXmppConnection implements ConnectionListener {
         try {
 
             Presence presence = rosterConnection.getPresence(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)));
-            presenceMap.put(Constants.TYPE, presence.getType().toString());
-            presenceMap.put(Constants.MODE, presence.getMode().toString());
+            presenceMap.put(Constants.PRESENCE_TYPE, presence.getType().toString().toLowerCase());
+            presenceMap.put(Constants.PRESENCE_MODE, presence.getMode().toString().toLowerCase());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -406,139 +414,41 @@ public class FlutterXmppConnection implements ConnectionListener {
         return isJoinedSuccessfully;
     }
 
-    public static void requestMAM(String userJid, String requestBefore, String requestSince, String limit) {
+    public static void updateChatState(String jid, String status) {
+
         try {
 
-            MamManager mamManager = MamManager.getInstanceFor(mConnection);
-            MamManager.MamQueryArgs.Builder queryArgs = MamManager.MamQueryArgs.builder();
+            Jid toJid = Utils.getFullJid(jid);
 
-            if (requestBefore != null && !requestBefore.isEmpty()) {
-                long requestBeforets = Long.parseLong(requestBefore);
-                if (requestBeforets > 0)
-                    queryArgs.limitResultsBefore(new Date(requestBeforets));
-            }
-            if (requestSince != null && !requestSince.isEmpty()) {
-                long requestAfterts = Long.parseLong(requestSince);
-                if (requestAfterts > 0)
-                    queryArgs.limitResultsSince(new Date(requestAfterts));
-            }
-            if (limit != null && !limit.isEmpty()) {
+            Message message = new Message(toJid);
+            ChatState chatState = ChatState.valueOf(status);
+            message.addExtension(new ChatStateExtension(chatState));
 
-                int limitMessage = Integer.parseInt(limit);
-                if (limitMessage > 0) {
-                    queryArgs.setResultPageSizeTo(limitMessage);
-                } else {
-                    queryArgs.setResultPageSizeTo(Integer.MAX_VALUE);
-                }
-
-            }
-            userJid = Utils.getValidJid(userJid);
-
-            if (userJid != null && !userJid.isEmpty()) {
-                Jid jid = Utils.getFullJid(userJid);
-                queryArgs.limitResultsToJid(jid);
-            }
-
-            Utils.printLog("MAM query Args " + queryArgs.toString());
-            MamManager.MamQuery query = mamManager.queryArchive(queryArgs.build());
-            List<Message> messageList = query.getMessages();
-
-            for (Message message : messageList) {
-                Utils.printLog("Received Message " + message.toXML(null));
-                broadcastMessageToFlutter(message);
-            }
+            Utils.printLog("Sending Typing status " + message.toXML(null));
+            mConnection.sendStanza(message);
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void updateChatState(String jid, String status) {
+    public static void updatePresence(String presenceType, String presenceMode) {
 
-        Jid toJid = Utils.getFullJid(jid);
+        try {
 
-        if (status != null && !status.isEmpty()) {
+            Presence presence = null;
 
-            try {
+            Presence.Type type = Presence.Type.valueOf(presenceType);
+            Presence.Mode mode = Presence.Mode.valueOf(presenceMode);
 
-                Message message = new Message(toJid);
-                ChatStateExtension extension = null;
+            presence = new Presence(type);
+            presence.setMode(mode);
+            mConnection.sendStanza(presence);
 
-                if (status.equals("composing")) {
-                    extension = new ChatStateExtension(ChatState.composing);
-                } else if (status.equals("paused")) {
-                    extension = new ChatStateExtension(ChatState.paused);
-                }
-
-                if (extension != null) {
-                    message.addExtension(extension);
-                }
-                Utils.printLog("Sending Typing status " + message.toXML(null));
-                mConnection.sendStanza(message);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    private static void broadcastMessageToFlutter(Message message) {
-        Utils.addLogInStorage(" Action: receiveMessageFromServer, Content: " + message.toXML(null).toString());
-
-        String META_TEXT = Constants.MESSAGE;
-        String body = message.getBody();
-        String from = message.getFrom().toString();
-        String msgId = message.getStanzaId();
-        String customText = "";
-        StandardExtensionElement customElement = (StandardExtensionElement) message
-                .getExtension(Constants.URN_XMPP_CUSTOM);
-        if (customElement != null && customElement.getFirstElement(Constants.custom) != null) {
-            customText = customElement.getFirstElement(Constants.custom).getText();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        String time = Constants.ZERO;
-        if (message.getExtension(Constants.URN_XMPP_TIME) != null) {
-            StandardExtensionElement timeElement = (StandardExtensionElement) message
-                    .getExtension(Constants.URN_XMPP_TIME);
-            if (timeElement != null && timeElement.getFirstElement(Constants.TS) != null) {
-                time = timeElement.getFirstElement(Constants.TS).getText();
-            }
-        }
-
-        if (message.hasExtension(DeliveryReceipt.ELEMENT, DeliveryReceipt.NAMESPACE)) {
-            DeliveryReceipt dr = DeliveryReceipt.from((Message) message);
-            msgId = dr.getId();
-            META_TEXT = Constants.DELIVERY_ACK;
-        }
-        ChatState chatState = null;
-
-        if (message.hasExtension(ChatStateExtension.NAMESPACE)) {
-            META_TEXT = Constants.CHATSTATE;
-            ChatStateExtension chatStateExtension = (ChatStateExtension) message.getExtension(ChatStateExtension.NAMESPACE);
-            chatState = chatStateExtension.getChatState();
-        }
-
-        String mediaURL = "";
-
-        if (!from.equals(mUsername)) {
-            //Bundle up the intent and send the broadcast.
-            Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
-            intent.setPackage(mApplicationContext.getPackageName());
-            intent.putExtra(Constants.BUNDLE_FROM_JID, from);
-            intent.putExtra(Constants.BUNDLE_MESSAGE_BODY, body);
-            intent.putExtra(Constants.BUNDLE_MESSAGE_PARAMS, msgId);
-            intent.putExtra(Constants.BUNDLE_MESSAGE_TYPE, message.getType().toString());
-            intent.putExtra(Constants.BUNDLE_MESSAGE_SENDER_JID, from);
-            intent.putExtra(Constants.MEDIA_URL, mediaURL);
-            intent.putExtra(Constants.CUSTOM_TEXT, customText);
-            intent.putExtra(Constants.META_TEXT, META_TEXT);
-            intent.putExtra(Constants.time, time);
-            if (chatState != null) {
-                intent.putExtra(Constants.CHATSTATE_TYPE, chatState.toString());
-            }
-
-            mApplicationContext.sendBroadcast(intent);
-        }
     }
 
     public void connect() throws IOException, XMPPException, SmackException {
@@ -556,7 +466,6 @@ public class FlutterXmppConnection implements ConnectionListener {
         } else {
 
             Utils.printLog(" not valid host: ");
-
             conf.setHost(mHost);
         }
 
@@ -583,7 +492,7 @@ public class FlutterXmppConnection implements ConnectionListener {
             conf.setCustomSSLContext(context);
 
             conf.setKeystoreType(null);
-            conf.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
+            conf.setSecurityMode(ConnectionConfiguration.SecurityMode.required);
         }
 
         Utils.printLog(" connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + Constants.PORT + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource);
@@ -606,74 +515,13 @@ public class FlutterXmppConnection implements ConnectionListener {
             e.printStackTrace();
         }
 
-        mConnection.addSyncStanzaListener(new StanzaListener() {
-            @Override
-            public void processStanza(Stanza packet) {
-                Presence presence = (Presence) packet;
-                String jid = presence.getFrom().toString();
-                Presence.Type type = presence.getType();
-                Presence.Mode mode = presence.getMode();
-                Intent intent = new Intent(Constants.PRESENCE_MESSAGE);
-                intent.setPackage(mApplicationContext.getPackageName());
-                intent.putExtra(Constants.BUNDLE_FROM_JID, jid);
-                intent.putExtra(Constants.BUNDLE_PRESENCE_TYPE, type.toString().toLowerCase());
-                intent.putExtra(Constants.BUNDLE_PRESENCE_MODE, mode.toString().toLowerCase());
-                mApplicationContext.sendBroadcast(intent);
-            }
-        }, new StanzaFilter() {
-            @Override
-            public boolean accept(Stanza stanza) {
-                return stanza instanceof Presence;
-            }
-        });
-
-        mConnection.addStanzaAcknowledgedListener(new StanzaListener() {
-            @Override
-            public void processStanza(Stanza packet) throws SmackException.NotConnectedException, InterruptedException, SmackException.NotLoggedInException {
-
-                if (packet instanceof Message) {
-
-                    Message ackMessage = (Message) packet;
-
-                    Utils.addLogInStorage(" Action: receiveStanzaAckFromServer, Content: " + ackMessage.toXML(null).toString());
-
-                    //Bundle up the intent and send the broadcast.
-                    Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
-                    intent.setPackage(mApplicationContext.getPackageName());
-                    intent.putExtra(Constants.BUNDLE_FROM_JID, ackMessage.getTo().toString());
-                    intent.putExtra(Constants.BUNDLE_MESSAGE_BODY, ackMessage.getBody());
-                    intent.putExtra(Constants.BUNDLE_MESSAGE_PARAMS, ackMessage.getStanzaId());
-                    intent.putExtra(Constants.BUNDLE_MESSAGE_TYPE, ackMessage.getType().toString());
-                    intent.putExtra(Constants.META_TEXT, Constants.ACK);
-                    mApplicationContext.sendBroadcast(intent);
-                }
-
-
-            }
-        });
-
         setupUiThreadBroadCastMessageReceiver();
 
-        mConnection.addSyncStanzaListener(new StanzaListener() {
-            @Override
-            public void processStanza(Stanza packet) throws SmackException.NotConnectedException, InterruptedException, SmackException.NotLoggedInException {
+        mConnection.addSyncStanzaListener(new PresenceListnerAndFilter(mApplicationContext), StanzaTypeFilter.PRESENCE);
 
-                try {
+        mConnection.addStanzaAcknowledgedListener(new StanzaAckListner(mApplicationContext));
 
-                    Message message = (Message) packet;
-                    broadcastMessageToFlutter(message);
-
-                } catch (Exception e) {
-                    Utils.printLog(" Main Exception : " + e.getLocalizedMessage());
-                }
-
-            }
-        }, new StanzaFilter() {
-            @Override
-            public boolean accept(Stanza stanza) {
-                return stanza instanceof Message;
-            }
-        });
+        mConnection.addSyncStanzaListener(new MessageListner(mApplicationContext), StanzaTypeFilter.MESSAGE);
 
         ReconnectionManager reconnectionManager = ReconnectionManager.getInstanceFor(mConnection);
         ReconnectionManager.setEnabledPerDefault(true);

@@ -1,8 +1,15 @@
 package org.xrstudio.xmpp.flutter_xmpp.Utils;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
 
+import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.StandardExtensionElement;
+import org.jivesoftware.smackx.chatstates.ChatState;
+import org.jivesoftware.smackx.chatstates.packet.ChatStateExtension;
+import org.jivesoftware.smackx.receipts.DeliveryReceipt;
 import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
@@ -141,5 +148,71 @@ public class Utils {
         if (FlutterXmppPlugin.DEBUG) {
             Log.d(Constants.TAG, message);
         }
+    }
+
+    public static void broadcastMessageToFlutter(Context mApplicationContext, Message message) {
+
+        Utils.addLogInStorage(" Action: receiveMessageFromServer, Content: " + message.toXML(null).toString());
+
+        String META_TEXT = Constants.MESSAGE;
+        String body = message.getBody();
+        String from = message.getFrom().toString();
+        String msgId = message.getStanzaId();
+        String customText = "";
+
+        StandardExtensionElement customElement = (StandardExtensionElement) message
+                .getExtension(Constants.URN_XMPP_CUSTOM);
+        if (customElement != null && customElement.getFirstElement(Constants.custom) != null) {
+            customText = customElement.getFirstElement(Constants.custom).getText();
+        }
+
+        String time = Constants.ZERO;
+        if (message.getExtension(Constants.URN_XMPP_TIME) != null) {
+            StandardExtensionElement timeElement = (StandardExtensionElement) message
+                    .getExtension(Constants.URN_XMPP_TIME);
+            if (timeElement != null && timeElement.getFirstElement(Constants.TS) != null) {
+                time = timeElement.getFirstElement(Constants.TS).getText();
+            }
+        }
+
+        if (message.hasExtension(DeliveryReceipt.ELEMENT, DeliveryReceipt.NAMESPACE)) {
+            DeliveryReceipt dr = DeliveryReceipt.from((Message) message);
+            msgId = dr.getId();
+            META_TEXT = Constants.DELIVERY_ACK;
+        }
+
+        ChatState chatState = null;
+
+        if (message.hasExtension(ChatStateExtension.NAMESPACE)) {
+            META_TEXT = Constants.CHATSTATE;
+            ChatStateExtension chatStateExtension = (ChatStateExtension) message.getExtension(ChatStateExtension.NAMESPACE);
+            chatState = chatStateExtension.getChatState();
+        }
+
+        String mediaURL = "";
+
+        if (!from.equals(FlutterXmppConnection.mUsername)) {
+            //Bundle up the intent and send the broadcast.
+            Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
+            intent.setPackage(mApplicationContext.getPackageName());
+            intent.putExtra(Constants.BUNDLE_FROM_JID, from);
+            intent.putExtra(Constants.BUNDLE_MESSAGE_BODY, body);
+            intent.putExtra(Constants.BUNDLE_MESSAGE_PARAMS, msgId);
+            intent.putExtra(Constants.BUNDLE_MESSAGE_TYPE, message.getType().toString());
+            intent.putExtra(Constants.BUNDLE_MESSAGE_SENDER_JID, from);
+            intent.putExtra(Constants.MEDIA_URL, mediaURL);
+            intent.putExtra(Constants.CUSTOM_TEXT, customText);
+            intent.putExtra(Constants.META_TEXT, META_TEXT);
+            intent.putExtra(Constants.time, time);
+            if (chatState != null) {
+                intent.putExtra(Constants.CHATSTATE_TYPE, chatState.toString().toLowerCase());
+            }
+
+            mApplicationContext.sendBroadcast(intent);
+        }
+    }
+
+    public  static void sendBroadcast(){
+
     }
 }

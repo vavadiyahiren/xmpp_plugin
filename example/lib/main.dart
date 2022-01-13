@@ -204,8 +204,35 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     await flutterXmpp.getAdmins(groupName);
   }
 
-  String dropdownvalue = 'Chat';
+  Future<void> changePresenceType(presenceType, presenceMode) async {
+    await flutterXmpp.changePresenceType(presenceType, presenceMode);
+  }
+
+  String dropDownValue = 'Chat';
   var items = ['Chat', 'Group Chat'];
+
+  ///
+  String presenceType = 'available';
+  var presenceTypeItems = [
+    'available',
+    'unavailable',
+    'subscribe',
+    'subscribed',
+    'unsubscribe',
+    'unsubscribed',
+    'error',
+    'probe',
+  ];
+
+  ///
+  String presenceMode = 'available';
+  var presenceModeitems = [
+    'chat',
+    'available',
+    'away',
+    'xa',
+    'dnd',
+  ];
 
   TextEditingController _userNameController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
@@ -330,19 +357,80 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 ),
                 Builder(
                   builder: (context) {
-                    return ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => mamExamples(flutterXmpp)),
-                        );
-                      },
-                      child: Text("MAM Modules"),
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.black,
-                      ),
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => MamExamples(flutterXmpp)),
+                            );
+                          },
+                          child: Text("MAM Modules"),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.black,
+                          ),
+                        ),
+                        Spacer(),
+                      ],
                     );
                   },
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Presence Type: "),
+                    DropdownButton(
+                      value: presenceType,
+                      icon: Icon(Icons.keyboard_arrow_down),
+                      items: presenceTypeItems.map(
+                        (String items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Text(items),
+                          );
+                        },
+                      ).toList(),
+                      onChanged: (val) {
+                        setState(
+                          () {
+                            presenceType = val.toString();
+                            changePresenceType(presenceType, presenceMode);
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Presence Mode: "),
+                    DropdownButton(
+                      value: presenceMode,
+                      icon: Icon(Icons.keyboard_arrow_down),
+                      items: presenceModeitems.map(
+                        (String items) {
+                          return DropdownMenuItem(
+                            value: items,
+                            child: Text(items),
+                          );
+                        },
+                      ).toList(),
+                      onChanged: (val) {
+                        setState(
+                          () {
+                            presenceMode = val.toString();
+                            changePresenceType(presenceType, presenceMode);
+                          },
+                        );
+                      },
+                    ),
+                  ],
                 ),
                 SizedBox(
                   height: 10,
@@ -355,6 +443,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   height: 10,
                 ),
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Flexible(
                       child: ElevatedButton(
@@ -370,36 +459,39 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     SizedBox(
                       width: 45,
                     ),
-                    Builder(builder: (context) {
-                      return Flexible(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            await createMUC("${_createMUCNamecontroller.text}", true);
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
+                    Builder(
+                      builder: (context) {
+                        return Flexible(
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              await createMUC("${_createMUCNamecontroller.text}", true);
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
                                   builder: (context) => HomePage(
-                                        groupName: _createMUCNamecontroller.text,
-                                        addMembersInGroup: addMembersInGroup,
-                                        addAdminsInGroup: addAdminsInGroup,
-                                        removeMember: removeMember,
-                                        removeAdmin: removeAdmin,
-                                        addOwner: addOwner,
-                                        removeOwner: removeOwner,
-                                        getAdmins: getAdmins,
-                                        getMembers: getMembers,
-                                        getOwners: getOwners,
-                                        getOnlineMemberCount: getOnlineMemberCount,
-                                      )),
-                            );
-                          },
-                          child: Text('Create Group & Manage'),
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors.black,
+                                    groupName: _createMUCNamecontroller.text,
+                                    addMembersInGroup: addMembersInGroup,
+                                    addAdminsInGroup: addAdminsInGroup,
+                                    removeMember: removeMember,
+                                    removeAdmin: removeAdmin,
+                                    addOwner: addOwner,
+                                    removeOwner: removeOwner,
+                                    getAdmins: getAdmins,
+                                    getMembers: getMembers,
+                                    getOwners: getOwners,
+                                    getOnlineMemberCount: getOnlineMemberCount,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Text('Create Group & Manage'),
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors.black,
+                            ),
                           ),
-                        ),
-                      );
-                    }),
+                        );
+                      },
+                    ),
                   ],
                 ),
                 SizedBox(
@@ -456,18 +548,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   height: 10,
                 ),
                 DropdownButton(
-                  value: dropdownvalue,
+                  value: dropDownValue,
                   icon: Icon(Icons.keyboard_arrow_down),
-                  items: items.map((String items) {
-                    return DropdownMenuItem(
-                      value: items,
-                      child: Text(items),
-                    );
-                  }).toList(),
+                  items: items.map(
+                    (String items) {
+                      return DropdownMenuItem(
+                        value: items,
+                        child: Text(items),
+                      );
+                    },
+                  ).toList(),
                   onChanged: (val) {
-                    setState(() {
-                      dropdownvalue = val.toString();
-                    });
+                    setState(
+                      () {
+                        dropDownValue = val.toString();
+                      },
+                    );
                   },
                 ),
                 SizedBox(
@@ -479,7 +575,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     ElevatedButton(
                       onPressed: () async {
                         int id = DateTime.now().millisecondsSinceEpoch;
-                        (dropdownvalue == "Chat")
+                        (dropDownValue == "Chat")
                             ? await flutterXmpp.sendMessageWithType(
                                 "${_toNameController.text}",
                                 "${_messageController.text}",
@@ -493,13 +589,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       },
                       child: Text(" Send "),
                       style: ElevatedButton.styleFrom(
-                        primary: (dropdownvalue == "Chat") ? Colors.black : Colors.deepPurple,
+                        primary: (dropDownValue == "Chat") ? Colors.black : Colors.deepPurple,
                       ),
                     ),
                     ElevatedButton(
                       onPressed: () async {
                         int id = DateTime.now().millisecondsSinceEpoch;
-                        (dropdownvalue == "Chat")
+                        (dropDownValue == "Chat")
                             ? await flutterXmpp.sendCustomMessage(
                                 "${_toNameController.text}",
                                 "${_messageController.text}",
@@ -515,7 +611,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       },
                       child: Text(" Send Custom Message "),
                       style: ElevatedButton.styleFrom(
-                        primary: (dropdownvalue == "Chat") ? Colors.black : Colors.deepPurple,
+                        primary: (dropDownValue == "Chat") ? Colors.black : Colors.deepPurple,
                       ),
                     ),
                   ],

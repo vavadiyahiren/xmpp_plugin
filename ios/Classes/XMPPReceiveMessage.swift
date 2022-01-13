@@ -12,6 +12,8 @@ import XMPPFramework
 extension XMPPController {
     
     func handel_ChatMessage(_ message: XMPPMessage, withType type : String, withStrem : XMPPStream) {
+        
+        printLog("handling message \(String(describing: message))")
         if APP_DELEGATE.objEventData == nil {
             print("\(#function) | Nil data of APP_DELEGATE.objEventData")
             return

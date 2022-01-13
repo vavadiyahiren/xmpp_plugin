@@ -10,9 +10,10 @@ import androidx.annotation.NonNull;
 import org.xrstudio.xmpp.flutter_xmpp.Connection.FlutterXmppConnection;
 import org.xrstudio.xmpp.flutter_xmpp.Connection.FlutterXmppConnectionService;
 import org.xrstudio.xmpp.flutter_xmpp.Enum.ConnectionState;
-import org.xrstudio.xmpp.flutter_xmpp.Enum.GROUP_ROLE;
+import org.xrstudio.xmpp.flutter_xmpp.Enum.GroupRole;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Constants;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Utils;
+import org.xrstudio.xmpp.flutter_xmpp.managers.MAMManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -144,7 +145,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                     // Handle the auth status events.
                     case Constants.PRESENCE_MESSAGE:
 
-                        String jid = intent.getStringExtra(Constants.BUNDLE_TO_JID);
+                        String jid = intent.getStringExtra(Constants.BUNDLE_FROM_JID);
                         String presenceType = intent.getStringExtra(Constants.BUNDLE_PRESENCE_TYPE);
                         String presenceMode = intent.getStringExtra(Constants.BUNDLE_PRESENCE_MODE);
 
@@ -466,7 +467,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 groupName = call.argument(Constants.GROUP_NAME);
                 membersJid = call.argument(Constants.MEMBERS_JID);
 
-                FlutterXmppConnection.manageAddMembersInGroup(GROUP_ROLE.MEMBER, groupName, membersJid);
+                FlutterXmppConnection.manageAddMembersInGroup(GroupRole.MEMBER, groupName, membersJid);
 
                 result.success(Constants.SUCCESS);
                 break;
@@ -476,7 +477,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 groupName = call.argument(Constants.GROUP_NAME);
                 membersJid = call.argument(Constants.MEMBERS_JID);
 
-                FlutterXmppConnection.manageAddMembersInGroup(GROUP_ROLE.ADMIN, groupName, membersJid);
+                FlutterXmppConnection.manageAddMembersInGroup(GroupRole.ADMIN, groupName, membersJid);
 
                 result.success(Constants.SUCCESS);
                 break;
@@ -486,7 +487,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 groupName = call.argument(Constants.GROUP_NAME);
                 membersJid = call.argument(Constants.MEMBERS_JID);
 
-                FlutterXmppConnection.manageRemoveFromGroup(GROUP_ROLE.MEMBER, groupName, membersJid);
+                FlutterXmppConnection.manageRemoveFromGroup(GroupRole.MEMBER, groupName, membersJid);
 
                 result.success(Constants.SUCCESS);
                 break;
@@ -496,7 +497,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 groupName = call.argument(Constants.GROUP_NAME);
                 membersJid = call.argument(Constants.MEMBERS_JID);
 
-                FlutterXmppConnection.manageRemoveFromGroup(GROUP_ROLE.ADMIN, groupName, membersJid);
+                FlutterXmppConnection.manageRemoveFromGroup(GroupRole.ADMIN, groupName, membersJid);
 
                 result.success(Constants.SUCCESS);
                 break;
@@ -506,7 +507,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 groupName = call.argument(Constants.GROUP_NAME);
                 membersJid = call.argument(Constants.MEMBERS_JID);
 
-                FlutterXmppConnection.manageAddMembersInGroup(GROUP_ROLE.OWNER, groupName, membersJid);
+                FlutterXmppConnection.manageAddMembersInGroup(GroupRole.OWNER, groupName, membersJid);
 
                 result.success(Constants.SUCCESS);
                 break;
@@ -516,7 +517,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 groupName = call.argument(Constants.GROUP_NAME);
                 membersJid = call.argument(Constants.MEMBERS_JID);
 
-                FlutterXmppConnection.manageRemoveFromGroup(GROUP_ROLE.OWNER, groupName, membersJid);
+                FlutterXmppConnection.manageRemoveFromGroup(GroupRole.OWNER, groupName, membersJid);
 
                 result.success(Constants.SUCCESS);
                 break;
@@ -524,14 +525,14 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
             case Constants.GET_OWNERS:
 
                 groupName = call.argument(Constants.GROUP_NAME);
-                jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.OWNER, groupName);
+                jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GroupRole.OWNER, groupName);
                 result.success(jidList);
                 break;
 
             case Constants.GET_ADMINS:
 
                 groupName = call.argument(Constants.GROUP_NAME);
-                jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.ADMIN, groupName);
+                jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GroupRole.ADMIN, groupName);
                 result.success(jidList);
                 break;
 
@@ -542,12 +543,12 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 String requestSince = call.argument(Constants.requestSince);
                 String limit = call.argument(Constants.limit);
                 Utils.printLog("userJId " + userJid + " Before : " + requestBefore + " since " + requestSince + " limit " + limit);
-                FlutterXmppConnection.requestMAM(userJid, requestBefore, requestSince, limit);
+                MAMManager.requestMAM(userJid, requestBefore, requestSince, limit);
                 result.success("SUCCESS");
 
                 break;
 
-            case Constants.GET_TYPING_STATUS:
+            case Constants.CHANGE_TYPING_STATUS:
 
                 String typingJid = call.argument(Constants.userJid);
                 String typingStatus = call.argument(Constants.typingStatus);
@@ -556,10 +557,19 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 result.success("SUCCESS");
                 break;
 
+            case Constants.CHANGE_PRESENCE_TYPE:
+
+                String presenceType = call.argument(Constants.PRESENCE_TYPE);
+                String presenceMode = call.argument(Constants.PRESENCE_MODE);
+                Utils.printLog("presenceType : " + presenceType + " , Presence Mode : " + presenceMode);
+                FlutterXmppConnection.updatePresence(presenceType, presenceMode);
+                result.success("SUCCESS");
+                break;
+
             case Constants.GET_MEMBERS:
 
                 groupName = call.argument(Constants.GROUP_NAME);
-                jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GROUP_ROLE.MEMBER, groupName);
+                jidList = FlutterXmppConnection.getMembersOrAdminsOrOwners(GroupRole.MEMBER, groupName);
                 result.success(jidList);
                 break;
 

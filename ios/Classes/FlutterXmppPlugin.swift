@@ -95,6 +95,9 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             
         case pluginMethod.getMyRosters:
             self.getMyRostersActivity(call, result)
+           
+        case pluginMethod.reqMAM:
+            self.manageMAMActivity(call, result)
             
         default:
             guard let vData = call.arguments as? [String : Any] else {
@@ -418,6 +421,36 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         APP_DELEGATE.singalCallBack = result
         APP_DELEGATE.objXMPP.getMyRosters(withStrem: self.objXMPP.xmppStream, objXMPP: self.objXMPP)
         //result(xmppConstants.SUCCESS)
+    }
+    
+    func manageMAMActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
+        //var vData : [String : Any]?
+        //if let data = call.arguments as? [String : Any] { vData = data }
+        guard let vData = call.arguments as? [String : Any] else {
+            result(xmppConstants.DataNil);
+            return
+        }
+        var vJid : String = ""
+        var vTSBefore : Int64 = 0
+        var vTSSince : Int64 = 0
+        var vLimit : Int = 0
+        if let value = vData["userJid"] as? String { vJid = value }
+        if let value = vData["requestBefore"] as? String {
+            vTSBefore = Int64(value) ?? vTSBefore
+        }
+        if let value = vData["requestSince"] as? String {
+            vTSSince = Int64(value) ?? vTSSince
+        }
+        if let value = vData["limit"] as? String {
+            vLimit = Int(value) ?? vLimit
+        }
+        printLog([vJid, vTSBefore, vTSSince, vLimit])
+        APP_DELEGATE.objXMPP.getMAMMessage(withDMChatJid: vJid,
+                                           tsBefore: vTSBefore,
+                                           tsSince: vTSSince,
+                                           limit: vLimit,
+                                           withStrem: self.objXMPP.xmppStream,
+                                           objXMPP: self.objXMPP)
     }
     
     //MARK: - perform XMPP Connection
