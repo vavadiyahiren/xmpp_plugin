@@ -416,30 +416,19 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     public static void updateChatState(String jid, String status) {
 
-        Jid toJid = Utils.getFullJid(jid);
+        try {
 
-        if (status != null && !status.isEmpty()) {
+            Jid toJid = Utils.getFullJid(jid);
 
-            try {
+            Message message = new Message(toJid);
+            ChatState chatState = ChatState.valueOf(status);
+            message.addExtension(new ChatStateExtension(chatState));
 
-                Message message = new Message(toJid);
-                ChatStateExtension extension = null;
+            Utils.printLog("Sending Typing status " + message.toXML(null));
+            mConnection.sendStanza(message);
 
-                if (status.equals("composing")) {
-                    extension = new ChatStateExtension(ChatState.composing);
-                } else if (status.equals("paused")) {
-                    extension = new ChatStateExtension(ChatState.paused);
-                }
-
-                if (extension != null) {
-                    message.addExtension(extension);
-                }
-                Utils.printLog("Sending Typing status " + message.toXML(null));
-                mConnection.sendStanza(message);
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
