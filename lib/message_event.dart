@@ -13,6 +13,7 @@ class MessageEvent {
   String? presenceType;
   String? presenceMode;
   String? chatStateType;
+  int? isReadSent;
 
   MessageEvent({
     this.customText,
@@ -28,6 +29,7 @@ class MessageEvent {
     this.presenceType,
     this.presenceMode,
     this.chatStateType,
+    this.isReadSent,
   });
 
   Map<String, dynamic> toEventData() {
@@ -44,6 +46,7 @@ class MessageEvent {
       'mediaURL': mediaURL,
       'presenceType': presenceType,
       'presenceMode': presenceMode,
+      'isReadSent': isReadSent,
       'chatStateType': chatStateType,
 
     };
@@ -55,6 +58,7 @@ class MessageEvent {
       from: eventData['from'] ?? '',
       senderJid: eventData['senderJid'] ?? '',
       time: eventData['time'] ?? '0',
+      isReadSent: eventData['isReadSent'] ?? 0,
       id: eventData['id'] ?? '',
       type: eventData['type'] ?? '',
       body: eventData['body'] ?? '',

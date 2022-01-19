@@ -178,20 +178,27 @@ public class FlutterXmppConnection implements ConnectionListener {
         try {
 
             List<Jid> jidList = new ArrayList<>();
+            MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
+
             for (String memberJid : membersJid) {
                 if (!memberJid.contains(mHost)) {
                     memberJid = memberJid + Constants.SYMBOL_COMPARE_JID + mHost;
                 }
                 Jid jid = JidCreate.from(memberJid);
                 jidList.add(jid);
+
             }
 
-            MultiUserChat muc = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
             if (groupRole == GroupRole.ADMIN) {
                 muc.grantAdmin(jidList);
             } else if (groupRole == GroupRole.MEMBER) {
                 muc.grantMembership(jidList);
             }
+
+            for (Jid jid : jidList) {
+                muc.invite(jid.asEntityBareJidIfPossible(), Constants.INVITE_MESSAGE);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -498,10 +505,12 @@ public class FlutterXmppConnection implements ConnectionListener {
         Utils.printLog(" connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + Constants.PORT + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource);
         //Set up the ui thread broadcast message receiver.
 
-        mConnection = new XMPPTCPConnection(conf.build());
-        mConnection.addConnectionListener(this);
 
         try {
+
+            mConnection = new XMPPTCPConnection(conf.build());
+            mConnection.addConnectionListener(this);
+
 
             Utils.printLog(" Calling connect(): ");
             mConnection.connect();
@@ -509,23 +518,26 @@ public class FlutterXmppConnection implements ConnectionListener {
             rosterConnection = Roster.getInstanceFor(mConnection);
             rosterConnection.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
 
+            mConnection.setUseStreamManagement(true);
+            mConnection.setUseStreamManagementResumption(true);
+
             mConnection.login();
+
+            setupUiThreadBroadCastMessageReceiver();
+
+            mConnection.addSyncStanzaListener(new PresenceListnerAndFilter(mApplicationContext), StanzaTypeFilter.PRESENCE);
+
+            mConnection.addStanzaAcknowledgedListener(new StanzaAckListner(mApplicationContext));
+
+            mConnection.addSyncStanzaListener(new MessageListner(mApplicationContext), StanzaTypeFilter.MESSAGE);
+
+            ReconnectionManager reconnectionManager = ReconnectionManager.getInstanceFor(mConnection);
+            ReconnectionManager.setEnabledPerDefault(true);
+            reconnectionManager.enableAutomaticReconnection();
 
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        setupUiThreadBroadCastMessageReceiver();
-
-        mConnection.addSyncStanzaListener(new PresenceListnerAndFilter(mApplicationContext), StanzaTypeFilter.PRESENCE);
-
-        mConnection.addStanzaAcknowledgedListener(new StanzaAckListner(mApplicationContext));
-
-        mConnection.addSyncStanzaListener(new MessageListner(mApplicationContext), StanzaTypeFilter.MESSAGE);
-
-        ReconnectionManager reconnectionManager = ReconnectionManager.getInstanceFor(mConnection);
-        ReconnectionManager.setEnabledPerDefault(true);
-        reconnectionManager.enableAutomaticReconnection();
 
     }
 
