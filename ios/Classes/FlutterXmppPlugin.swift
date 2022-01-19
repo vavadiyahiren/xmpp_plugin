@@ -98,6 +98,9 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
            
         case pluginMethod.reqMAM:
             self.manageMAMActivity(call, result)
+        
+        case pluginMethod.getPresence:
+            self.getPresenceActivity(call, result)
             
         default:
             guard let vData = call.arguments as? [String : Any] else {
@@ -451,6 +454,19 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
                                            limit: vLimit,
                                            withStrem: self.objXMPP.xmppStream,
                                            objXMPP: self.objXMPP)
+    }
+    
+    func getPresenceActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
+        var vData : [String : Any]?
+        if let data = call.arguments as? [String : Any] { vData = data }
+        
+        let vMethod : String = call.method.trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(String(describing: vData))")
+                
+        
+        APP_DELEGATE.singalCallBack = result
+        APP_DELEGATE.objXMPP.getMyRosters(withStrem: self.objXMPP.xmppStream, objXMPP: self.objXMPP)
+        //result(xmppConstants.SUCCESS)
     }
     
     //MARK: - perform XMPP Connection

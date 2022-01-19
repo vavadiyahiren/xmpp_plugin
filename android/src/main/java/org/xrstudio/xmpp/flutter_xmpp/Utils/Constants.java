@@ -149,6 +149,7 @@ public class Constants {
     public static final String PRESENCE_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.presencemessage";
     public static final String GROUP_SEND_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.sendGroupMessage";
     public static int PORT_NUMBER = 5222;
+    public static final String INVITE_MESSAGE ="Invitations to the group";
 
     public static String EMPTY = "";
 }

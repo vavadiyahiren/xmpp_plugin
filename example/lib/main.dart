@@ -511,14 +511,31 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 SizedBox(
                   height: 10,
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    _joinGroup("${_joinMUCTextController.text}", "${_joinTimeController.text}");
+                Builder(
+                  builder: (context) {
+                    return Row(
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            _joinGroup(context, "${_joinMUCTextController.text}", "${_joinTimeController.text}");
+                          },
+                          child: Text('Join Group'),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.black,
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            _joinGroup(context, "${_joinMUCTextController.text}", "${_joinTimeController.text}", isManageGroup: true);
+                          },
+                          child: Text('Join Group & Manage'),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.black,
+                          ),
+                        ),
+                      ],
+                    );
                   },
-                  child: Text('Join Group'),
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.black,
-                  ),
                 ),
                 SizedBox(
                   height: 10,
@@ -787,9 +804,29 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     print('responseTest groupResponse $groupResponse');
   }
 
-  void _joinGroup(String grouname, String time) async {
+  void _joinGroup(BuildContext context, String grouname, String time, {bool isManageGroup = false}) async {
     bool response = await joinMucGroup("$grouname,$time");
     print("responseTest joinResponse $response");
+    if(response && isManageGroup) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(
+            groupName: grouname,
+            addMembersInGroup: addMembersInGroup,
+            addAdminsInGroup: addAdminsInGroup,
+            removeMember: removeMember,
+            removeAdmin: removeAdmin,
+            addOwner: addOwner,
+            removeOwner: removeOwner,
+            getAdmins: getAdmins,
+            getMembers: getMembers,
+            getOwners: getOwners,
+            getOnlineMemberCount: getOnlineMemberCount,
+          ),
+        ),
+      );
+    }
   }
 }
 

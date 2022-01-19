@@ -122,7 +122,7 @@ var lastseen = await flutterXmpp.getLastSeen(jid);
 18. Get the list of my rosters
 
 ```
- await flutterXmpp.getMyRosters();
+await flutterXmpp.getMyRosters();
 ```
 
 19. Creating a roster entry
@@ -135,6 +135,24 @@ await flutterXmpp.createRoster(jid);
 
 ```
 await flutterXmpp.joinMucGroup(groupId);
+```
+
+21. Request MAM Messages
+
+```
+await flutterXmpp.requestMamMessages(userJid, requestSince, requestBefore, limit);
+```
+
+22. Update Typing Status
+
+```
+await flutterXmpp.changeTypingStatus(userJid, typingStatus);
+```
+
+23. Update Presence Type
+
+```
+await flutterXmpp.changePresenceType(presenceType, presenceMode);
 ```
 
 # To be Added
