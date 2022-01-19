@@ -155,6 +155,3 @@ await flutterXmpp.changeTypingStatus(userJid, typingStatus);
 await flutterXmpp.changePresenceType(presenceType, presenceMode);
 ```
 
-# To be Added
-
- - MAM
