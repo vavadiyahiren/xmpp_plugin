@@ -11,13 +11,13 @@ public class Constants {
     public static final String GET_TYPING_STATUS = "typing_status";
     public static final String CHANGE_TYPING_STATUS = "change_typing_status";
     public static final String CHANGE_PRESENCE_TYPE = "change_presence_type";
+    public static final String GET_CONNECTION_STATUS = "get_connection_status";
     public static final String SYMBOL_COMPARE_JID = "@";
     public static final String CREATE_MUC = "create_muc";
     public static final String CONFERENCE = "conference";
     public static final String GET_OWNERS = "get_owners";
     public static final String GET_ADMINS = "get_admins";
     public static final String GET_MEMBERS = "get_members";
-    public static final String GET_PRESENCE = "get_presence";
     public static final String GET_LAST_SEEN = "get_last_seen";
     public static final String CREATE_ROSTER = "create_roster";
     public static final String GET_MY_ROSTERS = "get_my_rosters";

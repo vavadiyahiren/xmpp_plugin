@@ -566,6 +566,12 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 result.success("SUCCESS");
                 break;
 
+            case Constants.GET_CONNECTION_STATUS:
+                
+                FlutterXmppConnection.getConnectionStatus();
+                result.success("SUCCESS");
+                break;
+
             case Constants.GET_MEMBERS:
 
                 groupName = call.argument(Constants.GROUP_NAME);
@@ -587,12 +593,6 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 result.success(userLastActivity + "");
                 break;
 
-            case Constants.GET_PRESENCE:
-
-                userJid = call.argument(Constants.USER_JID);
-                HashMap<String, String> getPresence = FlutterXmppConnection.getPresence(userJid);
-                result.success(getPresence.toString());
-                break;
 
             case Constants.GET_MY_ROSTERS:
 

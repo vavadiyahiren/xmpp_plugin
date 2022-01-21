@@ -229,12 +229,6 @@ class XmppConnection {
     print('checkNewFeat create roster success');
   }
 
-  Future<String> getPresence(String userJid) async {
-    final params = {"user_jid": userJid};
-    String presence = await _channel.invokeMethod('get_presence', params);
-    print('checkNewFeat getPresence presence: $presence');
-    return presence;
-  }
 
   Future<dynamic> getMyRosters() async {
     List<dynamic> myRosters = await _channel.invokeMethod('get_my_rosters');
@@ -282,11 +276,14 @@ class XmppConnection {
     await _channel.invokeMethod('change_typing_status', params);
   }
 
-  Future<void> changePresenceType(
-    String presenceType,String presenceMode
-  ) async {
+  Future<void> changePresenceType(String presenceType, String presenceMode) async {
     print(" Plugin : presenceType : $presenceType , presenceMode : $presenceMode");
     final params = {"presenceType": presenceType, "presenceMode": presenceMode};
     await _channel.invokeMethod('change_presence_type', params);
+  }
+
+  Future<void> getConnectionStatus() async {
+    printLogForMethodCall('get_connection_status', '');
+    await _channel.invokeMethod('get_connection_status');
   }
 }

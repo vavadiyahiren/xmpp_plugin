@@ -359,6 +359,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   builder: (context) {
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ElevatedButton(
                           onPressed: () {
@@ -372,7 +373,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                             primary: Colors.black,
                           ),
                         ),
-                        Spacer(),
+                        ElevatedButton(
+                          onPressed: () async {
+                            flutterXmpp.getConnectionStatus();
+                          },
+                          child: Text("Connection Status"),
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.black,
+                          ),
+                        ),
                       ],
                     );
                   },
@@ -514,10 +523,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 Builder(
                   builder: (context) {
                     return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ElevatedButton(
                           onPressed: () async {
-                            _joinGroup(context, "${_joinMUCTextController.text}", "${_joinTimeController.text}");
+                            _joinGroup(context, "${_joinMUCTextController.text}",
+                                "${_joinTimeController.text}");
                           },
                           child: Text('Join Group'),
                           style: ElevatedButton.styleFrom(
@@ -526,7 +537,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         ),
                         ElevatedButton(
                           onPressed: () async {
-                            _joinGroup(context, "${_joinMUCTextController.text}", "${_joinTimeController.text}", isManageGroup: true);
+                            _joinGroup(context, "${_joinMUCTextController.text}",
+                                "${_joinTimeController.text}",
+                                isManageGroup: true);
                           },
                           child: Text('Join Group & Manage'),
                           style: ElevatedButton.styleFrom(
@@ -703,30 +716,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   child: Text("Get Last activity"),
                   style: ElevatedButton.styleFrom(primary: Colors.black),
                 ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Flexible(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          await flutterXmpp.getPresence(
-                            "${_userJidController.text}",
-                          );
-                        },
-                        child: Text(" Get Presence "),
-                        style: ElevatedButton.styleFrom(primary: Colors.black),
-                      ),
-                    ),
-                    Flexible(
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          await flutterXmpp.getMyRosters();
-                        },
-                        child: Text(" Get MyRosters "),
-                        style: ElevatedButton.styleFrom(primary: Colors.black),
-                      ),
-                    ),
-                  ],
+                ElevatedButton(
+                  onPressed: () async {
+                    await flutterXmpp.getMyRosters();
+                  },
+                  child: Text(" Get MyRosters "),
+                  style: ElevatedButton.styleFrom(primary: Colors.black),
                 ),
                 SizedBox(
                   height: 15,
@@ -804,10 +799,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     print('responseTest groupResponse $groupResponse');
   }
 
-  void _joinGroup(BuildContext context, String grouname, String time, {bool isManageGroup = false}) async {
+  void _joinGroup(BuildContext context, String grouname, String time,
+      {bool isManageGroup = false}) async {
     bool response = await joinMucGroup("$grouname,$time");
     print("responseTest joinResponse $response");
-    if(response && isManageGroup) {
+    if (response && isManageGroup) {
       Navigator.push(
         context,
         MaterialPageRoute(

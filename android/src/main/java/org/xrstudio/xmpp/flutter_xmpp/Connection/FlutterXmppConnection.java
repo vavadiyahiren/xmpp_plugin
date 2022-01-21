@@ -50,7 +50,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -285,19 +284,6 @@ public class FlutterXmppConnection implements ConnectionListener {
         return userLastActivity;
     }
 
-    public static HashMap<String, String> getPresence(String userJid) {
-        HashMap<String, String> presenceMap = new HashMap<>();
-        try {
-
-            Presence presence = rosterConnection.getPresence(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)));
-            presenceMap.put(Constants.PRESENCE_TYPE, presence.getType().toString().toLowerCase());
-            presenceMap.put(Constants.PRESENCE_MODE, presence.getMode().toString().toLowerCase());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return presenceMap;
-    }
 
     public static List<String> getMyRosters() {
         List<String> muRosterList = new ArrayList<>();
@@ -451,6 +437,16 @@ public class FlutterXmppConnection implements ConnectionListener {
             presence = new Presence(type);
             presence.setMode(mode);
             mConnection.sendStanza(presence);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static void getConnectionStatus() {
+
+        try {
 
         } catch (Exception e) {
             e.printStackTrace();
