@@ -47,7 +47,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
     private EventChannel event_channel;
     private ArrayList<String> membersJid;
     private MethodChannel method_channel;
-    private boolean requireSSLConnection = false, autoDeliveryReceipt = false;
+    private boolean requireSSLConnection = false, autoDeliveryReceipt = false, automaticReconnection = true, useStreamManagement = true;
     private BroadcastReceiver mBroadcastReceiver = null;
 
 //    public static void registerWith(Registrar registrar) {
@@ -317,6 +317,14 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 if (call.hasArgument(Constants.REQUIRE_SSL_CONNECTION)) {
                     requireSSLConnection = call.argument(Constants.REQUIRE_SSL_CONNECTION);
                 }
+                
+                if (call.hasArgument(Constants.AUTOMATIC_RECONNECTION)) {
+                    automaticReconnection = call.argument(Constants.AUTOMATIC_RECONNECTION);
+                }
+                
+                if (call.hasArgument(Constants.USER_STREAM_MANAGEMENT)) {
+                    useStreamManagement = call.argument(Constants.USER_STREAM_MANAGEMENT);
+                }
 
                 // Start authentication.
                 doLogin();
@@ -567,7 +575,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 break;
 
             case Constants.GET_CONNECTION_STATUS:
-                
+
                 FlutterXmppConnection.getConnectionStatus();
                 result.success("SUCCESS");
                 break;
@@ -625,6 +633,8 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
             i.putExtra(Constants.PORT, Constants.PORT_NUMBER);
             i.putExtra(Constants.AUTO_DELIVERY_RECEIPT, autoDeliveryReceipt);
             i.putExtra(Constants.REQUIRE_SSL_CONNECTION, requireSSLConnection);
+            i.putExtra(Constants.USER_STREAM_MANAGEMENT, useStreamManagement);
+            i.putExtra(Constants.AUTOMATIC_RECONNECTION, automaticReconnection);
             activity.startService(i);
         }
     }

@@ -107,6 +107,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       "nativeLogFilePath": NativeLogHelper.logFilePath,
       "requireSSLConnection": true,
       "autoDeliveryReceipt": true,
+      "useStreamManagement": true,
+      "automaticReconnection": true,
     };
 
     flutterXmpp = XmppConnection(auth);

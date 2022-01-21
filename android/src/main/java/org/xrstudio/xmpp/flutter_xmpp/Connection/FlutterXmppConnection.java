@@ -66,11 +66,12 @@ public class FlutterXmppConnection implements ConnectionListener {
     private static String mServiceName = "";
     private static XMPPTCPConnection mConnection;
     private static MultiUserChatManager multiUserChatManager;
-    private static boolean mRequireSSLConnection, mAutoDeliveryReceipt;
+    private static boolean mRequireSSLConnection, mAutoDeliveryReceipt, mAutomaticReconnection = true, mUseStreamManagement = true;
     private static Context mApplicationContext;
     private BroadcastReceiver uiThreadMessageReceiver;//Receives messages from the ui thread.
 
-    public FlutterXmppConnection(Context context, String jid_user, String password, String host, Integer port, boolean requireSSLConnection, boolean autoDeliveryReceipt) {
+    public FlutterXmppConnection(Context context, String jid_user, String password, String host, Integer port, boolean requireSSLConnection,
+                                 boolean autoDeliveryReceipt ,boolean useStreamManagement, boolean automaticReconnection) {
 
         Utils.printLog(" Connection Constructor called: ");
 
@@ -80,6 +81,8 @@ public class FlutterXmppConnection implements ConnectionListener {
         mHost = host;
         mRequireSSLConnection = requireSSLConnection;
         mAutoDeliveryReceipt = autoDeliveryReceipt;
+        mUseStreamManagement = useStreamManagement;
+        mAutomaticReconnection = automaticReconnection;
         if (jid_user != null && jid_user.contains(Constants.SYMBOL_COMPARE_JID)) {
             String[] jid_list = jid_user.split(Constants.SYMBOL_COMPARE_JID);
             mUsername = jid_list[0];
@@ -514,8 +517,10 @@ public class FlutterXmppConnection implements ConnectionListener {
             rosterConnection = Roster.getInstanceFor(mConnection);
             rosterConnection.setSubscriptionMode(Roster.SubscriptionMode.accept_all);
 
-            mConnection.setUseStreamManagement(true);
-            mConnection.setUseStreamManagementResumption(true);
+            if (mUseStreamManagement) {
+                mConnection.setUseStreamManagement(true);
+                mConnection.setUseStreamManagementResumption(true);
+            }
 
             mConnection.login();
 
@@ -527,9 +532,12 @@ public class FlutterXmppConnection implements ConnectionListener {
 
             mConnection.addSyncStanzaListener(new MessageListner(mApplicationContext), StanzaTypeFilter.MESSAGE);
 
-            ReconnectionManager reconnectionManager = ReconnectionManager.getInstanceFor(mConnection);
-            ReconnectionManager.setEnabledPerDefault(true);
-            reconnectionManager.enableAutomaticReconnection();
+            if (mAutomaticReconnection) {
+                ReconnectionManager reconnectionManager = ReconnectionManager.getInstanceFor(mConnection);
+                ReconnectionManager.setEnabledPerDefault(true);
+                reconnectionManager.enableAutomaticReconnection();
+            }
+
 
         } catch (InterruptedException e) {
             e.printStackTrace();

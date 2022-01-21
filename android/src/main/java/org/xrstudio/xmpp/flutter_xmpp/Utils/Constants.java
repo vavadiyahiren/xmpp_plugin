@@ -84,6 +84,8 @@ public class Constants {
     public static final String AUTO_DELIVERY_RECEIPT = "autoDeliveryReceipt";
     public static final String MUC_MEMBER_ONLY = "muc#roomconfig_membersonly";
     public static final String REQUIRE_SSL_CONNECTION = "requireSSLConnection";
+    public static final String USER_STREAM_MANAGEMENT = "useStreamManagement";
+    public static final String AUTOMATIC_RECONNECTION = "automaticReconnection";
     public static final String MUC_PERSISTENT_ROOM = "muc#roomconfig_persistentroom";
 
     // Broadcast Parameters
