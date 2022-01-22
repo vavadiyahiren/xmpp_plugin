@@ -376,9 +376,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () async {
-                            flutterXmpp.getConnectionStatus();
-                          },
+                          onPressed: _showConnectionStatus,
                           child: Text("Connection Status"),
                           style: ElevatedButton.styleFrom(
                             primary: Colors.black,
@@ -824,6 +822,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ),
         ),
       );
+    }
+  }
+
+  void _showConnectionStatus() async {
+    try {
+      String connectionStatus = await flutterXmpp.getConnectionStatus();
+      if (_scaffoldKey.currentState != null) {
+        _scaffoldKey.currentState!
+            .showSnackBar(new SnackBar(content: new Text('$connectionStatus'),duration: Duration(milliseconds: 700),));
+      }
+    } catch (e) {
+      print(e);
     }
   }
 }

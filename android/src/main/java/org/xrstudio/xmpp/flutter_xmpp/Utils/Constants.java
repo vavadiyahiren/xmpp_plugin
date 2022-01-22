@@ -118,13 +118,6 @@ public class Constants {
     public static final String BODY = "body";
     public static final String time = "time";
     public static final String LOGOUT = "logout";
-    public static final String STATE_UNKNOWN = "UNKNOWN";
-    public static final String CURRENT_STATE = "current_state";
-    public static final String STATE_CONNECTED = "CONNECTED";
-    public static final String STATE_CONNECTING = "CONNECTING";
-    public static final String STATE_DISCONNECTED = "DISCONNECTED";
-    public static final String STATE_AUTHENTICATED = "AUTHENTICATED";
-    public static final String STATE_DISCONNECTING = "DISCONNECTING";
     public static final String JOIN_MUC_GROUP = "join_muc_group";
     public static final String JOIN_MUC_GROUPS = "join_muc_groups";
     public static final String BUNDLE_TO = "b_to";

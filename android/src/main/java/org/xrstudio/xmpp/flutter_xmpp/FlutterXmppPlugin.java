@@ -168,7 +168,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
     // Sending a message to one-one chat.
     public static void sendMessage(String body, String toUser, String msgId, String method, String time) {
 
-        if (FlutterXmppConnectionService.getState().equals(ConnectionState.CONNECTED)) {
+        if (FlutterXmppConnectionService.getState().equals(ConnectionState.AUTHENTICATED)) {
 
             if (method.equals(Constants.SEND_GROUP_MESSAGE)) {
                 Intent intent = new Intent(Constants.GROUP_SEND_MESSAGE);
@@ -317,11 +317,11 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 if (call.hasArgument(Constants.REQUIRE_SSL_CONNECTION)) {
                     requireSSLConnection = call.argument(Constants.REQUIRE_SSL_CONNECTION);
                 }
-                
+
                 if (call.hasArgument(Constants.AUTOMATIC_RECONNECTION)) {
                     automaticReconnection = call.argument(Constants.AUTOMATIC_RECONNECTION);
                 }
-                
+
                 if (call.hasArgument(Constants.USER_STREAM_MANAGEMENT)) {
                     useStreamManagement = call.argument(Constants.USER_STREAM_MANAGEMENT);
                 }
@@ -357,30 +357,6 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 sendMessage(body, to_jid, id, call.method, time);
 
                 result.success(Constants.SUCCESS);
-                break;
-
-            case Constants.CURRENT_STATE:
-
-                String state = Constants.STATE_UNKNOWN;
-                switch (FlutterXmppConnectionService.getState()) {
-                    case CONNECTED:
-                        state = Constants.STATE_CONNECTED;
-                        break;
-                    case AUTHENTICATED:
-                        state = Constants.STATE_AUTHENTICATED;
-                        break;
-                    case CONNECTING:
-                        state = Constants.STATE_CONNECTING;
-                        break;
-                    case DISCONNECTING:
-                        state = Constants.STATE_DISCONNECTING;
-                        break;
-                    case DISCONNECTED:
-                        state = Constants.STATE_DISCONNECTED;
-                        break;
-                }
-
-                result.success(state);
                 break;
 
             case Constants.JOIN_MUC_GROUPS:
@@ -576,8 +552,8 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
 
             case Constants.GET_CONNECTION_STATUS:
 
-                FlutterXmppConnection.getConnectionStatus();
-                result.success("SUCCESS");
+                ConnectionState connectionStatus = FlutterXmppConnectionService.getState();
+                result.success(connectionStatus.toString().toLowerCase());
                 break;
 
             case Constants.GET_MEMBERS:
@@ -641,7 +617,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
 
     private void logout() {
         // Check if user is connected to xmpp ? if yes then break connection.
-        if (FlutterXmppConnectionService.getState().equals(ConnectionState.CONNECTED)) {
+        if (FlutterXmppConnectionService.getState().equals(ConnectionState.AUTHENTICATED)) {
             Intent i1 = new Intent(activity, FlutterXmppConnectionService.class);
             activity.stopService(i1);
         }

@@ -447,18 +447,8 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     }
 
-    public static void getConnectionStatus() {
-
-        try {
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
-
     public void connect() throws IOException, XMPPException, SmackException {
-
+        FlutterXmppConnectionService.sConnectionState = ConnectionState.CONNECTING;
         XMPPTCPConnectionConfiguration.Builder conf = XMPPTCPConnectionConfiguration.builder();
         conf.setXmppDomain(mServiceName);
 
@@ -540,6 +530,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 
 
         } catch (InterruptedException e) {
+            FlutterXmppConnectionService.sConnectionState = ConnectionState.DISCONNECTED;
             e.printStackTrace();
         }
 
@@ -655,7 +646,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         Utils.printLog(" Flutter Authenticated Successfully: ");
 
         multiUserChatManager = MultiUserChatManager.getInstanceFor(connection);
-        FlutterXmppConnectionService.sConnectionState = ConnectionState.CONNECTED;
+        FlutterXmppConnectionService.sConnectionState = ConnectionState.AUTHENTICATED;
 //        showContactListActivityWhenAuthenticated();
 
         //Bundle up the intent and send the broadcast.

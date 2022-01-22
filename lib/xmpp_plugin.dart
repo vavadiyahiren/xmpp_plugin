@@ -86,12 +86,6 @@ class XmppConnection {
     return status;
   }
 
-  Future<String> currentState() async {
-    printLogForMethodCall('current_state', {});
-    final String state = await _channel.invokeMethod('current_state');
-    return state;
-  }
-
   Future<void> start(Function(MessageEvent) _onEvent, Function _onError) async {
     streamGetMsg = _eventChannel.receiveBroadcastStream().listen((dataEvent) {
       MessageEvent eventModel = MessageEvent.fromJson(dataEvent);
@@ -282,8 +276,8 @@ class XmppConnection {
     await _channel.invokeMethod('change_presence_type', params);
   }
 
-  Future<void> getConnectionStatus() async {
+  Future<String> getConnectionStatus() async {
     printLogForMethodCall('get_connection_status', '');
-    await _channel.invokeMethod('get_connection_status');
+    return await _channel.invokeMethod('get_connection_status');
   }
 }
