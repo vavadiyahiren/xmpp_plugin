@@ -101,6 +101,9 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         
         case pluginMethod.getPresence:
             self.getPresenceActivity(call, result)
+                    
+        case pluginMethod.changeTypingStatus:
+            self.changeTypingStatus(call, result)
             
         default:
             guard let vData = call.arguments as? [String : Any] else {
@@ -352,6 +355,8 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
                                                    withRoomName: vGroupName,
                                                    withUsers: membersJids,
                                                    withStrem: self.objXMPP.xmppStream)
+        
+        result(xmppConstants.SUCCESS)
     }
     
     func performGetMembersInGroupActivity(withMemeberType type : xmppMUCUserType,
@@ -457,16 +462,51 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
     }
     
     func getPresenceActivity(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
-        var vData : [String : Any]?
-        if let data = call.arguments as? [String : Any] { vData = data }
-        
+        guard let vData = call.arguments as? [String : Any] else {
+            result(xmppConstants.DataNil);
+            return
+        }
         let vMethod : String = call.method.trim()
         printLog("\(#function) | \(vMethod) | arguments: \(String(describing: vData))")
-                
+          /*
+        var vUserId : String = ""
+        if let value = vData["user_jid"] as? String { vUserId = value }
+        if vUserId.isEmpty {
+            result(xmppConstants.DataNil)
+            return
+        }
+        
+        APP_DELEGATE.singalCallBack = result
+        APP_DELEGATE.objXMPP.getPresenceOfUser(withJid: vUserId,
+                                               withStrem: self.objXMPP.xmppStream,
+                                               objXMPP: self.objXMPP)
+        return
         
         APP_DELEGATE.singalCallBack = result
         APP_DELEGATE.objXMPP.getMyRosters(withStrem: self.objXMPP.xmppStream, objXMPP: self.objXMPP)
         //result(xmppConstants.SUCCESS)
+        */
+    }
+    
+    func changeTypingStatus(_ call: FlutterMethodCall, _ result: @escaping FlutterResult)  {
+        guard let vData = call.arguments as? [String : Any] else {
+            result(xmppConstants.DataNil);
+            return
+        }
+        let vMethod : String = call.method.trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(String(describing: vData))")
+                
+        var vUserId : String = ""
+        var vTypingStatus : String = ""
+        if let value = vData["userJid"] as? String { vUserId = value }
+        if let value = vData["typingStatus"] as? String { vTypingStatus = value }
+        
+        if vUserId.isEmpty {
+            result(xmppConstants.DataNil)
+            return
+        }
+        APP_DELEGATE.objXMPP.sendTypingStatus(withJid: vUserId, status: vTypingStatus, withStrem: self.objXMPP.xmppStream)
+        result(xmppConstants.SUCCESS)
     }
     
     //MARK: - perform XMPP Connection
@@ -505,6 +545,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
     
     @objc func notiObs_XMPPConnectionStatus(notfication: NSNotification) {
         var valueStatus : String = ""
+        print("\(#function) | XMPPConnetion status \(objXMPPConnStatus)")
         switch objXMPPConnStatus {
         case .Processing:
             //valueStatus = xmppConnStatus.Processing

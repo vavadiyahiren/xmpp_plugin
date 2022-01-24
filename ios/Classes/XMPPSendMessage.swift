@@ -157,6 +157,52 @@ extension XMPPController {
         }
     }
     
+    func sendPresence(withJid jid: String, type: String, move: String) {
+        let dicParam = ["type" : xmppConstants.presence,
+                        "from" : jid,
+                        "presenceType" : type,
+                        "presenceMode" : move]
+        addLogger(.sentMessageToFlutter, dicParam)
+        
+//        if let callBack = APP_DELEGATE.singalCallBack {
+//            callBack(dicParam)
+//        }
+        APP_DELEGATE.objEventData!(dicParam)
+    }
+    
+    
+    func sendTypingStatus(withJid jid: String, status : String, withStrem : XMPPStream) {
+        let vJid : XMPPJID? = XMPPJID(string: jid)
+        
+        let vChatType : String = xmppChatType.CHAT //? xmppChatType.GROUPCHAT : xmppChatType.CHAT
+        let xmppMessage = XMPPMessage.init(type: vChatType.lowercased(), to: vJid)
+        
+        var vStatus : XMPPMessage.ChatState = .composing
+        switch status {
+        case xmppTypingStatus.Active:
+            vStatus = .active
+            
+        case xmppTypingStatus.Composing:
+            vStatus = .composing
+            
+        case xmppTypingStatus.Paused:
+            vStatus = .paused
+        
+        case xmppTypingStatus.Inactive:
+            vStatus = .inactive
+            
+        case xmppTypingStatus.Gone:
+            vStatus = .gone
+            
+        default:
+            vStatus = .gone
+        }
+        xmppMessage.addChatState(vStatus)
+        withStrem.send(xmppMessage)
+        
+        addLogger(.sentMessageToServer, xmppMessage)
+    }
+    
     //MARK: -
     private func getTimeElement(withTime time :String) -> XMLElement? {
         let ele: XMLElement = XMLElement.init(name: eleTIME.Name, xmlns: eleTIME.Namespace)

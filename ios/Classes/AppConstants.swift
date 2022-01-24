@@ -48,6 +48,7 @@ struct pluginMethod {
     static let getMyRosters : String                = "get_my_rosters"
     static let reqMAM : String                      = "request_mam"
     static let getPresence : String                 = "get_presence"
+    static let changeTypingStatus : String          = "change_typing_status"
 }
 
 struct pluginMessType {
@@ -78,12 +79,14 @@ struct xmppConstants {
     static let DataNil : String = "Data nil"
     
     static let errorMessOfMUC : String = "Owner privileges required"
+    
+    static let presence : String = "presence"
 }
 struct xmppConnStatus {
     static let Processing : String = "Processing"
     static let Authenticated : String = "Authenticated"
     static let Failed : String = "Failed"
-    static let Disconnect : String = "Disconnect"
+    static let Disconnect : String = "Disconnected"
 }
 struct xmppMUCRole {
     /*
@@ -99,6 +102,14 @@ struct xmppMUCRole {
     static let Admin : String = "admin"
     static let Member : String = "member"
     static let None : String = "none"
+}
+
+struct xmppTypingStatus {
+    static let Active : String = "active"
+    static let Composing : String = "composing"
+    static let Paused : String = "paused"
+    static let Inactive : String = "inactive"
+    static let Gone : String = "gone"
 }
 
 class groupInfo {
