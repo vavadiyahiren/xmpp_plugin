@@ -81,11 +81,10 @@
 * Delivery Receipt extensions are made configurable
 * Bug fixes for group joining with full group jid on android
 
-## 1.2.0
+## 2.0.0
 
 * Added MAM support(XEP-0313)
 * Added chatstate type support for android only(XEP-0085)
 * Added presence support for android 
 * Changed dependancy from jCenter() to Maven() 
 
-* 
