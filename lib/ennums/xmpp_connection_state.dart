@@ -1,0 +1,11 @@
+enum XmppConnectionState { connected, authenticated, connecting, disconnected }
+
+extension XmppConnectionStateParser on String {
+  XmppConnectionState toConnectionState() {
+    return XmppConnectionState.values.firstWhere((XmppConnectionState e) {
+      return e.name.toString().toLowerCase() == this.toLowerCase();
+    }, orElse: () {
+      return XmppConnectionState.disconnected;
+    });
+  }
+}

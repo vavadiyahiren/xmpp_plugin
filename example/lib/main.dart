@@ -9,6 +9,7 @@ import 'package:flutter_xmpp_example/native_log_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share/share.dart';
 import 'package:xmpp_plugin/custom_element.dart';
+import 'package:xmpp_plugin/ennums/xmpp_connection_state.dart';
 import 'package:xmpp_plugin/message_event.dart';
 import 'package:xmpp_plugin/xmpp_plugin.dart';
 
@@ -827,10 +828,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   void _showConnectionStatus() async {
     try {
-      String connectionStatus = await flutterXmpp.getConnectionStatus();
+      XmppConnectionState connectionStatus = await flutterXmpp.getConnectionStatus();
       if (_scaffoldKey.currentState != null) {
-        _scaffoldKey.currentState!
-            .showSnackBar(new SnackBar(content: new Text('$connectionStatus'),duration: Duration(milliseconds: 700),));
+        _scaffoldKey.currentState!.showSnackBar(new SnackBar(
+          content: new Text('${connectionStatus.toString()}'),
+          duration: Duration(milliseconds: 700),
+        ));
       }
     } catch (e) {
       print(e);

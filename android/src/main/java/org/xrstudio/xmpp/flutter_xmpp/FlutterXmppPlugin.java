@@ -553,7 +553,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
             case Constants.GET_CONNECTION_STATUS:
 
                 ConnectionState connectionStatus = FlutterXmppConnectionService.getState();
-                result.success(connectionStatus.toString().toLowerCase());
+                result.success(connectionStatus.toString());
                 break;
 
             case Constants.GET_MEMBERS:

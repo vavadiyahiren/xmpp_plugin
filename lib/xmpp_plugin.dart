@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/services.dart';
 import 'package:xmpp_plugin/message_event.dart';
+import 'package:xmpp_plugin/ennums/xmpp_connection_state.dart';
 
 class XmppConnection {
   static const MethodChannel _channel = MethodChannel('flutter_xmpp/method');
@@ -276,8 +277,9 @@ class XmppConnection {
     await _channel.invokeMethod('change_presence_type', params);
   }
 
-  Future<String> getConnectionStatus() async {
+  Future<XmppConnectionState> getConnectionStatus() async {
     printLogForMethodCall('get_connection_status', '');
-    return await _channel.invokeMethod('get_connection_status');
+    String connectionState = await _channel.invokeMethod('get_connection_status');
+    return connectionState.toConnectionState();
   }
 }
