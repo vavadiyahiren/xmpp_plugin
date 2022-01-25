@@ -155,3 +155,8 @@ await flutterXmpp.changeTypingStatus(userJid, typingStatus);
 await flutterXmpp.changePresenceType(presenceType, presenceMode);
 ```
 
+
+Contact
+-------
+ 
+You can reach us via mail(hiren@xrstudio.in) the if you have questions or need support.
