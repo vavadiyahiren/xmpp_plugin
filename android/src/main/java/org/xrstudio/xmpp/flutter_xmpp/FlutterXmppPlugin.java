@@ -563,6 +563,29 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 result.success(jidList);
                 break;
 
+            case Constants.CURRENT_STATE:
+
+                String state = Constants.STATE_UNKNOWN;
+                switch (FlutterXmppConnectionService.getState()) {
+                    case CONNECTED:
+                        state = Constants.STATE_CONNECTED;
+                        break;
+                    case AUTHENTICATED:
+                        state = Constants.STATE_AUTHENTICATED;
+                        break;
+                    case CONNECTING:
+                        state = Constants.STATE_CONNECTING;
+                        break;
+                    case DISCONNECTING:
+                        state = Constants.STATE_DISCONNECTING;
+                        break;
+                    case DISCONNECTED:
+                        state = Constants.STATE_DISCONNECTED;
+                        break;
+                }
+                result.success(state);
+                break;
+
             case Constants.GET_ONLINE_MEMBER_COUNT:
 
                 groupName = call.argument(Constants.GROUP_NAME);

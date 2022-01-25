@@ -282,4 +282,11 @@ class XmppConnection {
     String connectionState = await _channel.invokeMethod('get_connection_status');
     return connectionState.toConnectionState();
   }
+
+  Future<String> currentState() async {
+    printLogForMethodCall('current_state', {});
+    final String state = await _channel.invokeMethod('current_state');
+    return state;
+  }
+
 }

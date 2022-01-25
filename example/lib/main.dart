@@ -219,12 +219,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   var presenceTypeItems = [
     'available',
     'unavailable',
-    'subscribe',
-    'subscribed',
-    'unsubscribe',
-    'unsubscribed',
-    'error',
-    'probe',
   ];
 
   ///
@@ -734,12 +728,25 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                 SizedBox(
                   height: 15,
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    await flutterXmpp.createRoster(_createRostersController.text);
-                  },
-                  child: Text("Create MyRosters"),
-                  style: ElevatedButton.styleFrom(primary: Colors.black),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () async {
+                        await flutterXmpp.createRoster(_createRostersController.text);
+                      },
+                      child: Text("Create MyRosters"),
+                      style: ElevatedButton.styleFrom(primary: Colors.black),
+                    ),
+                    ElevatedButton(
+                      onPressed: () async {
+                        var val = await flutterXmpp.currentState();
+                        log('Val return = ${val.toString()}');
+                      },
+                      child: Text("Current State"),
+                      style: ElevatedButton.styleFrom(primary: Colors.black),
+                    ),
+                  ],
                 ),
                 SizedBox(
                   height: 15,
