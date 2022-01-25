@@ -143,6 +143,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                         break;
 
                     // Handle the auth status events.
+
                     case Constants.PRESENCE_MESSAGE:
 
                         String jid = intent.getStringExtra(Constants.BUNDLE_FROM_JID);

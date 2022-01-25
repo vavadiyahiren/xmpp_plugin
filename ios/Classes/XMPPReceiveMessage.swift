@@ -50,5 +50,41 @@ extension XMPPController {
             self.senAckDeliveryReceipt(withMessageId: messId)
             return
         }
+        
+        if  message.hasChatState {
+            
+            var objMess : Message = Message.init()
+            objMess.initWithMessage(message: message)
+            
+            var chatStateType : String = ""
+            
+            let vFrom : String = message.fromStr ?? ""
+            
+            if message.hasComposingChatState {
+                chatStateType = "composing"
+            } else if message.hasGoneChatState {
+                chatStateType = "gone"
+            } else if message.hasPausedChatState {
+                chatStateType = "paused"
+            } else if message.hasActiveChatState {
+                chatStateType = "active"
+            } else if message.hasInactiveChatState {
+                chatStateType = "inactive"
+            }
+                        
+            let dicData = ["type" : "chatstate",
+                           "id" : objMess.id,
+                           "from" : vFrom,
+                           "body" : "",
+                           "customText" : "",
+                           "msgtype" : "normal",
+                           "senderJid": vFrom,
+                           "time" : "",
+                           "chatStateType" : chatStateType] as [String : Any]
+                    
+            APP_DELEGATE.objEventData!(dicData)
+            return
+        }
+        
     }
 }

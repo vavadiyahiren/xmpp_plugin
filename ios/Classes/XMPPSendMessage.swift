@@ -112,6 +112,10 @@ extension XMPPController {
         }
     }
     
+    func broadCastMessageToFlutter(_ dicData : String){
+        
+    }
+    
     func sendMemberList(withUsers arrUsers: [String]) {
         printLog("\(#function) | arrUsers: \(arrUsers)")
         addLogger(.sentMessageToFlutter, arrUsers)
