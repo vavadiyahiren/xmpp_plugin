@@ -88,3 +88,9 @@
 * Added presence support for android 
 * Changed dependancy from jCenter() to Maven() 
 
+## 2.1.0
+
+* Added chatstate type support for iOS(XEP-0085)
+* Added presence support for iOS 
+* Added support for flexible stream usage and auto reconnection
+* Added flexiblity to get connection status from native libs
