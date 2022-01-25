@@ -49,6 +49,7 @@ struct pluginMethod {
     static let reqMAM : String                      = "request_mam"
     static let getPresence : String                 = "get_presence"
     static let changeTypingStatus : String          = "change_typing_status"
+    static let changePresenceType : String          = "change_presence_type"
 }
 
 struct pluginMessType {

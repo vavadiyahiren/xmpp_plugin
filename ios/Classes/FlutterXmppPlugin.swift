@@ -35,6 +35,8 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         addLogger(.receiveFromFlutter, call)
         
         let vMethod : String = call.method.trim()
+        printLog(" \(#function) |vMethod \(vMethod)")
+        
         switch vMethod {
         case pluginMethod.login:
             self.performLoginActivity(call, result)
@@ -105,6 +107,9 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         case pluginMethod.changeTypingStatus:
             self.changeTypingStatus(call, result)
             
+        case pluginMethod.changePresenceType :
+            self.changePresence(call, result)
+            
         default:
             guard let vData = call.arguments as? [String : Any] else {
                 print("Getting invalid/nil arguments-data by pluging.... | \(vMethod) | arguments: \(String(describing: call.arguments))")
@@ -124,7 +129,6 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             return
         }
         let vMethod : String = call.method.trim()
-        printLog("\(#function) | \(vMethod) | arguments: \(vData)")
         
         let vHost : String = (vData["host"] as? String ?? "").trim()
         let vPort : String = (vData["port"] as? String ?? "0").trim()
@@ -507,6 +511,26 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         }
         APP_DELEGATE.objXMPP.sendTypingStatus(withJid: vUserId, status: vTypingStatus, withStrem: self.objXMPP.xmppStream)
         result(xmppConstants.SUCCESS)
+    }
+    
+    func changePresence (_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+        printLog("\(#function) | changepresence")
+
+        guard let vData = call.arguments as? [String : Any] else {
+            result(xmppConstants.DataNil);
+            return
+        }
+        let vMethod : String = call.method.trim()
+        printLog("\(#function) | \(vMethod) | arguments: \(String(describing: vData))")
+        
+        var vPresenceType : String = "available"
+        var vPresenceMode : String = "available"
+        
+        if let value = vData["presenceType"] as? String { vPresenceType = value }
+        if let value = vData["presenceMode"] as? String { vPresenceMode = value }
+        
+        APP_DELEGATE.objXMPP.changePresenceWithMode( withMode: vPresenceMode, withType : vPresenceType , withXMPPStrem: self.objXMPP.xmppStream)
+       
     }
     
     //MARK: - perform XMPP Connection

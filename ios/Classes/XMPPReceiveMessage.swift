@@ -83,6 +83,7 @@ extension XMPPController {
                            "chatStateType" : chatStateType] as [String : Any]
                     
             APP_DELEGATE.objEventData!(dicData)
+            self.broadCastMessageToFlutter(dicData: dicData)
             return
         }
         

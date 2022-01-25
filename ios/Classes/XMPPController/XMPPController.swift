@@ -150,6 +150,23 @@ class XMPPController : NSObject {
         let presence = XMPPPresence(type: vStatus.trim())
         xmppStream.send(presence)
     }
+    
+    func changePresenceWithMode(withMode vMode : String , withType vType : String, withXMPPStrem xmppStream : XMPPStream){
+        printLog("\(#function) | Mode : \(vMode) , Type \(vType)")
+//        let presence = XMPPPresence(type: vType.trim())
+//        presence.show = vMode;
+        
+   //     let presence = XMPPPresence.init(show : XMPPPresence.ShowType.dnd)
+       
+        let vStatus : String = (vType == "available") ? "available" : "unavailable"
+        let presence = XMPPPresence(type: vStatus.trim())
+        
+        let mode = DDXMLElement.element(withName: "show", stringValue: vMode.trim()) as! DDXMLElement
+        presence.addChild(mode)
+        
+        addLogger(.sentMessageToServer, presence)
+        xmppStream.send(presence)
+    }
 }
 
 extension XMPPController: XMPPStreamDelegate, XMPPMUCLightDelegate  {
@@ -171,8 +188,8 @@ extension XMPPController: XMPPStreamDelegate, XMPPMUCLightDelegate  {
 //            printLog("\(#function) | Not getting any error.")
 //
 //        }
-        //print("\(#function) | XMPP Server connection error | error: \(err.localizedDescription)")
-        
+        // print("\(#function) | XMPP Server connection error | error: \(err.localizedDescription)")
+       
         self.changeStatus(.Offline, withXMPPStrem: sender)
         APP_DELEGATE.objXMPPConnStatus = .Disconnect
     }
