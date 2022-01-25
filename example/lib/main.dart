@@ -260,14 +260,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       home: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: GestureDetector(
-            onLongPress: () {
-              _userNameController.text = 'test';
-              _passwordController.text = 'test';
-              _hostController.text = 'xrstudio.in';
-            },
-            child: const Text('XMPP Plugin'),
-          ),
+          title: const Text('XMPP Plugin'),
           backgroundColor: Colors.black,
           actions: [
             IconButton(
