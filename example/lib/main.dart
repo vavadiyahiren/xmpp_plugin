@@ -108,7 +108,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       "nativeLogFilePath": NativeLogHelper.logFilePath,
       "requireSSLConnection": true,
       "autoDeliveryReceipt": true,
-      "useStreamManagement": true,
+      "useStreamManagement": false,
       "automaticReconnection": true,
     };
 
@@ -800,6 +800,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ),
           Text(
             "customText: ${event.customText}",
+          ),
+          Text(
+            "PresenceMode: ${event.presenceMode}",
+          ),
+          Text(
+            "PresenceType: ${event.presenceType}",
           ),
           Divider(
             color: Colors.black,

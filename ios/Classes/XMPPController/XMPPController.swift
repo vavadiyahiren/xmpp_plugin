@@ -61,12 +61,15 @@ class XMPPController : NSObject {
         }
         self.xmppStream.addDelegate(self, delegateQueue: DispatchQueue.main)
         
-        /// xmppReconnect Configuration
-        xmppReconnect = XMPPReconnect()
-        self.xmppReconnect.manualStart()
-        self.xmppReconnect.activate(self.xmppStream)
-        self.xmppReconnect.addDelegate(self, delegateQueue: DispatchQueue.main)
-        
+        if xmpp_AutoReConnection {
+           /// xmppReconnect Configuration
+            xmppReconnect = XMPPReconnect()
+            self.xmppReconnect.manualStart()
+            self.xmppReconnect.activate(self.xmppStream)
+            self.xmppReconnect.addDelegate(self, delegateQueue: DispatchQueue.main)
+            
+        }
+       
         /// xmppRoster Configuration
         self.xmppRosterStorage = XMPPRosterCoreDataStorage.init()
         if let objRosSto = self.xmppRosterStorage {
@@ -152,11 +155,6 @@ class XMPPController : NSObject {
     }
     
     func changePresenceWithMode(withMode vMode : String , withType vType : String, withXMPPStrem xmppStream : XMPPStream){
-        printLog("\(#function) | Mode : \(vMode) , Type \(vType)")
-//        let presence = XMPPPresence(type: vType.trim())
-//        presence.show = vMode;
-        
-   //     let presence = XMPPPresence.init(show : XMPPPresence.ShowType.dnd)
        
         let vStatus : String = (vType == "available") ? "available" : "unavailable"
         let presence = XMPPPresence(type: vStatus.trim())
@@ -184,19 +182,17 @@ extension XMPPController: XMPPStreamDelegate, XMPPMUCLightDelegate  {
     }
     
     func xmppStreamDidDisconnect(_ sender: XMPPStream, withError error: Error?) {
-//        guard let err = error else {
-//            printLog("\(#function) | Not getting any error.")
-//
-//        }
-        // print("\(#function) | XMPP Server connection error | error: \(err.localizedDescription)")
-       
+ 
         self.changeStatus(.Offline, withXMPPStrem: sender)
         APP_DELEGATE.objXMPPConnStatus = .Disconnect
     }
     
     //MARK:- Authenticate
     func xmppStreamDidAuthenticate(_ sender: XMPPStream) {
-        self.configureStreamManagement()
+        
+        if xmpp_UseStream {
+            self.configureStreamManagement()
+        }
         self.changeStatus(.Online, withXMPPStrem: sender)
         
         APP_DELEGATE.objXMPPConnStatus = .Sucess
@@ -256,6 +252,7 @@ extension XMPPController : XMPPStreamManagementDelegate {
         xmppStreamManagement.automaticallyRequestAcks(afterStanzaCount: 1, orTimeout: 10)
         xmppStreamManagement.automaticallySendAcks(afterStanzaCount: 1, orTimeout: 10)
         xmppStreamManagement.enable(withResumption: true, maxTimeout: 2.0)
+        
         
         xmppStreamManagement.sendAck()
         xmppStream.register(xmppStreamManagement)

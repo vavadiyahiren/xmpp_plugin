@@ -19,6 +19,8 @@ public var xmpp_UserPass: String = ""
 public var xmpp_Resource: String = ""
 public var xmpp_RequireSSLConnection: Bool = false
 public var xmpp_AutoDeliveryReceipt: Bool = false
+public var xmpp_AutoReConnection: Bool = true
+public var xmpp_UseStream: Bool = true
 
 let default_isPersistent : Bool = false
 
@@ -50,6 +52,7 @@ struct pluginMethod {
     static let getPresence : String                 = "get_presence"
     static let changeTypingStatus : String          = "change_typing_status"
     static let changePresenceType : String          = "change_presence_type"
+    static let getConnectionStatus : String         = "get_connection_status"
 }
 
 struct pluginMessType {

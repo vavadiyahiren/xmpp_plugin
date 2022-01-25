@@ -110,6 +110,9 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         case pluginMethod.changePresenceType :
             self.changePresence(call, result)
             
+        case pluginMethod.getConnectionStatus :
+            self.getConnectionStatus(call, result)
+            
         default:
             guard let vData = call.arguments as? [String : Any] else {
                 print("Getting invalid/nil arguments-data by pluging.... | \(vMethod) | arguments: \(String(describing: call.arguments))")
@@ -168,6 +171,18 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             vAutoDelivReceipt = (value == 1)
         }
         
+        // AutoReconnection configuration
+        var vAutoReconnection : Bool = true
+        if let value = vData["automaticReconnection"] as? Int {
+            vAutoReconnection = (value == 1)
+        }
+        
+        // Use Stream Managment
+        var vUseStream : Bool = true
+        if let value = vData["useStreamManagement"] as? Int {
+            vUseStream = (value == 1)
+        }
+        
         xmpp_HostName = vHost
         xmpp_HostPort = Int16(vPort) ?? 0
         xmpp_UserId = vUserJid
@@ -175,6 +190,8 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         xmpp_Resource = vResource
         xmpp_RequireSSLConnection = vRequiSSLConn
         xmpp_AutoDeliveryReceipt = vAutoDelivReceipt
+        xmpp_AutoReConnection = vAutoReconnection
+        xmpp_UseStream = vUseStream
         
         self.performXMPPConnectionActivity()
         result(xmppConstants.SUCCESS)
@@ -531,6 +548,42 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         
         APP_DELEGATE.objXMPP.changePresenceWithMode( withMode: vPresenceMode, withType : vPresenceType , withXMPPStrem: self.objXMPP.xmppStream)
        
+        result(xmppConstants.SUCCESS)
+    }
+    
+    func getConnectionStatus (_ call: FlutterMethodCall, _ result: @escaping FlutterResult) {
+       
+        var valueStatus : String = ""
+        
+        if objXMPP.isAuthenticated() {
+            valueStatus = "authenticated"
+        } else if objXMPP.isConnected() {
+            valueStatus = "connected"
+        }
+        
+        if valueStatus.isEmpty {
+           
+            print("\(#function) | XMPPConnetion status nil/empty.")
+            switch objXMPPConnStatus {
+            case .Processing:
+                valueStatus = "connecting"
+                break
+            case .Failed:
+                valueStatus = "failed"
+                break
+            case .Disconnect,
+                 .None:
+                valueStatus = "disconnected"
+                break
+            default:
+                valueStatus = "disconnected"
+                break
+            }
+        }
+    
+        printLog("\(#function) connection status \(valueStatus) ")
+        result(valueStatus)
+        
     }
     
     //MARK: - perform XMPP Connection
