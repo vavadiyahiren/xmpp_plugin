@@ -3,5 +3,10 @@
 
 .packages
 .pub/
+.idea/
+pubspec.lock
+example/pubspec.lock
+
+*.lock
 
 build/
