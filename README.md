@@ -7,7 +7,12 @@ final param = {
       "user_jid":"jid/resource",
       "password": "password",
       "host": "xmpphost",
-      "port": "5222"
+      "port": "5222",
+      "nativeLogFilePath": "filepath",
+      "requireSSLConnection": true,
+      "autoDeliveryReceipt": true,
+      "useStreamManagement": false,
+      "automaticReconnection": true,
 };
 
 XmppConnection xmppConnection = XmppConnection(param);
