@@ -160,6 +160,12 @@ await flutterXmpp.changeTypingStatus(userJid, typingStatus);
 await flutterXmpp.changePresenceType(presenceType, presenceMode);
 ```
 
+24. Get Connection status
+
+```
+XmppConnectionState connectionStatus = await flutterXmpp.getConnectionStatus();
+```
+
 
 Contact
 -------
