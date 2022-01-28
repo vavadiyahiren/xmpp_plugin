@@ -530,7 +530,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 
 
         } catch (InterruptedException e) {
-            FlutterXmppConnectionService.sConnectionState = ConnectionState.DISCONNECTED;
+            FlutterXmppConnectionService.sConnectionState = ConnectionState.FAILED;
             e.printStackTrace();
         }
 
@@ -681,7 +681,7 @@ public class FlutterXmppConnection implements ConnectionListener {
     public void connectionClosedOnError(Exception e) {
         Utils.printLog(" ConnectionClosedOnError, error:  " + e.toString());
 
-        FlutterXmppConnectionService.sConnectionState = ConnectionState.DISCONNECTED;
+        FlutterXmppConnectionService.sConnectionState = ConnectionState.FAILED;
 
         //Bundle up the intent and send the broadcast.
         Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
