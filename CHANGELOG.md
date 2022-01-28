@@ -94,3 +94,7 @@
 * Added presence support for iOS 
 * Added support for flexible stream usage and auto reconnection
 * Added flexiblity to get connection status from native libs
+
+## 2.1.1
+
+* Bug fixes for android
