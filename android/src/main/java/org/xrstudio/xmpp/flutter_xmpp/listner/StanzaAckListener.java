@@ -9,11 +9,11 @@ import org.jivesoftware.smack.packet.Stanza;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Constants;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Utils;
 
-public class StanzaAckListner implements StanzaListener {
+public class StanzaAckListener implements StanzaListener {
 
     private static Context mApplicationContext;
 
-    public StanzaAckListner(Context context) {
+    public StanzaAckListener(Context context) {
         mApplicationContext = context;
     }
 

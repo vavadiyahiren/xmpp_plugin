@@ -44,6 +44,7 @@ public class Constants {
     public static final String TLS = "TLS";
     public static final String TIME = "TIME";
     public static final String TYPE = "type";
+    public static final String EXCEPTION = "exception";
     public static final String MODE = "mode";
     public static final String custom = "custom";
     public static final String CUSTOM = "CUSTOM";
@@ -154,4 +155,13 @@ public class Constants {
     public static final String INVITE_MESSAGE ="Invitations to the group";
 
     public static String EMPTY = "";
+
+    public static final String SUCCESS_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.successmessage";
+    public static final String BUNDLE_SUCCESS_TYPE = "b_success_type";
+    public static final String CHANNEL_SUCCESS_EVENT_STREAM = "flutter_xmpp/success_event_stream";
+
+    public static final String ERROR_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.errormessage";
+    public static final String BUNDLE_ERROR_TYPE = "b_error_type";
+    public static final String BUNDLE_EXCEPTION = "b_exception";
+    public static final String CHANNEL_ERROR_EVENT_STREAM = "flutter_xmpp/error_event_stream";
 }

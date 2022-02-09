@@ -14,6 +14,8 @@ import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 import org.xrstudio.xmpp.flutter_xmpp.Connection.FlutterXmppConnection;
+import org.xrstudio.xmpp.flutter_xmpp.Enum.ErrorState;
+import org.xrstudio.xmpp.flutter_xmpp.Enum.SuccessState;
 import org.xrstudio.xmpp.flutter_xmpp.FlutterXmppPlugin;
 
 import java.io.BufferedWriter;
@@ -212,7 +214,27 @@ public class Utils {
         }
     }
 
-    public  static void sendBroadcast(){
+    public static void sendBroadcast() {
 
+    }
+
+    public static void broadcastSuccessMessageToFlutter(Context mApplicationContext, SuccessState successState, String jid) {
+
+        //Bundle up the intent and send the broadcast.
+        Intent intent = new Intent(Constants.SUCCESS_MESSAGE);
+        intent.setPackage(mApplicationContext.getPackageName());
+        intent.putExtra(Constants.BUNDLE_SUCCESS_TYPE, successState.toString());
+        intent.putExtra(Constants.FROM, jid);
+        mApplicationContext.sendBroadcast(intent);
+    }
+
+    public static void broadcastErrorMessageToFlutter(Context mApplicationContext, ErrorState errorState, String exception, String jid) {
+
+        Intent intent = new Intent(Constants.ERROR_MESSAGE);
+        intent.setPackage(mApplicationContext.getPackageName());
+        intent.putExtra(Constants.FROM, jid);
+        intent.putExtra(Constants.BUNDLE_EXCEPTION, exception);
+        intent.putExtra(Constants.BUNDLE_ERROR_TYPE, errorState.toString());
+        mApplicationContext.sendBroadcast(intent);
     }
 }

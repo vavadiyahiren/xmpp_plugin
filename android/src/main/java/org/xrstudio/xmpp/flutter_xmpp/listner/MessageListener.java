@@ -7,11 +7,11 @@ import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Stanza;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Utils;
 
-public class MessageListner implements StanzaListener {
+public class MessageListener implements StanzaListener {
 
     private static Context mApplicationContext;
 
-    public MessageListner(Context context) {
+    public MessageListener(Context context) {
         mApplicationContext = context;
     }
 
