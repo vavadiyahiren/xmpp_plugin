@@ -222,12 +222,19 @@ extension XMPPController {
             return
         }
         
+        let body =  message.body;
+        printLog("\(#function) message body  \(body)")
         //------------------------------------------------------------------------
         //Other Chat message received
         let vMessType : String = (message.type ?? xmppChatType.NORMAL).trim()
         switch vMessType {
+        
         case xmppChatType.NORMAL:
+            if(body?.isEmpty == true){
+                self.handel_ChatMessage(message, withType: vMessType, withStrem: sender)
+            }
             self.handelNormalChatMessage(message, withStrem: sender)
+            break;
             
         default:
             self.handel_ChatMessage(message, withType: vMessType, withStrem: sender)
