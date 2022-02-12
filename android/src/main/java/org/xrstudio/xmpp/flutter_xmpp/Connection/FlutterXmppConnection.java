@@ -36,12 +36,13 @@ import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.jid.parts.Resourcepart;
 import org.xrstudio.xmpp.flutter_xmpp.Enum.ConnectionState;
+import org.xrstudio.xmpp.flutter_xmpp.Enum.ErrorState;
 import org.xrstudio.xmpp.flutter_xmpp.Enum.GroupRole;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Constants;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Utils;
-import org.xrstudio.xmpp.flutter_xmpp.listner.MessageListner;
-import org.xrstudio.xmpp.flutter_xmpp.listner.PresenceListnerAndFilter;
-import org.xrstudio.xmpp.flutter_xmpp.listner.StanzaAckListner;
+import org.xrstudio.xmpp.flutter_xmpp.listner.MessageListener;
+import org.xrstudio.xmpp.flutter_xmpp.listner.PresenceListenerAndFilter;
+import org.xrstudio.xmpp.flutter_xmpp.listner.StanzaAckListener;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -71,7 +72,7 @@ public class FlutterXmppConnection implements ConnectionListener {
     private BroadcastReceiver uiThreadMessageReceiver;//Receives messages from the ui thread.
 
     public FlutterXmppConnection(Context context, String jid_user, String password, String host, Integer port, boolean requireSSLConnection,
-                                 boolean autoDeliveryReceipt ,boolean useStreamManagement, boolean automaticReconnection) {
+                                 boolean autoDeliveryReceipt, boolean useStreamManagement, boolean automaticReconnection) {
 
         Utils.printLog(" Connection Constructor called: ");
 
@@ -329,6 +330,9 @@ public class FlutterXmppConnection implements ConnectionListener {
 
         } catch (Exception e) {
             e.printStackTrace();
+            String groupCreateError = e.getLocalizedMessage();
+            Utils.printLog(" createMUC : exception: " + groupCreateError);
+            Utils.broadcastErrorMessageToFlutter(mApplicationContext, ErrorState.GROUP_CREATION_FAILED, groupCreateError, groupName);
         }
         return isGroupCreatedSuccessfully;
 
@@ -363,8 +367,10 @@ public class FlutterXmppConnection implements ConnectionListener {
                     multiUserChat.join(mucEnterConfiguration);
                 }
             } catch (Exception e) {
-                Utils.printLog(" exception: " + e.getLocalizedMessage());
                 e.printStackTrace();
+                String allGroupJoinError = e.getLocalizedMessage();
+                Utils.printLog(" joinAllGroup : exception: " + allGroupJoinError);
+                Utils.broadcastErrorMessageToFlutter(mApplicationContext, ErrorState.GROUP_JOINED_FAILED, allGroupJoinError, groupId);
             }
 
         }
@@ -403,7 +409,9 @@ public class FlutterXmppConnection implements ConnectionListener {
 
             isJoinedSuccessfully = true;
         } catch (Exception e) {
-            Utils.printLog(" groupID : exception: " + e.getLocalizedMessage());
+            String groupJoinError = e.getLocalizedMessage();
+            Utils.printLog(" joinGroup : exception: " + groupJoinError);
+            Utils.broadcastErrorMessageToFlutter(mApplicationContext, ErrorState.GROUP_JOINED_FAILED, groupJoinError, groupId);
             e.printStackTrace();
         }
 
@@ -516,11 +524,11 @@ public class FlutterXmppConnection implements ConnectionListener {
 
             setupUiThreadBroadCastMessageReceiver();
 
-            mConnection.addSyncStanzaListener(new PresenceListnerAndFilter(mApplicationContext), StanzaTypeFilter.PRESENCE);
+            mConnection.addSyncStanzaListener(new PresenceListenerAndFilter(mApplicationContext), StanzaTypeFilter.PRESENCE);
 
-            mConnection.addStanzaAcknowledgedListener(new StanzaAckListner(mApplicationContext));
+            mConnection.addStanzaAcknowledgedListener(new StanzaAckListener(mApplicationContext));
 
-            mConnection.addSyncStanzaListener(new MessageListner(mApplicationContext), StanzaTypeFilter.MESSAGE);
+            mConnection.addSyncStanzaListener(new MessageListener(mApplicationContext), StanzaTypeFilter.MESSAGE);
 
             if (mAutomaticReconnection) {
                 ReconnectionManager reconnectionManager = ReconnectionManager.getInstanceFor(mConnection);

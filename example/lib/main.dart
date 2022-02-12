@@ -11,6 +11,8 @@ import 'package:share/share.dart';
 import 'package:xmpp_plugin/custom_element.dart';
 import 'package:xmpp_plugin/ennums/xmpp_connection_state.dart';
 import 'package:xmpp_plugin/message_event.dart';
+import 'package:xmpp_plugin/success_response_event.dart';
+import 'package:xmpp_plugin/error_response_event.dart';
 import 'package:xmpp_plugin/xmpp_plugin.dart';
 
 import 'mamExamples.dart';
@@ -113,7 +115,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     };
 
     flutterXmpp = XmppConnection(auth);
-    await flutterXmpp.start(_onReceiveMessage, _onError);
+    await flutterXmpp.start(_onReceiveMessage, _onSuccessEventReceive, _onErrorEventReceive, _onError);
     await flutterXmpp.login();
   }
 
@@ -151,6 +153,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     setState(
       () {},
     );
+  }
+
+  Future<void> _onSuccessEventReceive(SuccessResponseEvent successResponseEvent) async {
+    print('receiveEvent successEventReceive: ${successResponseEvent.toSuccessResponseData().toString()}');
+  }
+
+  Future<void> _onErrorEventReceive(ErrorResponseEvent errorResponseEvent) async {
+    print('receiveEvent errorEventReceive: ${errorResponseEvent.toErrorResponseData().toString()}');
   }
 
   void _onError(Object error) {

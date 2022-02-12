@@ -2,18 +2,21 @@ package org.xrstudio.xmpp.flutter_xmpp.listner;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Stanza;
+import org.jivesoftware.smackx.muc.packet.MUCUser;
+import org.xrstudio.xmpp.flutter_xmpp.Enum.SuccessState;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Constants;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Utils;
 
-public class PresenceListnerAndFilter implements StanzaListener {
+public class PresenceListenerAndFilter implements StanzaListener {
 
     private static Context mApplicationContext;
 
-    public PresenceListnerAndFilter(Context context) {
+    public PresenceListenerAndFilter(Context context) {
         mApplicationContext = context;
     }
 
@@ -26,7 +29,26 @@ public class PresenceListnerAndFilter implements StanzaListener {
         Presence.Type type = presence.getType();
         Presence.Mode mode = presence.getMode();
 
-        Utils.printLog("Type : " + type + " , Mode " + mode);
+        if (presence.hasExtension(MUCUser.ELEMENT, MUCUser.NAMESPACE)) {
+            MUCUser mucUser = MUCUser.from(presence);
+
+            if (mucUser != null) {
+
+                if (mucUser.getStatus().contains(MUCUser.Status.ROOM_CREATED_201)) {
+                    // Room was created by user
+
+                    Utils.broadcastSuccessMessageToFlutter(mApplicationContext, SuccessState.GROUP_CREATED_SUCCESS, jid);
+
+                    return;
+                } else if (mucUser.getStatus().contains(MUCUser.Status.PRESENCE_TO_SELF_110)) {
+                    // User was joined the room
+
+                    Utils.broadcastSuccessMessageToFlutter(mApplicationContext, SuccessState.GROUP_JOINED_SUCCESS, jid);
+
+                    return;
+                }
+            }
+        }
 
         Intent intent = new Intent(Constants.PRESENCE_MESSAGE);
         intent.setPackage(mApplicationContext.getPackageName());

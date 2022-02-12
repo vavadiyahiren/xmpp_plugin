@@ -4,11 +4,17 @@ import 'dart:developer';
 import 'package:flutter/services.dart';
 import 'package:xmpp_plugin/message_event.dart';
 import 'package:xmpp_plugin/ennums/xmpp_connection_state.dart';
+import 'package:xmpp_plugin/success_response_event.dart';
+import 'package:xmpp_plugin/error_response_event.dart';
 
 class XmppConnection {
   static const MethodChannel _channel = MethodChannel('flutter_xmpp/method');
   static const EventChannel _eventChannel = EventChannel('flutter_xmpp/stream');
+  static const EventChannel _successEventChannel = EventChannel('flutter_xmpp/success_event_stream');
+  static const EventChannel _errorEventChannel = EventChannel('flutter_xmpp/error_event_stream');
   static late StreamSubscription streamGetMsg;
+  static late StreamSubscription successEventStream;
+  static late StreamSubscription errorEventStream;
 
   dynamic auth;
 
@@ -87,15 +93,27 @@ class XmppConnection {
     return status;
   }
 
-  Future<void> start(Function(MessageEvent) _onEvent, Function _onError) async {
+  Future<void> start(Function(MessageEvent) _onEvent, Function(SuccessResponseEvent) onSuccessEvent, Function(ErrorResponseEvent) onErrorEvent,  Function _onError) async {
     streamGetMsg = _eventChannel.receiveBroadcastStream().listen((dataEvent) {
       MessageEvent eventModel = MessageEvent.fromJson(dataEvent);
       _onEvent.call(eventModel);
+    }, onError: _onError);
+
+    successEventStream = _successEventChannel.receiveBroadcastStream().listen((successData) {
+      SuccessResponseEvent eventModel = SuccessResponseEvent.fromJson(successData);
+      onSuccessEvent.call(eventModel);
+    }, onError: _onError);
+
+    errorEventStream = _errorEventChannel.receiveBroadcastStream().listen((errorData) {
+      ErrorResponseEvent eventModel = ErrorResponseEvent.fromJson(errorData);
+      onErrorEvent.call(eventModel);
     }, onError: _onError);
   }
 
   Future<void> stop() async {
     streamGetMsg.cancel();
+    successEventStream.cancel();
+    errorEventStream.cancel();
   }
 
   /// Return: "SUCCESS" or "FAIL"

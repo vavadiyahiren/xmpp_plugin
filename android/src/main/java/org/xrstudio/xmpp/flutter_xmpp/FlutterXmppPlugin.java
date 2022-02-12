@@ -47,8 +47,12 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
     private EventChannel event_channel;
     private ArrayList<String> membersJid;
     private MethodChannel method_channel;
-    private boolean requireSSLConnection = false, autoDeliveryReceipt = false, automaticReconnection = true, useStreamManagement = true;
+    private EventChannel success_channel;
+    private EventChannel error_channel;
     private BroadcastReceiver mBroadcastReceiver = null;
+    private BroadcastReceiver successBroadcastReceiver = null;
+    private BroadcastReceiver errorBroadcastReceiver = null;
+    private boolean requireSSLConnection = false, autoDeliveryReceipt = false, automaticReconnection = true, useStreamManagement = true;
 
 //    public static void registerWith(Registrar registrar) {
 //
@@ -199,12 +203,113 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
         FlutterXmppConnection.sendCustomMessage(body, toUser, msgId, customText, false, time);
     }
 
+    private static BroadcastReceiver getSuccessBroadCast(final EventChannel.EventSink events) {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                switch (action) {
+
+                    case Constants.SUCCESS_MESSAGE:
+
+                        String successType = intent.getStringExtra(Constants.BUNDLE_SUCCESS_TYPE);
+                        String from = intent.getStringExtra(Constants.FROM);
+
+                        Map<String, Object> successBuild = new HashMap<>();
+                        successBuild.put(Constants.TYPE, successType);
+                        successBuild.put(Constants.FROM, from);
+
+                        Utils.addLogInStorage("Action: sentSuccessMessageToFlutter, Content: " + successBuild.toString());
+
+                        events.success(successBuild);
+                        break;
+
+                }
+            }
+        };
+    }
+
+    private static BroadcastReceiver getErrorBroadCast(final EventChannel.EventSink errorEvents) {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                switch (action) {
+
+                    case Constants.ERROR_MESSAGE:
+
+                        String from = intent.getStringExtra(Constants.FROM);
+                        String error = intent.getStringExtra(Constants.BUNDLE_EXCEPTION);
+                        String errorType = intent.getStringExtra(Constants.BUNDLE_ERROR_TYPE);
+
+                        Map<String, Object> errorBuild = new HashMap<>();
+                        errorBuild.put(Constants.FROM, from);
+                        errorBuild.put(Constants.EXCEPTION, error);
+                        errorBuild.put(Constants.TYPE, errorType);
+
+                        Utils.addLogInStorage("Action: sentErrorMessageToFlutter, Content: " + errorBuild.toString());
+                        
+                        errorEvents.success(errorBuild);
+                        break;
+
+                }
+            }
+        };
+    }
+
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
         method_channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), Constants.CHANNEL);
         method_channel.setMethodCallHandler(this);
         event_channel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), Constants.CHANNEL_STREAM);
         event_channel.setStreamHandler(this);
+
+        success_channel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), Constants.CHANNEL_SUCCESS_EVENT_STREAM);
+        success_channel.setStreamHandler(new EventChannel.StreamHandler() {
+            @Override
+            public void onListen(Object args, EventChannel.EventSink events) {
+                if (successBroadcastReceiver == null) {
+                    Utils.printLog(" adding success listener: ");
+                    successBroadcastReceiver = getSuccessBroadCast(events);
+                    IntentFilter filter = new IntentFilter();
+                    filter.addAction(Constants.SUCCESS_MESSAGE);
+                    activity.registerReceiver(successBroadcastReceiver, filter);
+                }
+            }
+
+            @Override
+            public void onCancel(Object o) {
+                if (successBroadcastReceiver != null) {
+                    Utils.printLog(" cancelling success listener: ");
+                    activity.unregisterReceiver(successBroadcastReceiver);
+                    successBroadcastReceiver = null;
+                }
+            }
+        });
+
+        error_channel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), Constants.CHANNEL_ERROR_EVENT_STREAM);
+        error_channel.setStreamHandler(new EventChannel.StreamHandler() {
+            @Override
+            public void onListen(Object args, EventChannel.EventSink errorEvents) {
+                if (errorBroadcastReceiver == null) {
+                    Utils.printLog(" adding error listener: ");
+                    errorBroadcastReceiver = getErrorBroadCast(errorEvents);
+                    IntentFilter filter = new IntentFilter();
+                    filter.addAction(Constants.ERROR_MESSAGE);
+                    activity.registerReceiver(errorBroadcastReceiver, filter);
+                }
+            }
+
+            @Override
+            public void onCancel(Object o) {
+                if (errorBroadcastReceiver != null) {
+                    Utils.printLog(" cancelling error listener: ");
+                    activity.unregisterReceiver(errorBroadcastReceiver);
+                    errorBroadcastReceiver = null;
+                }
+            }
+        });
+
     }
 
     @Override
