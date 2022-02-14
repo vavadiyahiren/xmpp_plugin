@@ -638,6 +638,8 @@ public class FlutterXmppConnection implements ConnectionListener {
 
         FlutterXmppConnectionService.sConnectionState = ConnectionState.CONNECTED;
 
+        Utils.broadcastConnectionMessageToFlutter(mApplicationContext, ConnectionState.CONNECTED, "");
+
         //Bundle up the intent and send the broadcast.
         Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
         intent.setPackage(mApplicationContext.getPackageName());
@@ -657,6 +659,8 @@ public class FlutterXmppConnection implements ConnectionListener {
         FlutterXmppConnectionService.sConnectionState = ConnectionState.AUTHENTICATED;
 //        showContactListActivityWhenAuthenticated();
 
+        Utils.broadcastConnectionMessageToFlutter(mApplicationContext, ConnectionState.AUTHENTICATED, "");
+
         //Bundle up the intent and send the broadcast.
         Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
         intent.setPackage(mApplicationContext.getPackageName());
@@ -674,6 +678,8 @@ public class FlutterXmppConnection implements ConnectionListener {
 
         FlutterXmppConnectionService.sConnectionState = ConnectionState.DISCONNECTED;
 
+        Utils.broadcastConnectionMessageToFlutter(mApplicationContext, ConnectionState.DISCONNECTED, "");
+
         //Bundle up the intent and send the broadcast.
         Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
         intent.setPackage(mApplicationContext.getPackageName());
@@ -690,6 +696,8 @@ public class FlutterXmppConnection implements ConnectionListener {
         Utils.printLog(" ConnectionClosedOnError, error:  " + e.toString());
 
         FlutterXmppConnectionService.sConnectionState = ConnectionState.FAILED;
+
+        Utils.broadcastConnectionMessageToFlutter(mApplicationContext, ConnectionState.FAILED, e.getLocalizedMessage());
 
         //Bundle up the intent and send the broadcast.
         Intent intent = new Intent(Constants.RECEIVE_MESSAGE);

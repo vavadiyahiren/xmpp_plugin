@@ -11,9 +11,11 @@ class XmppConnection {
   static const MethodChannel _channel = MethodChannel('flutter_xmpp/method');
   static const EventChannel _eventChannel = EventChannel('flutter_xmpp/stream');
   static const EventChannel _successEventChannel = EventChannel('flutter_xmpp/success_event_stream');
+  static const EventChannel _connectionEventChannel = EventChannel('flutter_xmpp/connection_event_stream');
   static const EventChannel _errorEventChannel = EventChannel('flutter_xmpp/error_event_stream');
   static late StreamSubscription streamGetMsg;
   static late StreamSubscription successEventStream;
+  static late StreamSubscription connectionEventStream;
   static late StreamSubscription errorEventStream;
 
   dynamic auth;
@@ -93,7 +95,7 @@ class XmppConnection {
     return status;
   }
 
-  Future<void> start(Function(MessageEvent) _onEvent, Function(SuccessResponseEvent) onSuccessEvent, Function(ErrorResponseEvent) onErrorEvent,  Function _onError) async {
+  Future<void> start(Function(MessageEvent) _onEvent, Function(SuccessResponseEvent) onSuccessEvent, Function(ErrorResponseEvent) onErrorEvent, Function _onError) async {
     streamGetMsg = _eventChannel.receiveBroadcastStream().listen((dataEvent) {
       MessageEvent eventModel = MessageEvent.fromJson(dataEvent);
       _onEvent.call(eventModel);
@@ -104,16 +106,22 @@ class XmppConnection {
       onSuccessEvent.call(eventModel);
     }, onError: _onError);
 
+    connectionEventStream = _connectionEventChannel.receiveBroadcastStream().listen((successData) {
+    log('Connection channel ~~>>> $successData');
+    }, onError: _onError);
+
     errorEventStream = _errorEventChannel.receiveBroadcastStream().listen((errorData) {
       ErrorResponseEvent eventModel = ErrorResponseEvent.fromJson(errorData);
       onErrorEvent.call(eventModel);
     }, onError: _onError);
+
   }
 
   Future<void> stop() async {
     streamGetMsg.cancel();
     successEventStream.cancel();
     errorEventStream.cancel();
+    connectionEventStream.cancel();
   }
 
   /// Return: "SUCCESS" or "FAIL"

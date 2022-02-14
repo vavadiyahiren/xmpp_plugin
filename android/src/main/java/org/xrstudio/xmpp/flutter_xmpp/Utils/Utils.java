@@ -14,6 +14,7 @@ import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
 import org.jxmpp.stringprep.XmppStringprepException;
 import org.xrstudio.xmpp.flutter_xmpp.Connection.FlutterXmppConnection;
+import org.xrstudio.xmpp.flutter_xmpp.Enum.ConnectionState;
 import org.xrstudio.xmpp.flutter_xmpp.Enum.ErrorState;
 import org.xrstudio.xmpp.flutter_xmpp.Enum.SuccessState;
 import org.xrstudio.xmpp.flutter_xmpp.FlutterXmppPlugin;
@@ -235,6 +236,15 @@ public class Utils {
         intent.putExtra(Constants.FROM, jid);
         intent.putExtra(Constants.BUNDLE_EXCEPTION, exception);
         intent.putExtra(Constants.BUNDLE_ERROR_TYPE, errorState.toString());
+        mApplicationContext.sendBroadcast(intent);
+    }
+
+    public static void broadcastConnectionMessageToFlutter(Context mApplicationContext, ConnectionState connectionState, String errorMessage) {
+
+        Intent intent = new Intent(Constants.CONNECTION_STATE_MESSAGE);
+        intent.setPackage(mApplicationContext.getPackageName());
+        intent.putExtra(Constants.BUNDLE_CONNECTION_TYPE, connectionState.toString());
+        intent.putExtra(Constants.BUNDLE_CONNECTION_ERROR, errorMessage);
         mApplicationContext.sendBroadcast(intent);
     }
 }

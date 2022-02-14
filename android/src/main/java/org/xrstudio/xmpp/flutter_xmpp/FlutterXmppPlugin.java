@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -49,9 +50,11 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
     private MethodChannel method_channel;
     private EventChannel success_channel;
     private EventChannel error_channel;
+    private EventChannel connection_channel;
     private BroadcastReceiver mBroadcastReceiver = null;
     private BroadcastReceiver successBroadcastReceiver = null;
     private BroadcastReceiver errorBroadcastReceiver = null;
+    private BroadcastReceiver connectionBroadcastReceiver = null;
     private boolean requireSSLConnection = false, autoDeliveryReceipt = false, automaticReconnection = true, useStreamManagement = true;
 
 //    public static void registerWith(Registrar registrar) {
@@ -122,6 +125,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                         build.put(Constants.CHATSTATE_TYPE, chatStateType);
 
                         Utils.addLogInStorage("Action: sentMessageToFlutter, Content: " + build.toString());
+                        Log.d("TAG", " RECEIVE_MESSAGE-->> " + build.toString());
 
                         events.success(build);
 
@@ -248,8 +252,34 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                         errorBuild.put(Constants.TYPE, errorType);
 
                         Utils.addLogInStorage("Action: sentErrorMessageToFlutter, Content: " + errorBuild.toString());
-                        
+
                         errorEvents.success(errorBuild);
+                        break;
+
+                }
+            }
+        };
+    }
+
+    private static BroadcastReceiver getConnectionBroadCast(final EventChannel.EventSink connectionEvents) {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                switch (action) {
+
+                    case Constants.CONNECTION_STATE_MESSAGE:
+
+                        String connectionType = intent.getStringExtra(Constants.BUNDLE_CONNECTION_TYPE);
+                        String connectionError = intent.getStringExtra(Constants.BUNDLE_CONNECTION_ERROR);
+
+                        Map<String, Object> connectionStateBuild = new HashMap<>();
+                        connectionStateBuild.put(Constants.TYPE, connectionType);
+                        connectionStateBuild.put(Constants.ERROR, connectionError);
+
+                        Utils.addLogInStorage("Action: sentConnectionMessageToFlutter, Content: " + connectionStateBuild.toString());
+
+                        connectionEvents.success(connectionStateBuild);
                         break;
 
                 }
@@ -306,6 +336,29 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                     Utils.printLog(" cancelling error listener: ");
                     activity.unregisterReceiver(errorBroadcastReceiver);
                     errorBroadcastReceiver = null;
+                }
+            }
+        });
+
+        connection_channel = new EventChannel(flutterPluginBinding.getBinaryMessenger(), Constants.CHANNEL_CONNECTION_EVENT_STREAM);
+        connection_channel.setStreamHandler(new EventChannel.StreamHandler() {
+            @Override
+            public void onListen(Object args, EventChannel.EventSink connectionEvents) {
+                if (connectionBroadcastReceiver == null) {
+                    Utils.printLog(" adding connection listener: ");
+                    connectionBroadcastReceiver = getConnectionBroadCast(connectionEvents);
+                    IntentFilter filter = new IntentFilter();
+                    filter.addAction(Constants.CONNECTION_STATE_MESSAGE);
+                    activity.registerReceiver(connectionBroadcastReceiver, filter);
+                }
+            }
+
+            @Override
+            public void onCancel(Object o) {
+                if (connectionBroadcastReceiver != null) {
+                    Utils.printLog(" cancelling connection listener: ");
+                    activity.unregisterReceiver(connectionBroadcastReceiver);
+                    connectionBroadcastReceiver = null;
                 }
             }
         });

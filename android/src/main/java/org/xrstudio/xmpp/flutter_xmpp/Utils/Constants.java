@@ -24,6 +24,7 @@ public class Constants {
     public static final String STATE_CONNECTING = "CONNECTING";
     public static final String STATE_DISCONNECTED = "DISCONNECTED";
     public static final String STATE_AUTHENTICATED = "AUTHENTICATED";
+    public static final String STATE_FAILED = "FAILED";
     public static final String STATE_DISCONNECTING = "DISCONNECTING";
     public static final String GET_LAST_SEEN = "get_last_seen";
     public static final String CREATE_ROSTER = "create_roster";
@@ -151,17 +152,20 @@ public class Constants {
     public static final String OUTGOING_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.outgoinmessage";
     public static final String PRESENCE_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.presencemessage";
     public static final String GROUP_SEND_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.sendGroupMessage";
-    public static int PORT_NUMBER = 5222;
-    public static final String INVITE_MESSAGE ="Invitations to the group";
-
-    public static String EMPTY = "";
-
+    public static final String INVITE_MESSAGE = "Invitations to the group";
     public static final String SUCCESS_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.successmessage";
     public static final String BUNDLE_SUCCESS_TYPE = "b_success_type";
     public static final String CHANNEL_SUCCESS_EVENT_STREAM = "flutter_xmpp/success_event_stream";
-
     public static final String ERROR_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.errormessage";
     public static final String BUNDLE_ERROR_TYPE = "b_error_type";
     public static final String BUNDLE_EXCEPTION = "b_exception";
     public static final String CHANNEL_ERROR_EVENT_STREAM = "flutter_xmpp/error_event_stream";
+    public static int PORT_NUMBER = 5222;
+    public static String EMPTY = "";
+    
+    public static final String BUNDLE_CONNECTION_TYPE = "b_connection_type";
+    public static final String BUNDLE_CONNECTION_ERROR = "b_connection_error";
+    public static final String ERROR = "error";
+    public static final String CONNECTION_STATE_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.connectionstatemessage";
+    public static final String CHANNEL_CONNECTION_EVENT_STREAM = "flutter_xmpp/connection_event_stream";
 }
