@@ -10,9 +10,13 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:share/share.dart';
 import 'package:xmpp_plugin/custom_element.dart';
 import 'package:xmpp_plugin/ennums/xmpp_connection_state.dart';
-import 'package:xmpp_plugin/message_event.dart';
-import 'package:xmpp_plugin/success_response_event.dart';
 import 'package:xmpp_plugin/error_response_event.dart';
+import 'package:xmpp_plugin/message_event.dart';
+import 'package:xmpp_plugin/models/chat_state_model.dart';
+import 'package:xmpp_plugin/models/connection_event.dart';
+import 'package:xmpp_plugin/models/message_model.dart';
+import 'package:xmpp_plugin/models/present_mode.dart';
+import 'package:xmpp_plugin/success_response_event.dart';
 import 'package:xmpp_plugin/xmpp_plugin.dart';
 
 import 'mamExamples.dart';
@@ -21,58 +25,23 @@ const myTask = "syncWithTheBackEnd";
 
 void main() {
   runApp(MyApp());
-  if (Platform.isAndroid) {
-    // Workmanager().initialize(callbackDispatcher);
-    // Workmanager().registerOneOffTask(
-    //   "1",
-    //   myTask,
-    //   initialDelay: Duration(seconds: 30),
-    //   constraints: Constraints(
-    //     requiresCharging: true,
-    //     networkType: NetworkType.connected,
-    //   ),
-    // );
-  }
 }
-
-// void callbackDispatcher() {
-//   Workmanager().executeTask((task, inputData) async {
-//     switch (task) {
-//       case myTask:
-//         log("this method was called from native!");
-//         final auth = {
-//           "user_jid":
-//           "test4@xrstudio.in/${Platform.isAndroid ? "Android" : "iOS"}",
-//           "password": "test4",
-//           "host": "xrstudio.in",
-//           "port": '5222'
-//         };
-//
-//         XmppConnection flutterXmpp = XmppConnection(auth);
-//         // await flutterXmpp.start(_onReceiveMessage, _onError);
-//         await flutterXmpp.login();
-//         break;
-//       case Workmanager.iOSBackgroundTask:
-//         log("iOS background fetch delegate ran");
-//         break;
-//     }
-//     return Future.value(true);
-//   });
-// }
 
 class MyApp extends StatefulWidget {
   @override
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements DataChangeEvents {
   static late XmppConnection flutterXmpp;
-  List<MessageEvent> events = [];
+  List<MessageChat> events = [];
+  List<PresentModel> presentMo = [];
   String connectionStatus = "Disconnected";
 
   @override
   void initState() {
     checkStoragePermission();
+    XmppConnection.addListener(this);
     super.initState();
     log('didChangeAppLifecycleState() initState');
     WidgetsBinding.instance!.addObserver(this);
@@ -80,6 +49,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void dispose() {
+    XmppConnection.removeListener(this);
     WidgetsBinding.instance!.removeObserver(this);
     log('didChangeAppLifecycleState() dispose');
     super.dispose();
@@ -102,8 +72,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   Future<void> connect() async {
     final auth = {
-      "user_jid":
-          "${_userNameController.text}@${_hostController.text}/${Platform.isAndroid ? "Android" : "iOS"}",
+      "user_jid": "${_userNameController.text}@${_hostController.text}/${Platform.isAndroid ? "Android" : "iOS"}",
       "password": "${_passwordController.text}",
       "host": "${_hostController.text}",
       "port": '5222',
@@ -115,7 +84,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     };
 
     flutterXmpp = XmppConnection(auth);
-    await flutterXmpp.start(_onReceiveMessage, _onSuccessEventReceive, _onErrorEventReceive, _onError);
+    await flutterXmpp.start(_onError);
     await flutterXmpp.login();
   }
 
@@ -135,36 +104,70 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     }
   }
 
-  Future<void> _onReceiveMessage(MessageEvent e) async {
+  void _onError(Object error) {
+    // TODO : Handle the Error event
+  }
+  @override
+  void messageEvent(MessageEvent messageEvent) {
     // TODO : Handle the receive event
-    print('receiveEvent: ${e.toEventData().toString()}');
-    events.add(e);
+    print('receiveEvent: ${messageEvent.toEventData().toString()}');
 
-    if (e.msgtype == "Connected") {
+    if (messageEvent.msgtype == "Connected") {
       connectionStatus = "Connected";
     }
-    if (e.msgtype == "Authenticated") {
+    if (messageEvent.msgtype == "Authenticated") {
       connectionStatus = "Authenticated";
     }
-    if (e.msgtype == "Disconnected") {
+    if (messageEvent.msgtype == "Disconnected") {
       connectionStatus = "Disconnected";
     }
-
     setState(
       () {},
     );
   }
 
-  Future<void> _onSuccessEventReceive(SuccessResponseEvent successResponseEvent) async {
-    print('receiveEvent successEventReceive: ${successResponseEvent.toSuccessResponseData().toString()}');
-  }
-
-  Future<void> _onErrorEventReceive(ErrorResponseEvent errorResponseEvent) async {
+  @override
+  void onErrorEvent(ErrorResponseEvent errorResponseEvent) {
     print('receiveEvent errorEventReceive: ${errorResponseEvent.toErrorResponseData().toString()}');
   }
 
-  void _onError(Object error) {
-    // TODO : Handle the Error event
+  @override
+  void onSuccessEvent(SuccessResponseEvent successResponseEvent) {
+    print('receiveEvent successEventReceive: ${successResponseEvent.toSuccessResponseData().toString()}');
+  }
+
+  @override
+  void chatMessage(MessageChat messageChat) {
+    events.add(messageChat);
+    print('chatMessage: ${messageChat.toEventData()}');
+  }
+
+  @override
+  void groupMessage(MessageChat messageChat) {
+    events.add(messageChat);
+    print('groupMessage: ${messageChat.toEventData()}');
+  }
+
+  @override
+  void normalMessage(MessageChat messageChat) {
+    events.add(messageChat);
+    print('normalMessage: ${messageChat.toEventData()}');
+  }
+
+  @override
+  void presentMode(PresentModel presentModel) {
+    presentMo.add(presentModel);
+    log('presentMode ~~>>${presentModel.toJson()}');
+  }
+
+  @override
+  void chatState(ChatState chatState) {
+    log('chatState ~~>>$chatState');
+  }
+
+  @override
+  void connectionEvent(ConnectionEvent connectionEvent) {
+    log('connectionEvent ~~>>${connectionEvent.toJson()}');
   }
 
   Future<void> disconnectXMPP() async => await flutterXmpp.logout();
@@ -259,10 +262,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  List<CustomElement> customElements = [
-    CustomElement(
-        childBody: "test", childElement: "elem", elementName: "Name", elementNameSpace: "space")
-  ];
+  List<CustomElement> customElements = [CustomElement(childBody: "test", childElement: "elem", elementName: "Name", elementNameSpace: "space")];
 
   @override
   Widget build(BuildContext context) {
@@ -270,7 +270,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       home: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: const Text('XMPP Plugin'),
+          title: InkWell(
+              onLongPress: () {
+                _userNameController.text = 'test1';
+                _passwordController.text = 'test1';
+                _hostController.text = 'xrstudio.in';
+              },
+              child: const Text('XMPP Plugin')),
           backgroundColor: Colors.black,
           actions: [
             IconButton(
@@ -285,8 +291,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   Share.shareFiles([NativeLogHelper.logFilePath]);
                 } else {
                   if (_scaffoldKey.currentState != null) {
-                    _scaffoldKey.currentState!
-                        .showSnackBar(new SnackBar(content: new Text('File not found!')));
+                    _scaffoldKey.currentState!.showSnackBar(new SnackBar(content: new Text('File not found!')));
                   }
                 }
               },
@@ -298,8 +303,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   NativeLogHelper().deleteLogFile();
                 } else {
                   if (_scaffoldKey.currentState != null) {
-                    _scaffoldKey.currentState!
-                        .showSnackBar(new SnackBar(content: new Text('File not found!')));
+                    _scaffoldKey.currentState!.showSnackBar(new SnackBar(content: new Text('File not found!')));
                   }
                 }
               },
@@ -532,8 +536,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       children: [
                         ElevatedButton(
                           onPressed: () async {
-                            _joinGroup(context, "${_joinMUCTextController.text}",
-                                "${_joinTimeController.text}");
+                            _joinGroup(context, "${_joinMUCTextController.text}", "${_joinTimeController.text}");
                           },
                           child: Text('Join Group'),
                           style: ElevatedButton.styleFrom(
@@ -542,9 +545,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         ),
                         ElevatedButton(
                           onPressed: () async {
-                            _joinGroup(context, "${_joinMUCTextController.text}",
-                                "${_joinTimeController.text}",
-                                isManageGroup: true);
+                            _joinGroup(context, "${_joinMUCTextController.text}", "${_joinTimeController.text}", isManageGroup: true);
                           },
                           child: Text('Join Group & Manage'),
                           style: ElevatedButton.styleFrom(
@@ -612,15 +613,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         int id = DateTime.now().millisecondsSinceEpoch;
                         (dropDownValue == "Chat")
                             ? await flutterXmpp.sendMessageWithType(
-                                "${_toNameController.text}",
-                                "${_messageController.text}",
-                                "$id",
-                                DateTime.now().millisecondsSinceEpoch)
+                                "${_toNameController.text}", "${_messageController.text}", "$id", DateTime.now().millisecondsSinceEpoch)
                             : await flutterXmpp.sendGroupMessageWithType(
-                                "${_toNameController.text}",
-                                "${_messageController.text}",
-                                "$id",
-                                DateTime.now().millisecondsSinceEpoch);
+                                "${_toNameController.text}", "${_messageController.text}", "$id", DateTime.now().millisecondsSinceEpoch);
                       },
                       child: Text(" Send "),
                       style: ElevatedButton.styleFrom(
@@ -631,18 +626,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       onPressed: () async {
                         int id = DateTime.now().millisecondsSinceEpoch;
                         (dropDownValue == "Chat")
-                            ? await flutterXmpp.sendCustomMessage(
-                                "${_toNameController.text}",
-                                "${_messageController.text}",
-                                "$id",
-                                "${_custommessageController.text}",
-                                DateTime.now().millisecondsSinceEpoch)
-                            : await flutterXmpp.sendCustomGroupMessage(
-                                "${_toNameController.text}",
-                                "${_messageController.text}",
-                                "$id",
-                                "${_custommessageController.text}",
-                                DateTime.now().millisecondsSinceEpoch);
+                            ? await flutterXmpp.sendCustomMessage("${_toNameController.text}", "${_messageController.text}", "$id",
+                                "${_custommessageController.text}", DateTime.now().millisecondsSinceEpoch)
+                            : await flutterXmpp.sendCustomGroupMessage("${_toNameController.text}", "${_messageController.text}", "$id",
+                                "${_custommessageController.text}", DateTime.now().millisecondsSinceEpoch);
                       },
                       child: Text(" Send Custom Message "),
                       style: ElevatedButton.styleFrom(
@@ -751,7 +738,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     ElevatedButton(
                       onPressed: () async {
                         var val = await flutterXmpp.currentState();
-                        log('Val return = ${val.toString()}');
                       },
                       child: Text("Current State"),
                       style: ElevatedButton.styleFrom(primary: Colors.black),
@@ -780,7 +766,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   _buildMessage(int index) {
-    MessageEvent event = events[index];
+    MessageChat event = events[index];
 
     return Container(
       child: Column(
@@ -804,12 +790,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           Text(
             "customText: ${event.customText}",
           ),
-          Text(
-            "PresenceMode: ${event.presenceMode}",
-          ),
-          Text(
-            "PresenceType: ${event.presenceType}",
-          ),
+          // Text(
+          //   "PresenceMode: ${event.presenceMode}",
+          // ),
+          // Text(
+          //   "PresenceType: ${event.presenceType}",
+          // ),
           Divider(
             color: Colors.black,
           ),
@@ -823,8 +809,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     print('responseTest groupResponse $groupResponse');
   }
 
-  void _joinGroup(BuildContext context, String grouname, String time,
-      {bool isManageGroup = false}) async {
+  void _joinGroup(BuildContext context, String grouname, String time, {bool isManageGroup = false}) async {
     bool response = await joinMucGroup("$grouname,$time");
     print("responseTest joinResponse $response");
     if (response && isManageGroup) {

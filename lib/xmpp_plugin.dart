@@ -2,10 +2,35 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/services.dart';
-import 'package:xmpp_plugin/message_event.dart';
 import 'package:xmpp_plugin/ennums/xmpp_connection_state.dart';
-import 'package:xmpp_plugin/success_response_event.dart';
 import 'package:xmpp_plugin/error_response_event.dart';
+import 'package:xmpp_plugin/message_event.dart';
+import 'package:xmpp_plugin/models/message_model.dart';
+import 'package:xmpp_plugin/success_response_event.dart';
+
+import 'models/chat_state_model.dart';
+import 'models/connection_event.dart';
+import 'models/present_mode.dart';
+
+abstract class DataChangeEvents {
+  void messageEvent(MessageEvent messageEvent);
+
+  void chatMessage(MessageChat messageChat);
+
+  void groupMessage(MessageChat messageChat);
+
+  void normalMessage(MessageChat messageChat);
+
+  void presentMode(PresentModel message);
+
+  void chatState(ChatState chatState);
+
+  void connectionEvent(ConnectionEvent connectionEvent);
+
+  void onSuccessEvent(SuccessResponseEvent successResponseEvent);
+
+  void onErrorEvent(ErrorResponseEvent errorResponseEvent);
+}
 
 class XmppConnection {
   static const MethodChannel _channel = MethodChannel('flutter_xmpp/method');
@@ -17,10 +42,29 @@ class XmppConnection {
   static late StreamSubscription successEventStream;
   static late StreamSubscription connectionEventStream;
   static late StreamSubscription errorEventStream;
+  static List<DataChangeEvents> dataChangelist = <DataChangeEvents>[];
 
   dynamic auth;
 
   XmppConnection(this.auth);
+
+  static void addListener(DataChangeEvents dataChangeA) {
+    if (!dataChangelist.contains(dataChangeA)) {
+      dataChangelist.add(dataChangeA);
+    }
+  }
+
+  static void removeListener(DataChangeEvents dataChangeA) {
+    if (dataChangelist.contains(dataChangeA)) {
+      dataChangelist.remove(dataChangeA);
+    }
+  }
+
+  static void removeAllListener(DataChangeEvents dataChangeA) {
+    if (dataChangelist.isNotEmpty) {
+      dataChangelist.clear();
+    }
+  }
 
   Future<void> login() async {
     await _channel.invokeMethod('login', auth);
@@ -95,26 +139,50 @@ class XmppConnection {
     return status;
   }
 
-  Future<void> start(Function(MessageEvent) _onEvent, Function(SuccessResponseEvent) onSuccessEvent, Function(ErrorResponseEvent) onErrorEvent, Function _onError) async {
-    streamGetMsg = _eventChannel.receiveBroadcastStream().listen((dataEvent) {
-      MessageEvent eventModel = MessageEvent.fromJson(dataEvent);
-      _onEvent.call(eventModel);
+  Future<void> start(Function _onError) async {
+    streamGetMsg = _eventChannel.receiveBroadcastStream().listen(
+      (dataEvent) {
+        MessageEvent eventModel = MessageEvent.fromJson(dataEvent);
+        MessageChat messageChat = MessageChat.fromJson(dataEvent);
+        dataChangelist.forEach((element) {
+          element.messageEvent(eventModel);
+          if (eventModel.msgtype == 'chat') {
+            element.chatMessage(messageChat);
+          } else if (eventModel.msgtype == 'groupchat') {
+            element.groupMessage(messageChat);
+          } else if (eventModel.msgtype == 'normal') {
+            element.normalMessage(messageChat);
+          } else if (eventModel.type == 'presence') {
+            PresentModel presentModel = PresentModel.fromJson(dataEvent);
+            element.presentMode(presentModel);
+          } else if (eventModel.type == 'chatstate') {
+            ChatState chatState = ChatState.fromJson(dataEvent);
+            element.chatState(chatState);
+          }
+        });
+      },
+    );
+
+    connectionEventStream = _connectionEventChannel.receiveBroadcastStream().listen((connectionData) {
+      ConnectionEvent connectionEvent = ConnectionEvent.fromJson(connectionData);
+      dataChangelist.forEach((element) {
+        element.connectionEvent(connectionEvent);
+      });
     }, onError: _onError);
 
     successEventStream = _successEventChannel.receiveBroadcastStream().listen((successData) {
       SuccessResponseEvent eventModel = SuccessResponseEvent.fromJson(successData);
-      onSuccessEvent.call(eventModel);
-    }, onError: _onError);
-
-    connectionEventStream = _connectionEventChannel.receiveBroadcastStream().listen((successData) {
-    log('Connection channel ~~>>> $successData');
+      dataChangelist.forEach((element) {
+        element.onSuccessEvent(eventModel);
+      });
     }, onError: _onError);
 
     errorEventStream = _errorEventChannel.receiveBroadcastStream().listen((errorData) {
       ErrorResponseEvent eventModel = ErrorResponseEvent.fromJson(errorData);
-      onErrorEvent.call(eventModel);
+      dataChangelist.forEach((element) {
+        element.onErrorEvent(eventModel);
+      });
     }, onError: _onError);
-
   }
 
   Future<void> stop() async {
@@ -155,8 +223,7 @@ class XmppConnection {
     return await _channel.invokeMethod('join_muc_group', params);
   }
 
-  Future<void> sendCustomMessage(
-      String toJid, String body, String id, String customString, int time) async {
+  Future<void> sendCustomMessage(String toJid, String body, String id, String customString, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -171,8 +238,7 @@ class XmppConnection {
     log('call method to app from flutter methodName: $methodName: params: $params');
   }
 
-  Future<void> sendCustomGroupMessage(
-      String toJid, String body, String id, String customString, int time) async {
+  Future<void> sendCustomGroupMessage(String toJid, String body, String id, String customString, int time) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -250,7 +316,6 @@ class XmppConnection {
     print('checkNewFeat create roster success');
   }
 
-
   Future<dynamic> getMyRosters() async {
     List<dynamic> myRosters = await _channel.invokeMethod('get_my_rosters');
     print('checkNewFeat getRosters myRosters: $myRosters');
@@ -272,16 +337,9 @@ class XmppConnection {
     return admins;
   }
 
-  Future<void> requestMamMessages(
-      String userJid, String requestSince, String requestBefore, String limit) async {
-    print(
-        " Plugin : User Jid : $userJid , Request since : $requestSince , Request Before : $requestBefore, Limit : $limit ");
-    final params = {
-      "userJid": userJid,
-      "requestBefore": requestBefore,
-      "requestSince": requestSince,
-      "limit": limit
-    };
+  Future<void> requestMamMessages(String userJid, String requestSince, String requestBefore, String limit) async {
+    print(" Plugin : User Jid : $userJid , Request since : $requestSince , Request Before : $requestBefore, Limit : $limit ");
+    final params = {"userJid": userJid, "requestBefore": requestBefore, "requestSince": requestSince, "limit": limit};
     await _channel.invokeMethod('request_mam', params);
   }
 
@@ -314,5 +372,4 @@ class XmppConnection {
     final String state = await _channel.invokeMethod('current_state');
     return state;
   }
-
 }
