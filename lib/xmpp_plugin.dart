@@ -13,23 +13,21 @@ import 'models/connection_event.dart';
 import 'models/present_mode.dart';
 
 abstract class DataChangeEvents {
-  void messageEvent(MessageEvent messageEvent);
+  void onChatMessage(MessageChat messageChat);
 
-  void chatMessage(MessageChat messageChat);
+  void onGroupMessage(MessageChat messageChat);
 
-  void groupMessage(MessageChat messageChat);
+  void onNormalMessage(MessageChat messageChat);
 
-  void normalMessage(MessageChat messageChat);
+  void onPresenceChange(PresentModel message);
 
-  void presentMode(PresentModel message);
+  void onChatStateChange(ChatState chatState);
 
-  void chatState(ChatState chatState);
-
-  void connectionEvent(ConnectionEvent connectionEvent);
+  void onConnectionEvents(ConnectionEvent connectionEvent);
 
   void onSuccessEvent(SuccessResponseEvent successResponseEvent);
 
-  void onErrorEvent(ErrorResponseEvent errorResponseEvent);
+  void onXmppError(ErrorResponseEvent errorResponseEvent);
 }
 
 class XmppConnection {
@@ -145,19 +143,18 @@ class XmppConnection {
         MessageEvent eventModel = MessageEvent.fromJson(dataEvent);
         MessageChat messageChat = MessageChat.fromJson(dataEvent);
         dataChangelist.forEach((element) {
-          element.messageEvent(eventModel);
           if (eventModel.msgtype == 'chat') {
-            element.chatMessage(messageChat);
+            element.onChatMessage(messageChat);
           } else if (eventModel.msgtype == 'groupchat') {
-            element.groupMessage(messageChat);
+            element.onGroupMessage(messageChat);
           } else if (eventModel.msgtype == 'normal') {
-            element.normalMessage(messageChat);
+            element.onNormalMessage(messageChat);
           } else if (eventModel.type == 'presence') {
             PresentModel presentModel = PresentModel.fromJson(dataEvent);
-            element.presentMode(presentModel);
+            element.onPresenceChange(presentModel);
           } else if (eventModel.type == 'chatstate') {
             ChatState chatState = ChatState.fromJson(dataEvent);
-            element.chatState(chatState);
+            element.onChatStateChange(chatState);
           }
         });
       },
@@ -166,7 +163,7 @@ class XmppConnection {
     connectionEventStream = _connectionEventChannel.receiveBroadcastStream().listen((connectionData) {
       ConnectionEvent connectionEvent = ConnectionEvent.fromJson(connectionData);
       dataChangelist.forEach((element) {
-        element.connectionEvent(connectionEvent);
+        element.onConnectionEvents(connectionEvent);
       });
     }, onError: _onError);
 
@@ -180,7 +177,7 @@ class XmppConnection {
     errorEventStream = _errorEventChannel.receiveBroadcastStream().listen((errorData) {
       ErrorResponseEvent eventModel = ErrorResponseEvent.fromJson(errorData);
       dataChangelist.forEach((element) {
-        element.onErrorEvent(eventModel);
+        element.onXmppError(eventModel);
       });
     }, onError: _onError);
   }

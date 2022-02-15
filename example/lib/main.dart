@@ -6,12 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_xmpp_example/constants.dart';
 import 'package:flutter_xmpp_example/homepage.dart';
 import 'package:flutter_xmpp_example/native_log_helper.dart';
+import 'package:flutter_xmpp_example/utils.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share/share.dart';
 import 'package:xmpp_plugin/custom_element.dart';
 import 'package:xmpp_plugin/ennums/xmpp_connection_state.dart';
 import 'package:xmpp_plugin/error_response_event.dart';
-import 'package:xmpp_plugin/message_event.dart';
 import 'package:xmpp_plugin/models/chat_state_model.dart';
 import 'package:xmpp_plugin/models/connection_event.dart';
 import 'package:xmpp_plugin/models/message_model.dart';
@@ -107,28 +107,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
   void _onError(Object error) {
     // TODO : Handle the Error event
   }
-  @override
-  void messageEvent(MessageEvent messageEvent) {
-    // TODO : Handle the receive event
-    print('receiveEvent: ${messageEvent.toEventData().toString()}');
-
-    if (messageEvent.msgtype == "Connected") {
-      connectionStatus = "Connected";
-    }
-    if (messageEvent.msgtype == "Authenticated") {
-      connectionStatus = "Authenticated";
-    }
-    if (messageEvent.msgtype == "Disconnected") {
-      connectionStatus = "Disconnected";
-    }
-    setState(
-      () {},
-    );
-  }
 
   @override
-  void onErrorEvent(ErrorResponseEvent errorResponseEvent) {
-    print('receiveEvent errorEventReceive: ${errorResponseEvent.toErrorResponseData().toString()}');
+  void onXmppError(ErrorResponseEvent errorResponseEvent) {
+    print('receiveEvent onXmppError: ${errorResponseEvent.toErrorResponseData().toString()}');
   }
 
   @override
@@ -137,37 +119,39 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
   }
 
   @override
-  void chatMessage(MessageChat messageChat) {
+  void onChatMessage(MessageChat messageChat) {
     events.add(messageChat);
-    print('chatMessage: ${messageChat.toEventData()}');
+    print('onChatMessage: ${messageChat.toEventData()}');
   }
 
   @override
-  void groupMessage(MessageChat messageChat) {
+  void onGroupMessage(MessageChat messageChat) {
     events.add(messageChat);
-    print('groupMessage: ${messageChat.toEventData()}');
+    print('onGroupMessage: ${messageChat.toEventData()}');
   }
 
   @override
-  void normalMessage(MessageChat messageChat) {
+  void onNormalMessage(MessageChat messageChat) {
     events.add(messageChat);
-    print('normalMessage: ${messageChat.toEventData()}');
+    print('onNormalMessage: ${messageChat.toEventData()}');
   }
 
   @override
-  void presentMode(PresentModel presentModel) {
+  void onPresenceChange(PresentModel presentModel) {
     presentMo.add(presentModel);
-    log('presentMode ~~>>${presentModel.toJson()}');
+    log('onPresenceChange ~~>>${presentModel.toJson()}');
   }
 
   @override
-  void chatState(ChatState chatState) {
-    log('chatState ~~>>$chatState');
+  void onChatStateChange(ChatState chatState) {
+    log('onChatStateChange ~~>>$chatState');
   }
 
   @override
-  void connectionEvent(ConnectionEvent connectionEvent) {
-    log('connectionEvent ~~>>${connectionEvent.toJson()}');
+  void onConnectionEvents(ConnectionEvent connectionEvent) {
+    log('onConnectionEvents ~~>>${connectionEvent.toJson()}');
+    connectionStatus = connectionEvent.type!.toConnectionName();
+    setState(() {});
   }
 
   Future<void> disconnectXMPP() async => await flutterXmpp.logout();
