@@ -175,6 +175,7 @@ extension XMPPController: XMPPStreamDelegate, XMPPMUCLightDelegate  {
             return
         }
         do {
+            APP_DELEGATE.objXMPPConnStatus = .Connected
             try stream.authenticate(withPassword: self.password)
         } catch {
             APP_DELEGATE.objXMPPConnStatus = .Disconnect
@@ -223,14 +224,14 @@ extension XMPPController {
         }
         
         let body =  message.body;
-        printLog("\(#function) message body  \(body)")
+        printLog("\(#function) | message body  \(body)")
         //------------------------------------------------------------------------
         //Other Chat message received
         let vMessType : String = (message.type ?? xmppChatType.NORMAL).trim()
         switch vMessType {
         
         case xmppChatType.NORMAL:
-            if(body?.isEmpty == true){
+            if(body?.isEmpty != true){
                 self.handel_ChatMessage(message, withType: vMessType, withStrem: sender)
             }
             self.handelNormalChatMessage(message, withStrem: sender)
@@ -320,6 +321,21 @@ extension XMPPMessage {
     func getCustomElementInfo(withKey vKey : String) -> String {
         var value : String = ""
         let arrMI = self.elements(forName: eleCustom.Name)
+        guard let eleMI = arrMI.first else {
+            return value
+        }
+        
+        let arrMInfo = eleMI.elements(forName: vKey)
+        guard let vInfo = arrMInfo.first?.stringValue else {
+            return value
+        }
+        value = vInfo.trim()
+        return value
+    }
+    
+    func getErrorResponse(withKey vKey : String) -> String {
+        var value : String = ""
+        let arrMI = self.elements(forName: errorCustom.Name)
         guard let eleMI = arrMI.first else {
             return value
         }

@@ -87,10 +87,11 @@ struct xmppConstants {
     static let presence : String = "presence"
 }
 struct xmppConnStatus {
-    static let Processing : String = "Processing"
-    static let Authenticated : String = "Authenticated"
-    static let Failed : String = "Failed"
-    static let Disconnect : String = "Disconnected"
+    static let Processing : String = "connecting"
+    static let Authenticated : String = "authenticated"
+    static let Failed : String = "failed"
+    static let Disconnect : String = "disconnected"
+    static let Connected : String = "connected"
 }
 struct xmppMUCRole {
     /*
@@ -159,6 +160,14 @@ struct eleCustom {
     static let Kay : String = "custom"
 }
 
+
+struct errorCustom {
+    /// Value - CUSTOM
+    static let Name : String = "error"
+    /// Value - custom
+    static let Key : String = "text"
+}
+
 //MARK:- Enum's
 enum XMPPControllerError: Error {
     case wrongUserJID
@@ -169,6 +178,7 @@ enum xmppConnectionStatus : Int {
     case Sucess
     case Disconnect
     case Failed
+    case Connected
     
     var value: Int {
         return rawValue

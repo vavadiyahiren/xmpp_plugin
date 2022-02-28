@@ -53,8 +53,7 @@ extension XMPPController : XMPPRoomDelegate {
     func joinRoom(roomName: String, time : Int64, withStrem : XMPPStream){
         if roomName.trim().isEmpty {
             print("\(#function) | roomName nil/empty")
-            
-            sendMUCJoinStatus(false)
+            sendMUCJoinStatus(false,roomName, "Roomname can't be empty")
             return
         }
         
@@ -62,19 +61,19 @@ extension XMPPController : XMPPRoomDelegate {
         if vUserId.isEmpty {
             print("\(#function) | XMPP UserId is nil/empty")
             
-            sendMUCJoinStatus(false)
+            sendMUCJoinStatus(false,roomName,"User Id Can't be empty")
             return
         }
         guard let xmppJID = XMPPJID(string: getXMPPRoomJidName(withRoomName: roomName, withStrem: withStrem)) else {
             print("\(#function) | Invalid XMPPRoom Jid: \(roomName)")
             
-            sendMUCJoinStatus(false)
+            sendMUCJoinStatus(false,roomName, "Invalid Room Name")
             return
         }
         guard let roomMemory = XMPPRoomMemoryStorage.init() else {
             print("\(#function) | XMPPRoomMemoryStorage is nil/empty")
             
-            sendMUCJoinStatus(false)
+            sendMUCJoinStatus(false,roomName, "XMPPRoomMemoryStorage is nil/empty")
             return
         }
         let objGroupInfo : groupInfo = groupInfo.init()
@@ -174,14 +173,14 @@ extension XMPPController : XMPPRoomDelegate {
         var vRoom : String = ""
         guard let value = sender.myRoomJID?.bareJID.user else {
             print("\(#function) | XMPPRoom Joining Error | XMPPRoom-Name: \(vRoom)")
-            
-            sendMUCJoinStatus(false)
+            sendMUCJoinStatus(false,vRoom,"Join Error ")
             return
         }
         vRoom = "\(value)"
         printLog("\(#function) | XMPPRoom Joined | XMPPRoom-Name: \(vRoom)")
         
-        sendMUCJoinStatus(true)
+        sendMUCJoinStatus(true,vRoom,"")
+     
         /// No needs for update  alredy join room setting updates
         // Why Uncomment line : Not getting xmppRoom object for getting memeber list.
         self.updateGroupInfoIntoXMPPRoomCreatedAndJoined(withXMPPRoomObj: sender, roomName: vRoom)
@@ -274,7 +273,7 @@ extension XMPPController : XMPPRoomDelegate {
             if let _ = APP_DELEGATE.objXMPP.arrGroups.firstIndex(where: { (objGroup) -> Bool in
                 return objGroup.name == vMUCRoomName
             }) {
-                sendMUCJoinStatus(false)
+                sendMUCJoinStatus(false,vMUCRoomName, "Error Joining Group")
                 return true
             }
             printLog("\(#function) | Not getting MUCRoom")

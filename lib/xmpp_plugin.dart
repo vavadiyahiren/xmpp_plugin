@@ -84,12 +84,10 @@ class XmppConnection {
     return status;
   }
 
-  Future<String> sendMessageWithType(
-    String toJid,
-    String body,
-    String id,
-    int time,
-  ) async {
+  Future<String> sendMessageWithType(String toJid,
+      String body,
+      String id,
+      int time,) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -113,12 +111,10 @@ class XmppConnection {
     return status;
   }
 
-  Future<String> sendGroupMessageWithType(
-    String toJid,
-    String body,
-    String id,
-    int time,
-  ) async {
+  Future<String> sendGroupMessageWithType(String toJid,
+      String body,
+      String id,
+      int time,) async {
     final params = {
       "to_jid": toJid,
       "body": body,
@@ -169,6 +165,7 @@ class XmppConnection {
 
     successEventStream = _successEventChannel.receiveBroadcastStream().listen((successData) {
       SuccessResponseEvent eventModel = SuccessResponseEvent.fromJson(successData);
+      print("success event ${eventModel.toSuccessResponseData()}");
       dataChangelist.forEach((element) {
         element.onSuccessEvent(eventModel);
       });
@@ -176,6 +173,7 @@ class XmppConnection {
 
     errorEventStream = _errorEventChannel.receiveBroadcastStream().listen((errorData) {
       ErrorResponseEvent eventModel = ErrorResponseEvent.fromJson(errorData);
+      print("Error event ${eventModel.toErrorResponseData()}");
       dataChangelist.forEach((element) {
         element.onXmppError(eventModel);
       });
@@ -340,10 +338,8 @@ class XmppConnection {
     await _channel.invokeMethod('request_mam', params);
   }
 
-  Future<void> changeTypingStatus(
-    String userJid,
-    String typingstatus,
-  ) async {
+  Future<void> changeTypingStatus(String userJid,
+      String typingstatus,) async {
     print(" Plugin : User Jid : $userJid , Typing Status : $typingstatus ");
     final params = {
       "userJid": userJid,

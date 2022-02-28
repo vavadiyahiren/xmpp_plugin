@@ -4,7 +4,15 @@ import UIKit
 public class FlutterXmppPlugin: NSObject, FlutterPlugin {
     
     static var  objEventChannel : FlutterEventChannel  =  FlutterEventChannel.init()
+    static var  objConnectionEventChannel : FlutterEventChannel  =  FlutterEventChannel.init()
+    static var  objSuccessEventChannel : FlutterEventChannel  =  FlutterEventChannel.init()
+    static var  objErrorEventChannel : FlutterEventChannel  =  FlutterEventChannel.init()
+   
     var objEventData : FlutterEventSink?
+    var objConnectionEventData : FlutterEventSink?
+    var objSuccessEventData : FlutterEventSink?
+    var objErrorEventData : FlutterEventSink?
+
     var objXMPP : XMPPController = XMPPController.sharedInstance
     var objXMPPConnStatus : xmppConnectionStatus = xmppConnectionStatus.None {
         didSet {
@@ -27,6 +35,15 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         
         objEventChannel = FlutterEventChannel(name: "flutter_xmpp/stream", binaryMessenger: registrar.messenger())
         objEventChannel.setStreamHandler(SwiftStreamHandler())
+        
+        objConnectionEventChannel = FlutterEventChannel(name: "flutter_xmpp/connection_event_stream", binaryMessenger: registrar.messenger())
+        objConnectionEventChannel.setStreamHandler(ConnectionStreamHandler())
+                
+        objSuccessEventChannel = FlutterEventChannel(name: "flutter_xmpp/success_event_stream", binaryMessenger: registrar.messenger())
+        objSuccessEventChannel.setStreamHandler(SuccessStreamHandler())
+        
+        objErrorEventChannel = FlutterEventChannel(name: "flutter_xmpp/error_event_stream", binaryMessenger: registrar.messenger())
+        objErrorEventChannel.setStreamHandler(ErrorStreamHandler())
         
         APP_DELEGATE.manange_NotifcationObservers()
     }
@@ -271,10 +288,12 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         
         if !self.isValidMUCInfo(withRoomName: vGroupName) {
             printLog("\(#function) | \(vMethod) | invalid groupname validation : \(vGroupName)")
+            APP_DELEGATE.updateMUCCreateStatus(withRoomname: vGroupName, status: false, error : "Invalid Room Name")
             result(false)
             return
         }
         
+    
         printLog("\(#function) | \(vMethod) | after validation : \(vData)")
         
         let objGroupInfo : groupInfo = groupInfo.init()
@@ -333,6 +352,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         
         if !self.isValidMUCInfo(withRoomName: vRoomName, timeStamp: vRoomTSLongFormat) {
             result(false)
+            APP_DELEGATE.updateMUCJoinStatus(withRoomname: vRoomName, status: false, error : "Invalid Room Name")
             return
         }
         APP_DELEGATE.singalCallBack = result
@@ -628,6 +648,9 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
             //valueStatus = xmppConnStatus.Processing
             break
             
+        case .Connected:
+            valueStatus = xmppConnStatus.Connected
+            
         case .Sucess:
             valueStatus = xmppConnStatus.Authenticated
             
@@ -644,16 +667,15 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         }
         
         var dicDate : [String : Any] = [:]
-        dicDate["id"] = valueStatus
-        dicDate["message"] = valueStatus
-        dicDate["msgtype"] = valueStatus
+        dicDate["type"] = valueStatus
+        dicDate["error"] = ""
         
         /// Send data back to flutter event handler.
-        guard let objEventData = APP_DELEGATE.objEventData else {
+        guard let objConnectionEventData = APP_DELEGATE.objConnectionEventData else {
             printLog("\(#function) | Nil/Empty of APP_DELEGATE.objEventData | \(dicDate)")
             return
         }
-        objEventData(dicDate)
+        objConnectionEventData(dicDate)
     }
     
     //MARK: - MUC Validation
@@ -683,11 +705,93 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         }
         return true
     }
+    
+    func updateMUCJoinStatus(withRoomname Roomname:  String, status : Bool,error : String) {
+        print(" Roomname \(Roomname) status \(status)")
+        
+        var dicDate : [String : Any] = [:]
+        dicDate["from"] = Roomname
+        
+        if(status){
+            dicDate["type"] = "group_joined_success"
+            
+            /// Send data back to flutter event handler.
+            guard let objSuccessEventData = APP_DELEGATE.objSuccessEventData else {
+                printLog("\(#function) | Nil/Empty of APP_DELEGATE.objEventData | \(dicDate)")
+                return
+            }
+            objSuccessEventData(dicDate)
+            
+        } else {
+            dicDate["type"] = "group_joined_success"
+            dicDate["exception"] = error
+            
+            /// Send data back to flutter event handler.
+            guard let objErrorEventData = APP_DELEGATE.objErrorEventData else {
+                printLog("\(#function) | Nil/Empty of APP_DELEGATE.objEventData | \(dicDate)")
+                return
+            }
+            objErrorEventData(dicDate)
+            
+        }
+   
+    }
+    
+    func updateMUCCreateStatus(withRoomname Roomname:  String, status : Bool,error : String) {
+        print(" Roomname \(Roomname) status \(status)")
+        
+        var dicDate : [String : Any] = [:]
+        dicDate["from"] = Roomname
+
+            dicDate["type"] = "group_creation_failed"
+            dicDate["exception"] = error
+            
+            /// Send data back to flutter event handler.
+            guard let objErrorEventData = APP_DELEGATE.objErrorEventData else {
+                printLog("\(#function) | Nil/Empty of APP_DELEGATE.objEventData | \(dicDate)")
+                return
+            }
+            objErrorEventData(dicDate)
+               
+    }
 }
 
 class SwiftStreamHandler: NSObject, FlutterStreamHandler {
     public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         APP_DELEGATE.objEventData = events
+        return nil
+    }
+    
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        return nil
+    }
+}
+
+class ConnectionStreamHandler: NSObject, FlutterStreamHandler {
+    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        APP_DELEGATE.objConnectionEventData = events
+        return nil
+    }
+    
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        return nil
+    }
+}
+
+class SuccessStreamHandler: NSObject, FlutterStreamHandler {
+    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        APP_DELEGATE.objSuccessEventData = events
+        return nil
+    }
+    
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        return nil
+    }
+}
+
+class ErrorStreamHandler: NSObject, FlutterStreamHandler {
+    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        APP_DELEGATE.objErrorEventData = events
         return nil
     }
     

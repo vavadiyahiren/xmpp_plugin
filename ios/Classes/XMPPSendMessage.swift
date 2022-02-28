@@ -143,9 +143,13 @@ extension XMPPController {
         }
     }
     
-    func sendMUCJoinStatus(_ isSuccess: Bool) {
+    func sendMUCJoinStatus(_ isSuccess: Bool, _ roomName : String, _ error : String) {
         printLog("\(#function) | isSuccess: \(isSuccess)")
         addLogger(.sentMessageToFlutter, isSuccess)
+        
+        if( isSuccess){
+            APP_DELEGATE.updateMUCJoinStatus(withRoomname: roomName, status: isSuccess, error: error)
+        }
         
         if let callBack = APP_DELEGATE.singalCallBack {
             callBack(isSuccess)
