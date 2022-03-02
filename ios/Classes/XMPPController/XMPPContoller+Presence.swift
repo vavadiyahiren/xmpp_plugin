@@ -47,10 +47,9 @@ extension XMPPController {
         if presence.isErrorPresence {
             print("\(#function) | getting error Presence | presence: \(presence)")
            // let customElement : String = presence.gete(withKey: errorCustom.Key)
-            print("error \(presence.fromStr) ")
-                        
-            APP_DELEGATE.updateMUCJoinStatus(withRoomname: presence.fromStr ?? "", status: false, error : "Error joning room")
-            
+            let error = presence.getElements(withKey: "error").first?.getValue(withKey: "text") ?? ""
+            print("error isErrorPresence \(error)")
+            APP_DELEGATE.updateMUCJoinStatus(withRoomname: presence.fromStr ?? "", status: false, error : error ?? "")
             return
         }
         /**
