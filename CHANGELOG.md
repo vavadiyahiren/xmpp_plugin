@@ -98,3 +98,9 @@
 ## 2.1.1
 
 * Bug fixes for android
+
+## 2.1.2
+
+* Added more listners
+* More flexible way to listen a events via listners
+
