@@ -17,7 +17,7 @@ final param = {
 
 XmppConnection xmppConnection = XmppConnection(param);
 
-await xmppConnection.start(_onReceiveMessage, _onError);
+await xmppConnection.start(_onError);
 await xmppConnection.login();
 
 ```
@@ -164,6 +164,70 @@ await flutterXmpp.changePresenceType(presenceType, presenceMode);
 
 ```
 XmppConnectionState connectionStatus = await flutterXmpp.getConnectionStatus();
+```
+
+25. Get ErrorResponse Event
+
+```
+void onXmppError(ErrorResponseEvent errorResponseEvent) {
+    // TODO : Handle the Error Event
+}
+```
+
+26. Get SuccessResponse Event
+
+```
+void onSuccessEvent(SuccessResponseEvent successResponseEvent) {
+    // TODO : Handle the Success Event
+}
+```
+
+27. Get ChatMessage Event
+
+```
+void onChatMessage(MessageChat messageChat) {
+    // TODO : Handle the ChatMessage Event
+}
+```
+
+28. Get GroupMessage status
+
+```
+void onGroupMessage(MessageChat messageChat) {
+    // TODO : Handle the GroupMessage Event
+}
+```
+
+29. Get NormalMessage status
+
+```
+void onNormalMessage(MessageChat messageChat) {
+    // TODO : Handle the NormalMessage Event
+}
+```
+
+30. Get PresenceChange status
+
+```
+void onPresenceChange(PresentModel presentModel) {
+    // TODO : Handle the PresenceChange Event
+}
+```
+
+31. Get ChatStateChange status
+
+```
+void onChatStateChange(ChatState chatState) {
+    // TODO : Handle the ChatState Event
+}
+```
+
+32. Get ConnectionEvent status
+
+```
+void onConnectionEvents(ConnectionEvent connectionEvent) {
+    // TODO : Handle the ConnectionEvent Event
+}
 ```
 
 
