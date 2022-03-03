@@ -72,7 +72,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
 
   Future<void> connect() async {
     final auth = {
-      "user_jid": "${_userNameController.text}@${_hostController.text}/${Platform.isAndroid ? "Android" : "iOS"}",
+      "user_jid":
+          "${_userNameController.text}@${_hostController.text}/${Platform.isAndroid ? "Android" : "iOS"}",
       "password": "${_passwordController.text}",
       "host": "${_hostController.text}",
       "port": '5222',
@@ -115,7 +116,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
 
   @override
   void onSuccessEvent(SuccessResponseEvent successResponseEvent) {
-    print('receiveEvent successEventReceive: ${successResponseEvent.toSuccessResponseData().toString()}');
+    print(
+        'receiveEvent successEventReceive: ${successResponseEvent.toSuccessResponseData().toString()}');
   }
 
   @override
@@ -246,7 +248,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
 
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
-  List<CustomElement> customElements = [CustomElement(childBody: "test", childElement: "elem", elementName: "Name", elementNameSpace: "space")];
+  List<CustomElement> customElements = [
+    CustomElement(
+        childBody: "test", childElement: "elem", elementName: "Name", elementNameSpace: "space")
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -254,13 +259,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
       home: Scaffold(
         key: _scaffoldKey,
         appBar: AppBar(
-          title: InkWell(
-              onLongPress: () {
-                _userNameController.text = 'test1';
-                _passwordController.text = 'test1';
-                _hostController.text = 'xrstudio.in';
-              },
-              child: const Text('XMPP Plugin')),
+          title: const Text('XMPP Plugin'),
           backgroundColor: Colors.black,
           actions: [
             IconButton(
@@ -275,7 +274,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                   Share.shareFiles([NativeLogHelper.logFilePath]);
                 } else {
                   if (_scaffoldKey.currentState != null) {
-                    _scaffoldKey.currentState!.showSnackBar(new SnackBar(content: new Text('File not found!')));
+                    _scaffoldKey.currentState!
+                        .showSnackBar(new SnackBar(content: new Text('File not found!')));
                   }
                 }
               },
@@ -287,7 +287,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                   NativeLogHelper().deleteLogFile();
                 } else {
                   if (_scaffoldKey.currentState != null) {
-                    _scaffoldKey.currentState!.showSnackBar(new SnackBar(content: new Text('File not found!')));
+                    _scaffoldKey.currentState!
+                        .showSnackBar(new SnackBar(content: new Text('File not found!')));
                   }
                 }
               },
@@ -520,7 +521,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                       children: [
                         ElevatedButton(
                           onPressed: () async {
-                            _joinGroup(context, "${_joinMUCTextController.text}", "${_joinTimeController.text}");
+                            _joinGroup(context, "${_joinMUCTextController.text}",
+                                "${_joinTimeController.text}");
                           },
                           child: Text('Join Group'),
                           style: ElevatedButton.styleFrom(
@@ -529,7 +531,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                         ),
                         ElevatedButton(
                           onPressed: () async {
-                            _joinGroup(context, "${_joinMUCTextController.text}", "${_joinTimeController.text}", isManageGroup: true);
+                            _joinGroup(context, "${_joinMUCTextController.text}",
+                                "${_joinTimeController.text}",
+                                isManageGroup: true);
                           },
                           child: Text('Join Group & Manage'),
                           style: ElevatedButton.styleFrom(
@@ -597,9 +601,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                         int id = DateTime.now().millisecondsSinceEpoch;
                         (dropDownValue == "Chat")
                             ? await flutterXmpp.sendMessageWithType(
-                                "${_toNameController.text}", "${_messageController.text}", "$id", DateTime.now().millisecondsSinceEpoch)
+                                "${_toNameController.text}",
+                                "${_messageController.text}",
+                                "$id",
+                                DateTime.now().millisecondsSinceEpoch)
                             : await flutterXmpp.sendGroupMessageWithType(
-                                "${_toNameController.text}", "${_messageController.text}", "$id", DateTime.now().millisecondsSinceEpoch);
+                                "${_toNameController.text}",
+                                "${_messageController.text}",
+                                "$id",
+                                DateTime.now().millisecondsSinceEpoch);
                       },
                       child: Text(" Send "),
                       style: ElevatedButton.styleFrom(
@@ -610,10 +620,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                       onPressed: () async {
                         int id = DateTime.now().millisecondsSinceEpoch;
                         (dropDownValue == "Chat")
-                            ? await flutterXmpp.sendCustomMessage("${_toNameController.text}", "${_messageController.text}", "$id",
-                                "${_custommessageController.text}", DateTime.now().millisecondsSinceEpoch)
-                            : await flutterXmpp.sendCustomGroupMessage("${_toNameController.text}", "${_messageController.text}", "$id",
-                                "${_custommessageController.text}", DateTime.now().millisecondsSinceEpoch);
+                            ? await flutterXmpp.sendCustomMessage(
+                                "${_toNameController.text}",
+                                "${_messageController.text}",
+                                "$id",
+                                "${_custommessageController.text}",
+                                DateTime.now().millisecondsSinceEpoch)
+                            : await flutterXmpp.sendCustomGroupMessage(
+                                "${_toNameController.text}",
+                                "${_messageController.text}",
+                                "$id",
+                                "${_custommessageController.text}",
+                                DateTime.now().millisecondsSinceEpoch);
                       },
                       child: Text(" Send Custom Message "),
                       style: ElevatedButton.styleFrom(
@@ -793,7 +811,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
     print('responseTest groupResponse $groupResponse');
   }
 
-  void _joinGroup(BuildContext context, String grouname, String time, {bool isManageGroup = false}) async {
+  void _joinGroup(BuildContext context, String grouname, String time,
+      {bool isManageGroup = false}) async {
     bool response = await joinMucGroup("$grouname,$time");
     print("responseTest joinResponse $response");
     if (response && isManageGroup) {

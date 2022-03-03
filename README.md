@@ -29,34 +29,26 @@ await xmppConnection.sendMessageWithType("xyz@domain", "Hi", "MSGID");
 await xmppConnection.sendGroupMessageWithType("xyz@conference.domain", "Hi", "MSGID");
 ```
 
-3. Receive message from server
-
-```
-Future _onReceiveMessage(dynamic event) async {
-       // TODO : Handle the receive event
-}
-```
-
-4. Disconnect the xmppConnection
+3. Disconnect the xmppConnection
 
 ```
 xmppConnection.logout();
 ```
 
-5. Creating a MUC
+4. Creating a MUC
 
 ```
 xmppConnection.createMUC("groupName", true);
 ```
 
-6. Joining  MUC
+5. Joining  MUC
 
 ```
 xmppConnection.joinMucGroups(List<String> allGroupsId)
 
 ```
 
-7. Sending Custom Message
+6. Sending Custom Message
 
 ```
 await xmppConnection.sendCustomMessage("xyz@domain", "Hi", "MSGID","customTest");
@@ -64,109 +56,109 @@ await xmppConnection.sendCustomGroupMessage("xyz@conference.domain", "Hi", "MSGI
 
 ```
 
-8. Sending Delivery Receipt
+7. Sending Delivery Receipt
 
 ```
 await flutterXmpp.sendDelieveryReceipt("xyz@domain", "Received-Message-Id", "Receipt-Id");
 ```
 
-9. Adding members to MUC
+8. Adding members to MUC
 
 ```
 await flutterXmpp.addMembersInGroup("groupName", List<String> allMembersId);
 ```
 
-10. Adding admins to MUC
+9. Adding admins to MUC
 
 ```
 await flutterXmpp.addAdminsInGroup("groupName", List<String> allMembersId);
 ```
 
-11. Get member list from the MUC
+10. Get member list from the MUC
 
 ```
 await flutterXmpp.getMembers("groupName");
 ```
 
-12. Get Admin list from the MUC 
+11. Get Admin list from the MUC 
 
 ```
 await flutterXmpp.getAdmins("groupName");
 ```
 
-13. Get Owner list from the MUC
+12. Get Owner list from the MUC
 
 ```
 await flutterXmpp.getOwners("groupName");
 ```
 
-14. Remove members from the MUC
+13. Remove members from the MUC
 
 ```
 await flutterXmpp.removeMember("groupName", List<String> allMembersId);
 ```
 
-15. Remove admins from group
+14. Remove admins from group
 
 ```
 await flutterXmpp.removeAdmin("groupName", List<String> allMembersId);
 ```
 
-16. Get online member count from group
+15. Get online member count from group
 
 ```
 var onlineCount = await flutterXmpp.getOnlineMemberCount("groupName");
 ```
 
-17. Get last activity of the jid
+16. Get last activity of the jid
 
 ```
 var lastseen = await flutterXmpp.getLastSeen(jid);
 ```
 
-18. Get the list of my rosters
+17. Get the list of my rosters
 
 ```
 await flutterXmpp.getMyRosters();
 ```
 
-19. Creating a roster entry
+18. Creating a roster entry
 
 ```
 await flutterXmpp.createRoster(jid);
 ```
 
-20. Join single MUC
+19. Join single MUC
 
 ```
 await flutterXmpp.joinMucGroup(groupId);
 ```
 
-21. Request MAM Messages
+20. Request MAM Messages
 
 ```
 await flutterXmpp.requestMamMessages(userJid, requestSince, requestBefore, limit);
 ```
 
-22. Update Typing Status
+21. Update Typing Status
 
 ```
 await flutterXmpp.changeTypingStatus(userJid, typingStatus);
 ```
 
-23. Update Presence Type
+22. Update Presence Type
 
 ```
 await flutterXmpp.changePresenceType(presenceType, presenceMode);
 ```
 
-24. Get Connection status
+23. Get Connection status
 
 ```
 XmppConnectionState connectionStatus = await flutterXmpp.getConnectionStatus();
 ```
 
-25. Get ErrorResponse Event
+24. Get ErrorResponse Event
 
 ```
 void onXmppError(ErrorResponseEvent errorResponseEvent) {
@@ -174,7 +166,7 @@ void onXmppError(ErrorResponseEvent errorResponseEvent) {
 }
 ```
 
-26. Get SuccessResponse Event
+25. Get SuccessResponse Event
 
 ```
 void onSuccessEvent(SuccessResponseEvent successResponseEvent) {
@@ -182,7 +174,7 @@ void onSuccessEvent(SuccessResponseEvent successResponseEvent) {
 }
 ```
 
-27. Get ChatMessage Event
+26. Get ChatMessage Event
 
 ```
 void onChatMessage(MessageChat messageChat) {
@@ -190,7 +182,7 @@ void onChatMessage(MessageChat messageChat) {
 }
 ```
 
-28. Get GroupMessage status
+27. Get GroupMessage status
 
 ```
 void onGroupMessage(MessageChat messageChat) {
@@ -198,7 +190,7 @@ void onGroupMessage(MessageChat messageChat) {
 }
 ```
 
-29. Get NormalMessage status
+28. Get NormalMessage status
 
 ```
 void onNormalMessage(MessageChat messageChat) {
@@ -206,7 +198,7 @@ void onNormalMessage(MessageChat messageChat) {
 }
 ```
 
-30. Get PresenceChange status
+29. Get PresenceChange status
 
 ```
 void onPresenceChange(PresentModel presentModel) {
@@ -214,7 +206,7 @@ void onPresenceChange(PresentModel presentModel) {
 }
 ```
 
-31. Get ChatStateChange status
+30. Get ChatStateChange status
 
 ```
 void onChatStateChange(ChatState chatState) {
@@ -222,7 +214,7 @@ void onChatStateChange(ChatState chatState) {
 }
 ```
 
-32. Get ConnectionEvent status
+31. Get ConnectionEvent status
 
 ```
 void onConnectionEvents(ConnectionEvent connectionEvent) {
