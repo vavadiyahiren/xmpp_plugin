@@ -104,6 +104,6 @@
 * Added more listners
 * More flexible way to listen a events via listners
 
-## 2.1.3
+## 2.2.1
 
 * Bug fixes for normal message
