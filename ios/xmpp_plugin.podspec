@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'xmpp_plugin'
-  s.version          = '2.1.2'
+  s.version          = '2.1.3'
   s.summary          = 'Xmpp plugin which helps to connect with xmpp via native channels and native libs like smack android and ios via xmppframework'
   s.description      = <<-DESC
 A new Flutter project.
