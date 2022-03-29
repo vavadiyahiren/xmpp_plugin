@@ -1,6 +1,6 @@
 name: xmpp_plugin
 description: Xmpp plugin which helps to connect with xmpp via native channels and native libs like smack android and ios via xmppframework
-version: 2.2.0
+version: 2.1.2
 homepage: https://github.com/vavadiyahiren/xmpp_plugin
 
 environment:
