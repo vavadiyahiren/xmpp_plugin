@@ -50,16 +50,10 @@ extension XMPPController {
             self.senAckDeliveryReceipt(withMessageId: messId)
             return
         }
-        
+        var chatStateType : String = ""
+
         if  message.hasChatState {
-            
-            var objMess : Message = Message.init()
-            objMess.initWithMessage(message: message)
-            
-            var chatStateType : String = ""
-            
-            let vFrom : String = message.fromStr ?? ""
-            
+
             if message.hasComposingChatState {
                 chatStateType = "composing"
             } else if message.hasGoneChatState {
@@ -71,21 +65,25 @@ extension XMPPController {
             } else if message.hasInactiveChatState {
                 chatStateType = "inactive"
             }
-                        
+//         return
+        }
+           var objMess : Message = Message.init()
+           objMess.initWithMessage(message: message)
+
+           let vFrom : String = message.fromStr ?? ""
+
             let dicData = ["type" : "chatstate",
                            "id" : objMess.id,
                            "from" : vFrom,
-                           "body" : "",
+                           "body" : objMess.message,
                            "customText" : "",
                            "msgtype" : "normal",
                            "senderJid": vFrom,
                            "time" : "",
                            "chatStateType" : chatStateType] as [String : Any]
-                    
+
             APP_DELEGATE.objEventData!(dicData)
             self.broadCastMessageToFlutter(dicData: dicData)
-            return
-        }
-        
+
     }
 }
