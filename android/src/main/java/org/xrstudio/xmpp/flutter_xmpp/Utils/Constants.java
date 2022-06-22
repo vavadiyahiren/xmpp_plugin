@@ -58,6 +58,8 @@ public class Constants {
     public static final String URN_XMPP_TIME = "urn:xmpp:time";
     public static final String AUTHENTICATED = "Authenticated";
     public static final String URN_XMPP_CUSTOM = "urn:xmpp:custom";
+    public static final String event = "event";
+    public static final String eventPubSubNameSpace = "http://jabber.org/protocol/pubsub#event";
 
     // Params
     public static final String userJid = "userJid";
