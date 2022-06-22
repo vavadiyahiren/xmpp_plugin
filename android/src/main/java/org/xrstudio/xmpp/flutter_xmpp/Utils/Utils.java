@@ -5,10 +5,16 @@ import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
 
+import org.jivesoftware.smack.packet.ExtensionElement;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.StandardExtensionElement;
+import org.jivesoftware.smack.util.PacketParserUtils;
 import org.jivesoftware.smackx.chatstates.ChatState;
 import org.jivesoftware.smackx.chatstates.packet.ChatStateExtension;
+import org.jivesoftware.smackx.pubsub.EventElement;
+import org.jivesoftware.smackx.pubsub.ItemsExtension;
+import org.jivesoftware.smackx.pubsub.PayloadItem;
+import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.receipts.DeliveryReceipt;
 import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
@@ -25,6 +31,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class Utils {
@@ -157,6 +164,8 @@ public class Utils {
 
         Utils.addLogInStorage(" Action: receiveMessageFromServer, Content: " + message.toXML(null).toString());
 
+        message = parseEventStanzaMessage(message);
+        
         String META_TEXT = Constants.MESSAGE;
         String body = message.getBody();
         String from = message.getFrom().toString();
@@ -213,6 +222,30 @@ public class Utils {
 
             mApplicationContext.sendBroadcast(intent);
         }
+    }
+
+    private static Message parseEventStanzaMessage(Message message) {
+        try {
+            EventElement eventElement = message.getExtension(Constants.event, Constants.eventPubSubNameSpace);
+            if (eventElement != null) {
+                List<ExtensionElement> itemExtensions = eventElement.getExtensions();
+                for (int i = 0; i < itemExtensions.size(); i++) {
+                    ItemsExtension itemsExtension = (ItemsExtension) itemExtensions.get(i);
+                    List<?> items = itemsExtension.getItems();
+                    for (int j = 0; j < items.size(); j++) {
+                        PayloadItem<?> it = (PayloadItem<?>) items.get(j);
+                        SimplePayload payloadElement = (SimplePayload) it.getPayload();
+
+                        String xmlStanza = payloadElement.toXML(null);
+
+                        message = (Message) PacketParserUtils.parseStanza(xmlStanza);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return message;
     }
 
     public static void sendBroadcast() {
