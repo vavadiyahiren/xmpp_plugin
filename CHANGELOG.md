@@ -107,3 +107,7 @@
 ## 2.2.1
 
 * Bug fixes for normal message
+
+## 2.2.2
+
+* Added MUCSUB support
