@@ -676,17 +676,26 @@ public class FlutterXmppConnection implements ConnectionListener {
     public void connectionClosed() {
         Utils.printLog(" ConnectionClosed(): ");
 
-        FlutterXmppConnectionService.sConnectionState = ConnectionState.DISCONNECTED;
+        if(FlutterXmppConnectionService.sConnectionState == ConnectionState.FAILED) {
+            connectionCloseMessageToFlutter(ConnectionState.FAILED, Constants.FAILED);
+        } else {
+            FlutterXmppConnectionService.sConnectionState = ConnectionState.DISCONNECTED;
+            connectionCloseMessageToFlutter(ConnectionState.DISCONNECTED, Constants.DISCONNECTED);
+        }
+    }
 
-        Utils.broadcastConnectionMessageToFlutter(mApplicationContext, ConnectionState.DISCONNECTED, "");
+    void connectionCloseMessageToFlutter(ConnectionState connectionState, String connection) {
+        if(connectionState != ConnectionState.FAILED) {
+            Utils.broadcastConnectionMessageToFlutter(mApplicationContext, connectionState, "");
+        }
 
         //Bundle up the intent and send the broadcast.
         Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
         intent.setPackage(mApplicationContext.getPackageName());
-        intent.putExtra(Constants.BUNDLE_FROM_JID, Constants.DISCONNECTED);
-        intent.putExtra(Constants.BUNDLE_MESSAGE_BODY, Constants.DISCONNECTED);
-        intent.putExtra(Constants.BUNDLE_MESSAGE_PARAMS, Constants.DISCONNECTED);
-        intent.putExtra(Constants.BUNDLE_MESSAGE_TYPE, Constants.DISCONNECTED);
+        intent.putExtra(Constants.BUNDLE_FROM_JID, connection);
+        intent.putExtra(Constants.BUNDLE_MESSAGE_BODY, connection);
+        intent.putExtra(Constants.BUNDLE_MESSAGE_PARAMS, connection);
+        intent.putExtra(Constants.BUNDLE_MESSAGE_TYPE, connection);
         mApplicationContext.sendBroadcast(intent);
 
     }

@@ -55,6 +55,7 @@ public class Constants {
     public static final String CONNECTED = "Connected";
     public static final String SYMBOL_FORWARD_SLASH = "/";
     public static final String DISCONNECTED = "Disconnected";
+    public static final String FAILED = "Failed";
     public static final String URN_XMPP_TIME = "urn:xmpp:time";
     public static final String AUTHENTICATED = "Authenticated";
     public static final String URN_XMPP_CUSTOM = "urn:xmpp:custom";
