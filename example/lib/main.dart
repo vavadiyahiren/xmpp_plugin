@@ -20,6 +20,7 @@ import 'package:xmpp_plugin/success_response_event.dart';
 import 'package:xmpp_plugin/xmpp_plugin.dart';
 
 import 'mamExamples.dart';
+import 'native_log_helper.dart';
 
 const myTask = "syncWithTheBackEnd";
 
@@ -106,7 +107,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
   }
 
   void _onError(Object error) {
-    // TODO : Handle the Error event
+    print('_onError onXmppError: ${error.toString()}');
   }
 
   @override
@@ -150,7 +151,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
 
   @override
   void onConnectionEvents(ConnectionEvent connectionEvent) {
-    log('onConnectionEvents ~~>>${connectionEvent.toJson()}');
+    print("onConnectionEvents ~~>>${connectionEvent.type}");
     connectionStatus = connectionEvent.type!.toConnectionName();
     connectionStatusMessage = connectionEvent.error ?? '';
     setState(() {});

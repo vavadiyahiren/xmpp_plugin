@@ -588,6 +588,8 @@ public class FlutterXmppConnection implements ConnectionListener {
                     .addElement(Constants.TS, time).build();
             xmppMessage.addExtension(timeElement);
 
+            Utils.printLog(" Sent message time: " +time);
+
             if (mAutoDeliveryReceipt) {
                 DeliveryReceiptRequest.addTo(xmppMessage);
             }
