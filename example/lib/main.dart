@@ -107,7 +107,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
   }
 
   void _onError(Object error) {
-    print('_onError onXmppError: ${error.toString()}');
+    // TODO : Handle the Error event
   }
 
   @override
@@ -151,7 +151,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
 
   @override
   void onConnectionEvents(ConnectionEvent connectionEvent) {
-    print("onConnectionEvents ~~>>${connectionEvent.type}");
+    log('onConnectionEvents ~~>>${connectionEvent.toJson()}');
     connectionStatus = connectionEvent.type!.toConnectionName();
     connectionStatusMessage = connectionEvent.error ?? '';
     setState(() {});

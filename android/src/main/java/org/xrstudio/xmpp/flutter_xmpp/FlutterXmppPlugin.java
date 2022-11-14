@@ -113,8 +113,6 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                         String time = intent.hasExtra(Constants.time) ? intent.getStringExtra(Constants.time) : Constants.ZERO;
                         String chatStateType = intent.hasExtra(Constants.CHATSTATE_TYPE) ? intent.getStringExtra(Constants.CHATSTATE_TYPE) : Constants.EMPTY;
 
-                        Utils.printLog(" time3: " + time);
-
                         Map<String, Object> build = new HashMap<>();
                         build.put(Constants.TYPE, metaInfo);
                         build.put(Constants.ID, msgId);
@@ -123,7 +121,6 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                         build.put(Constants.MSG_TYPE, type);
                         build.put(Constants.SENDER_JID, senderJid);
                         build.put(Constants.CUSTOM_TEXT, customText);
-                        Utils.printLog(" time4: " + time);
                         build.put(Constants.time, time);
                         build.put(Constants.CHATSTATE_TYPE, chatStateType);
 
@@ -275,9 +272,6 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
 
                         String connectionType = intent.getStringExtra(Constants.BUNDLE_CONNECTION_TYPE);
                         String connectionError = intent.getStringExtra(Constants.BUNDLE_CONNECTION_ERROR);
-
-
-                        Utils.printLog(" connectionError: " + connectionError);
 
                         Map<String, Object> connectionStateBuild = new HashMap<>();
                         connectionStateBuild.put(Constants.TYPE, connectionType);

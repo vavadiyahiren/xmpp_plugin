@@ -201,8 +201,6 @@ public class Utils {
             chatState = chatStateExtension.getChatState();
         }
 
-        Utils.printLog(" time: " + time);
-
         String mediaURL = "";
 
         if (!from.equals(FlutterXmppConnection.mUsername)) {
@@ -217,7 +215,6 @@ public class Utils {
             intent.putExtra(Constants.MEDIA_URL, mediaURL);
             intent.putExtra(Constants.CUSTOM_TEXT, customText);
             intent.putExtra(Constants.META_TEXT, META_TEXT);
-            Utils.printLog(" time2: " + time);
             intent.putExtra(Constants.time, time);
             if (chatState != null) {
                 intent.putExtra(Constants.CHATSTATE_TYPE, chatState.toString().toLowerCase());
