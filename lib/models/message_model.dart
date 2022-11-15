@@ -10,6 +10,7 @@ class MessageChat {
   String? bubbleType;
   String? mediaURL;
   int? isReadSent;
+  String? delayTime;
 
   MessageChat({
     this.customText,
@@ -23,6 +24,7 @@ class MessageChat {
     this.bubbleType,
     this.mediaURL,
     this.isReadSent,
+    this.delayTime,
   });
 
   Map<String, dynamic> toEventData() {
@@ -38,6 +40,7 @@ class MessageChat {
       'bubbleType': bubbleType,
       'mediaURL': mediaURL,
       'isReadSent': isReadSent,
+      'delayTime': delayTime,
     };
   }
 
@@ -54,6 +57,7 @@ class MessageChat {
       msgtype: eventData['msgtype'] ?? '',
       bubbleType: eventData['bubbleType'] ?? '',
       mediaURL: eventData['mediaURL'] ?? '',
+      delayTime: eventData['delayTime'] ?? '',
     );
   }
 }
