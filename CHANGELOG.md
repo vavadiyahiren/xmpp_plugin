@@ -111,3 +111,9 @@
 ## 2.2.2
 
 * Added MUCSUB support
+
+## 2.2.3
+
+* Updated Dependacy
+* Added Delay timestamp
+* Added more information while unauthorized account
