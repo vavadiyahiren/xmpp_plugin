@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
+import 'package:share_plus/share_plus.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_xmpp_example/constants.dart';
@@ -8,7 +9,6 @@ import 'package:flutter_xmpp_example/homepage.dart';
 import 'package:flutter_xmpp_example/native_log_helper.dart';
 import 'package:flutter_xmpp_example/utils.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:share/share.dart';
 import 'package:xmpp_plugin/custom_element.dart';
 import 'package:xmpp_plugin/ennums/xmpp_connection_state.dart';
 import 'package:xmpp_plugin/error_response_event.dart';
@@ -45,13 +45,13 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
     XmppConnection.addListener(this);
     super.initState();
     log('didChangeAppLifecycleState() initState');
-    WidgetsBinding.instance!.addObserver(this);
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
     XmppConnection.removeListener(this);
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     log('didChangeAppLifecycleState() dispose');
     super.dispose();
   }
