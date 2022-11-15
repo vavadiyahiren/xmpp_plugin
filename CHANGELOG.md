@@ -112,7 +112,7 @@
 
 * Added MUCSUB support
 
-## 2.2.3
+## 2.2.3-2.2.5
 
 * Updated Dependacy
 * Added Delay timestamp
