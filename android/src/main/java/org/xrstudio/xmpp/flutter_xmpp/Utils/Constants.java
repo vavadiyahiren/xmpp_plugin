@@ -171,4 +171,8 @@ public class Constants {
     public static final String ERROR = "error";
     public static final String CONNECTION_STATE_MESSAGE = "org.xrstudio.xmpp.flutter_xmpp.connectionstatemessage";
     public static final String CHANNEL_CONNECTION_EVENT_STREAM = "flutter_xmpp/connection_event_stream";
+
+    public static final String URN_XMPP_RECEIPTS = "urn:xmpp:receipts";
+    public static final String URN_XMPP_DELAY = "urn:xmpp:delay";
+    public static final String DELAY_TIME = "delayTime";
 }

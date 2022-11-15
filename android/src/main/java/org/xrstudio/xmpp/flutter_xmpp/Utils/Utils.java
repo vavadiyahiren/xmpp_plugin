@@ -5,12 +5,14 @@ import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
 
+import org.jivesoftware.smack.packet.Element;
 import org.jivesoftware.smack.packet.ExtensionElement;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.StandardExtensionElement;
 import org.jivesoftware.smack.util.PacketParserUtils;
 import org.jivesoftware.smackx.chatstates.ChatState;
 import org.jivesoftware.smackx.chatstates.packet.ChatStateExtension;
+import org.jivesoftware.smackx.delay.packet.DelayInformation;
 import org.jivesoftware.smackx.pubsub.EventElement;
 import org.jivesoftware.smackx.pubsub.ItemsExtension;
 import org.jivesoftware.smackx.pubsub.PayloadItem;
@@ -165,7 +167,7 @@ public class Utils {
         Utils.addLogInStorage(" Action: receiveMessageFromServer, Content: " + message.toXML(null).toString());
 
         message = parseEventStanzaMessage(message);
-        
+
         String META_TEXT = Constants.MESSAGE;
         String body = message.getBody();
         String from = message.getFrom().toString();
@@ -203,6 +205,14 @@ public class Utils {
 
         String mediaURL = "";
 
+        String delayTime = Constants.ZERO;
+        if (message.hasExtension(Constants.URN_XMPP_RECEIPTS)) {
+            DelayInformation DelayTimeElement = (DelayInformation) message.getExtension(Constants.URN_XMPP_DELAY);
+            if (DelayTimeElement != null && DelayTimeElement.getStamp() != null) {
+                delayTime = DelayTimeElement.getStamp().toString();
+            }
+        }
+
         if (!from.equals(FlutterXmppConnection.mUsername)) {
             //Bundle up the intent and send the broadcast.
             Intent intent = new Intent(Constants.RECEIVE_MESSAGE);
@@ -216,6 +226,7 @@ public class Utils {
             intent.putExtra(Constants.CUSTOM_TEXT, customText);
             intent.putExtra(Constants.META_TEXT, META_TEXT);
             intent.putExtra(Constants.time, time);
+            intent.putExtra(Constants.DELAY_TIME, delayTime);
             if (chatState != null) {
                 intent.putExtra(Constants.CHATSTATE_TYPE, chatState.toString().toLowerCase());
             }
