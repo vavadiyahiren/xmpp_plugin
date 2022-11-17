@@ -247,7 +247,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
   TextEditingController _custommessageController = TextEditingController();
   TextEditingController _toNameController = TextEditingController();
 
-  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldKey = new GlobalKey<ScaffoldMessengerState>();
 
   List<CustomElement> customElements = [
     CustomElement(childBody: "test", childElement: "elem", elementName: "Name", elementNameSpace: "space")
