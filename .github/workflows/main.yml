@@ -1,0 +1,71 @@
+name: Integration tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  workflow_dispatch:
+
+env:
+  TEST_USER: ${{ secrets.TEST_USER }}
+  TEST_PASSWORD: ${{ secrets.TEST_PASSWORD }}
+  TEST_HOST: ${{ secrets.TEST_HOST }}
+  EXEC_ENV: 'github_actions'
+
+jobs:
+  ios:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: subosito/flutter-action@v2
+      with:
+        channel: 'master'
+        architecture: x64 
+    - run: flutter pub get
+    - uses: futureware-tech/simulator-action@v2
+      with:
+        model: 'iPhone 14'
+    - name: Create .env file
+      working-directory: ./example
+      run: |
+        cat > .env <<EOF
+        TEST_USER=${{ secrets.TEST_USER }}
+        TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
+        TEST_HOST=${{ secrets.TEST_HOST }}
+        EOF
+    - name: Run integration tests
+      working-directory: ./example
+      run: flutter test integration_test
+    - name: Build for iOS
+      working-directory: ./example
+      run: flutter build ios --release --no-codesign
+# Disabled, see pull request for more info.
+#  android:
+#    runs-on: macos-latest
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Setup Flutter SDK
+#        uses: subosito/flutter-action@v2
+#        with:
+#          channel: 'master'
+#          architecture: x64
+#      - name: Install Flutter dependencies
+#        run: flutter pub get
+#      - name: Create .env file
+#        working-directory: ./example
+#        run: |
+#          cat > .env <<EOF
+#          TEST_USER=${{ secrets.TEST_USER }}
+#          TEST_PASSWORD=${{ secrets.TEST_PASSWORD }}
+#          TEST_HOST=${{ secrets.TEST_HOST }}
+#          EOF
+#      - name: Run integration tests
+#        uses: reactivecircus/android-emulator-runner@v2
+#        with:
+#          api-level: 29
+#          arch: x86_64
+#          profile: Nexus 6
+#          working-directory: ./example
+#          script: flutter test integration_test
