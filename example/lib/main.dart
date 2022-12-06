@@ -20,7 +20,6 @@ import 'package:xmpp_plugin/success_response_event.dart';
 import 'package:xmpp_plugin/xmpp_plugin.dart';
 
 import 'mamExamples.dart';
-import 'native_log_helper.dart';
 
 const myTask = "syncWithTheBackEnd";
 
