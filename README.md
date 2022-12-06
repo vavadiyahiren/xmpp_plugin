@@ -1,5 +1,5 @@
 # xmpp_plugin
-
+![status workflow](https://github.com/florisgravendeel/xmpp_plugin/actions/workflows/main.yml/badge.svg)
 1. Connect to the xmpp server
 
 ```
