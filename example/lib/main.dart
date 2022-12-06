@@ -688,7 +688,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                         // online
                       } else if (last > Constants.RESULT_EMPTY) {
                         // not online but need to pass time
-                        DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(last);
+                        //DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(last);
                       } else {
                         // away
                       }
@@ -728,7 +728,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                     ),
                     ElevatedButton(
                       onPressed: () async {
-                        var val = await flutterXmpp.currentState();
+                        await flutterXmpp.currentState();
                       },
                       child: Text("Current State"),
                       style: ElevatedButton.styleFrom(backgroundColor: Colors.black),

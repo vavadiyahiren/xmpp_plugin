@@ -49,7 +49,7 @@ class NativeLogHelper {
         final sdkVersion = androidInfo.version.sdkInt;
         final status = await Permission.storage.status;
         if (status.isGranted) {
-          return await _getAndroidFilePath(sdkVersion!);
+          return await _getAndroidFilePath(sdkVersion);
         }
       } else {
         final storageDirectory = await getApplicationDocumentsDirectory();
