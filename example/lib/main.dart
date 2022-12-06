@@ -270,10 +270,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
             IconButton(
               onPressed: () async {
                 if (await NativeLogHelper().isFileExist()) {
-                  Share.shareFiles([NativeLogHelper.logFilePath]);
+                  Share.shareXFiles([XFile(NativeLogHelper.logFilePath)]);
                 } else {
                   if (_scaffoldKey.currentState != null) {
-                    _scaffoldKey.currentState!.showSnackBar(new SnackBar(content: new Text('File not found!')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("File not found!")));
                   }
                 }
               },
@@ -285,7 +285,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                   NativeLogHelper().deleteLogFile();
                 } else {
                   if (_scaffoldKey.currentState != null) {
-                    _scaffoldKey.currentState!.showSnackBar(new SnackBar(content: new Text('File not found!')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("File not found!")));
                   }
                 }
               },
@@ -829,7 +829,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
     try {
       XmppConnectionState connectionStatus = await flutterXmpp.getConnectionStatus();
       if (_scaffoldKey.currentState != null) {
-        _scaffoldKey.currentState!.showSnackBar(new SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
           content: new Text('${connectionStatus.toString()}'),
           duration: Duration(milliseconds: 700),
         ));
