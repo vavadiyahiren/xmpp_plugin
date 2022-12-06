@@ -337,7 +337,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                       },
                       child: Text(connectionStatus == 'Authenticated' ? "Disconnect" : "Connect"),
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.black,
+                        backgroundColor: Colors.black,
                       ),
                     ),
                     SizedBox(
@@ -364,14 +364,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                           },
                           child: Text("MAM Modules"),
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.black,
+                            backgroundColor: Colors.black,
                           ),
                         ),
                         ElevatedButton(
                           onPressed: _showConnectionStatus,
                           child: Text("Connection Status"),
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.black,
+                            backgroundColor: Colors.black,
                           ),
                         ),
                       ],
@@ -453,7 +453,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                         },
                         child: Text('Create Group'),
                         style: ElevatedButton.styleFrom(
-                          primary: Colors.black,
+                          backgroundColor: Colors.black,
                         ),
                       ),
                     ),
@@ -487,7 +487,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                             },
                             child: Text('Create Group & Manage'),
                             style: ElevatedButton.styleFrom(
-                              primary: Colors.black,
+                              backgroundColor: Colors.black,
                             ),
                           ),
                         );
@@ -523,7 +523,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                           },
                           child: Text('Join Group'),
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.black,
+                            backgroundColor: Colors.black,
                           ),
                         ),
                         ElevatedButton(
@@ -533,7 +533,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                           },
                           child: Text('Join Group & Manage'),
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.black,
+                            backgroundColor: Colors.black,
                           ),
                         ),
                       ],
@@ -603,7 +603,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                       },
                       child: Text(" Send "),
                       style: ElevatedButton.styleFrom(
-                        primary: (dropDownValue == "Chat") ? Colors.black : Colors.deepPurple,
+                        backgroundColor: (dropDownValue == "Chat") ? Colors.black : Colors.deepPurple,
                       ),
                     ),
                     ElevatedButton(
@@ -625,7 +625,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                       },
                       child: Text(" Send Custom Message "),
                       style: ElevatedButton.styleFrom(
-                        primary: (dropDownValue == "Chat") ? Colors.black : Colors.deepPurple,
+                        backgroundColor: (dropDownValue == "Chat") ? Colors.black : Colors.deepPurple,
                       ),
                     ),
                   ],
@@ -666,7 +666,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                     );
                   },
                   child: Text(" Send Receipt "),
-                  style: ElevatedButton.styleFrom(primary: Colors.black),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                 ),
                 SizedBox(
                   height: 10,
@@ -698,14 +698,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                     }
                   },
                   child: Text("Get Last activity"),
-                  style: ElevatedButton.styleFrom(primary: Colors.black),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                 ),
                 ElevatedButton(
                   onPressed: () async {
                     await flutterXmpp.getMyRosters();
                   },
                   child: Text(" Get MyRosters "),
-                  style: ElevatedButton.styleFrom(primary: Colors.black),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                 ),
                 SizedBox(
                   height: 15,
@@ -725,14 +725,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                         await flutterXmpp.createRoster(_createRostersController.text);
                       },
                       child: Text("Create MyRosters"),
-                      style: ElevatedButton.styleFrom(primary: Colors.black),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                     ),
                     ElevatedButton(
                       onPressed: () async {
                         var val = await flutterXmpp.currentState();
                       },
                       child: Text("Current State"),
-                      style: ElevatedButton.styleFrom(primary: Colors.black),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                     ),
                   ],
                 ),

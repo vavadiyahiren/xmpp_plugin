@@ -70,7 +70,7 @@ class _MamExamplesState extends State<MamExamples> {
                 },
                 child: Text("MAM Modules"),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.black,
+                  backgroundColor: Colors.black,
                 ),
               ),
               SizedBox(
@@ -89,7 +89,7 @@ class _MamExamplesState extends State<MamExamples> {
                 },
                 child: Text("Update Typing Status"),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.black,
+                  backgroundColor: Colors.black,
                 ),
               ),
             ],

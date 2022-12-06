@@ -64,7 +64,7 @@ class _HomePageState extends State<HomePage> {
                 },
                 child: Text('Add Member'),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.black,
+                  backgroundColor: Colors.black,
                 ),
               ),
               SizedBox(
@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage> {
                 },
                 child: Text('Add Admin'),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.black,
+                  backgroundColor: Colors.black,
                 ),
               ),
               Divider(
@@ -94,7 +94,7 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Text('Get Member'),
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.black,
+                      backgroundColor: Colors.black,
                     ),
                   ),
                   ElevatedButton(
@@ -103,7 +103,7 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Text('Get Admin'),
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.black,
+                      backgroundColor: Colors.black,
                     ),
                   ),
                 ],
@@ -120,7 +120,7 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Text('Remove Member'),
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.black,
+                      backgroundColor: Colors.black,
                     ),
                   ),
                   ElevatedButton(
@@ -129,7 +129,7 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Text('Remove admin'),
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.black,
+                      backgroundColor: Colors.black,
                     ),
                   ),
                 ],
@@ -146,7 +146,7 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Text('Add owner'),
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.black,
+                      backgroundColor: Colors.black,
                     ),
                   ),
                   ElevatedButton(
@@ -155,7 +155,7 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Text('Remove owner'),
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.black,
+                      backgroundColor: Colors.black,
                     ),
                   ),
                 ],
@@ -172,7 +172,7 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Text('List owner'),
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.black,
+                      backgroundColor: Colors.black,
                     ),
                   ),
                   ElevatedButton(
@@ -181,7 +181,7 @@ class _HomePageState extends State<HomePage> {
                     },
                     child: Text('Get Occupants Size'),
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.black,
+                      backgroundColor: Colors.black,
                     ),
                   ),
                 ],
