@@ -303,8 +303,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                   height: 10,
                 ),
                 customTextField(
-                  hintText: 'User Name',
+                  hintText: 'Username',
                   textEditController: _userNameController,
+                  addKey: true,
                 ),
                 SizedBox(
                   height: 10,
@@ -312,6 +313,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                 customTextField(
                   hintText: 'Password',
                   textEditController: _passwordController,
+                  addKey: true,
                 ),
                 SizedBox(
                   height: 10,
@@ -319,6 +321,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                 customTextField(
                   hintText: 'Host',
                   textEditController: _hostController,
+                  addKey: true,
                 ),
                 SizedBox(
                   height: 10,
@@ -338,6 +341,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                       ),
+                      key: Key('ConnectButton'),
                     ),
                     SizedBox(
                       width: 20,
@@ -843,8 +847,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
 Widget customTextField({
   TextEditingController? textEditController,
   String? hintText,
+  bool addKey = false,
 }) {
   return TextField(
+    key: addKey ? Key(hintText!) : null,
+    autocorrect: false,
     controller: textEditController,
     cursorColor: Colors.black,
     decoration: InputDecoration(
