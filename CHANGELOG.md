@@ -117,3 +117,10 @@
 * Updated Dependacy
 * Added Delay timestamp
 * Added more information while unauthorized account
+
+## 2.2.6
+
+* Updated Dependacies
+* Bumped ios support version
+* Added New Unit Test Cases
+* Code CleanUp
