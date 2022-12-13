@@ -6,7 +6,7 @@
 .idea/
 pubspec.lock
 example/pubspec.lock
-
+example/.env
 *.lock
 
 build/

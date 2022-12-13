@@ -20,7 +20,6 @@ import 'package:xmpp_plugin/success_response_event.dart';
 import 'package:xmpp_plugin/xmpp_plugin.dart';
 
 import 'mamExamples.dart';
-import 'native_log_helper.dart';
 
 const myTask = "syncWithTheBackEnd";
 
@@ -271,10 +270,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
             IconButton(
               onPressed: () async {
                 if (await NativeLogHelper().isFileExist()) {
-                  Share.shareFiles([NativeLogHelper.logFilePath]);
+                  Share.shareXFiles([XFile(NativeLogHelper.logFilePath)]);
                 } else {
                   if (_scaffoldKey.currentState != null) {
-                    _scaffoldKey.currentState!.showSnackBar(new SnackBar(content: new Text('File not found!')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("File not found!")));
                   }
                 }
               },
@@ -286,7 +285,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                   NativeLogHelper().deleteLogFile();
                 } else {
                   if (_scaffoldKey.currentState != null) {
-                    _scaffoldKey.currentState!.showSnackBar(new SnackBar(content: new Text('File not found!')));
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("File not found!")));
                   }
                 }
               },
@@ -304,8 +303,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                   height: 10,
                 ),
                 customTextField(
-                  hintText: 'User Name',
+                  hintText: 'Username',
                   textEditController: _userNameController,
+                  addKey: true,
                 ),
                 SizedBox(
                   height: 10,
@@ -313,6 +313,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                 customTextField(
                   hintText: 'Password',
                   textEditController: _passwordController,
+                  addKey: true,
                 ),
                 SizedBox(
                   height: 10,
@@ -320,6 +321,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                 customTextField(
                   hintText: 'Host',
                   textEditController: _hostController,
+                  addKey: true,
                 ),
                 SizedBox(
                   height: 10,
@@ -337,8 +339,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                       },
                       child: Text(connectionStatus == 'Authenticated' ? "Disconnect" : "Connect"),
                       style: ElevatedButton.styleFrom(
-                        primary: Colors.black,
+                        backgroundColor: Colors.black,
                       ),
+                      key: Key('ConnectButton'),
                     ),
                     SizedBox(
                       width: 20,
@@ -364,14 +367,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                           },
                           child: Text("MAM Modules"),
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.black,
+                            backgroundColor: Colors.black,
                           ),
                         ),
                         ElevatedButton(
                           onPressed: _showConnectionStatus,
                           child: Text("Connection Status"),
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.black,
+                            backgroundColor: Colors.black,
                           ),
                         ),
                       ],
@@ -453,7 +456,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                         },
                         child: Text('Create Group'),
                         style: ElevatedButton.styleFrom(
-                          primary: Colors.black,
+                          backgroundColor: Colors.black,
                         ),
                       ),
                     ),
@@ -487,7 +490,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                             },
                             child: Text('Create Group & Manage'),
                             style: ElevatedButton.styleFrom(
-                              primary: Colors.black,
+                              backgroundColor: Colors.black,
                             ),
                           ),
                         );
@@ -523,7 +526,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                           },
                           child: Text('Join Group'),
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.black,
+                            backgroundColor: Colors.black,
                           ),
                         ),
                         ElevatedButton(
@@ -533,7 +536,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                           },
                           child: Text('Join Group & Manage'),
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.black,
+                            backgroundColor: Colors.black,
                           ),
                         ),
                       ],
@@ -603,7 +606,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                       },
                       child: Text(" Send "),
                       style: ElevatedButton.styleFrom(
-                        primary: (dropDownValue == "Chat") ? Colors.black : Colors.deepPurple,
+                        backgroundColor: (dropDownValue == "Chat") ? Colors.black : Colors.deepPurple,
                       ),
                     ),
                     ElevatedButton(
@@ -625,7 +628,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                       },
                       child: Text(" Send Custom Message "),
                       style: ElevatedButton.styleFrom(
-                        primary: (dropDownValue == "Chat") ? Colors.black : Colors.deepPurple,
+                        backgroundColor: (dropDownValue == "Chat") ? Colors.black : Colors.deepPurple,
                       ),
                     ),
                   ],
@@ -666,7 +669,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                     );
                   },
                   child: Text(" Send Receipt "),
-                  style: ElevatedButton.styleFrom(primary: Colors.black),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                 ),
                 SizedBox(
                   height: 10,
@@ -689,7 +692,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                         // online
                       } else if (last > Constants.RESULT_EMPTY) {
                         // not online but need to pass time
-                        DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(last);
+                        //DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(last);
                       } else {
                         // away
                       }
@@ -698,14 +701,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                     }
                   },
                   child: Text("Get Last activity"),
-                  style: ElevatedButton.styleFrom(primary: Colors.black),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                 ),
                 ElevatedButton(
                   onPressed: () async {
                     await flutterXmpp.getMyRosters();
                   },
                   child: Text(" Get MyRosters "),
-                  style: ElevatedButton.styleFrom(primary: Colors.black),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                 ),
                 SizedBox(
                   height: 15,
@@ -725,14 +728,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                         await flutterXmpp.createRoster(_createRostersController.text);
                       },
                       child: Text("Create MyRosters"),
-                      style: ElevatedButton.styleFrom(primary: Colors.black),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                     ),
                     ElevatedButton(
                       onPressed: () async {
-                        var val = await flutterXmpp.currentState();
+                        await flutterXmpp.currentState();
                       },
                       child: Text("Current State"),
-                      style: ElevatedButton.styleFrom(primary: Colors.black),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
                     ),
                   ],
                 ),
@@ -830,7 +833,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
     try {
       XmppConnectionState connectionStatus = await flutterXmpp.getConnectionStatus();
       if (_scaffoldKey.currentState != null) {
-        _scaffoldKey.currentState!.showSnackBar(new SnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
           content: new Text('${connectionStatus.toString()}'),
           duration: Duration(milliseconds: 700),
         ));
@@ -844,8 +847,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
 Widget customTextField({
   TextEditingController? textEditController,
   String? hintText,
+  bool addKey = false,
 }) {
   return TextField(
+    key: addKey ? Key(hintText!) : null,
+    autocorrect: false,
     controller: textEditController,
     cursorColor: Colors.black,
     decoration: InputDecoration(
