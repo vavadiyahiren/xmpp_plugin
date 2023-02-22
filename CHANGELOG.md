@@ -124,3 +124,7 @@
 * Bumped ios support version
 * Added New Unit Test Cases
 * Code CleanUp
+
+## 2.2.7
+
+* Added new chatstat type
