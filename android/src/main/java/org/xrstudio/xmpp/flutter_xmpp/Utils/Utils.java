@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
 
-import org.jivesoftware.smack.packet.Element;
 import org.jivesoftware.smack.packet.ExtensionElement;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.StandardExtensionElement;

@@ -111,6 +111,7 @@ class _MyAppState extends State<MyApp>
 
   void _onError(Object error) {
     // TODO : Handle the Error event
+    print("Error: ${error.toString()}");
   }
 
   @override

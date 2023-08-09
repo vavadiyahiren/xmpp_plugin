@@ -87,14 +87,11 @@ public class FlutterXmppConnectionService extends Service {
         if (!mActive) {
             mActive = true;
             if (mThread == null || !mThread.isAlive()) {
-                mThread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Looper.prepare();
-                        mTHandler = new Handler();
-                        initConnection();
-                        Looper.loop();
-                    }
+                mThread = new Thread(() -> {
+                    Looper.prepare();
+                    mTHandler = new Handler();
+                    initConnection();
+                    Looper.loop();
                 });
                 mThread.start();
             }
@@ -108,12 +105,9 @@ public class FlutterXmppConnectionService extends Service {
 
         mActive = false;
         if (mTHandler != null) {
-            mTHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mConnection != null) {
-                        mConnection.disconnect();
-                    }
+            mTHandler.post(() -> {
+                if (mConnection != null) {
+                    mConnection.disconnect();
                 }
             });
         }
@@ -132,14 +126,14 @@ public class FlutterXmppConnectionService extends Service {
             Utils.printLog(" Missing User JID/Password/Host/Port: ");
 
         } else {
-            this.jid_user = (String) extras.get(Constants.JID_USER);
-            this.password = (String) extras.get(Constants.PASSWORD);
-            this.host = (String) extras.get(Constants.HOST);
-            this.port = (Integer) extras.get(Constants.PORT);
-            this.requireSSLConnection = (boolean) extras.get(Constants.REQUIRE_SSL_CONNECTION);
-            this.autoDeliveryReceipt = (boolean) extras.get(Constants.AUTO_DELIVERY_RECEIPT);
-            this.useStreamManagement = (boolean) extras.get(Constants.USER_STREAM_MANAGEMENT);
-            this.automaticReconnection = (boolean) extras.get(Constants.AUTOMATIC_RECONNECTION);
+            this.jid_user = extras.getString(Constants.JID_USER);
+            this.password = extras.getString(Constants.PASSWORD);
+            this.host = extras.getString(Constants.HOST);
+            this.port = extras.getInt(Constants.PORT, 5222);
+            this.requireSSLConnection = extras.getBoolean(Constants.REQUIRE_SSL_CONNECTION, false);
+            this.autoDeliveryReceipt = extras.getBoolean(Constants.AUTO_DELIVERY_RECEIPT, false);
+            this.useStreamManagement = extras.getBoolean(Constants.USER_STREAM_MANAGEMENT, true);
+            this.automaticReconnection = extras.getBoolean(Constants.AUTOMATIC_RECONNECTION, true);
 
         }
         start();

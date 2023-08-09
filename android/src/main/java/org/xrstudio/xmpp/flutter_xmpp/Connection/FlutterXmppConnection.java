@@ -305,7 +305,9 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     public static void createRosterEntry(String userJid) {
         try {
-            rosterConnection.createEntry(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)), userJid, null);
+//            rosterConnection.createEntry(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)), userJid, null);
+            rosterConnection.createItemAndRequestSubscription(JidCreate.bareFrom(Utils.getJidWithDomainName(userJid, mHost)), userJid, null);
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -364,7 +366,8 @@ public class FlutterXmppConnection implements ConnectionListener {
                 Resourcepart resourcepart = Resourcepart.from(mUsername);
 
                 long currentTime = new Date().getTime();
-                long lastMessageTime = Long.valueOf(lastMsgTime);
+//                long lastMessageTime = Long.valueOf(lastMsgTime);
+                long lastMessageTime = Long.parseLong(lastMsgTime);
                 long diff = currentTime - lastMessageTime;
 
                 MucEnterConfiguration mucEnterConfiguration = multiUserChat.getEnterConfigurationBuilder(resourcepart)
@@ -404,7 +407,8 @@ public class FlutterXmppConnection implements ConnectionListener {
             Resourcepart resourcepart = Resourcepart.from(mUsername);
 
             long currentTime = new Date().getTime();
-            long lastMessageTime = Long.valueOf(lastMsgTime);
+//            long lastMessageTime = Long.valueOf(lastMsgTime);
+            long lastMessageTime = Long.parseLong(lastMsgTime);
             long diff = currentTime - lastMessageTime;
 
             MucEnterConfiguration mucEnterConfiguration = multiUserChat.getEnterConfigurationBuilder(resourcepart)
@@ -448,7 +452,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 
         try {
 
-            Presence presence = null;
+            Presence presence;
 
             Presence.Type type = Presence.Type.valueOf(presenceType);
             Presence.Mode mode = Presence.Mode.valueOf(presenceMode);
@@ -502,9 +506,10 @@ public class FlutterXmppConnection implements ConnectionListener {
                 e.printStackTrace();
             }
             conf.setCustomSSLContext(context);
-
             conf.setKeystoreType(null);
             conf.setSecurityMode(ConnectionConfiguration.SecurityMode.required);
+        } else {
+            conf.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled);
         }
 
         Utils.printLog(" connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + Constants.PORT + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource);
@@ -515,6 +520,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 
             mConnection = new XMPPTCPConnection(conf.build());
             mConnection.addConnectionListener(this);
+
 
 
             Utils.printLog(" Calling connect(): ");
@@ -600,6 +606,16 @@ public class FlutterXmppConnection implements ConnectionListener {
                 DeliveryReceiptRequest.addTo(xmppMessage);
             }
 
+//            if (isDm) {
+//                xmppMessage.setTo(JidCreate.from(toJid));
+//                mConnection.sendStanza(xmppMessage);
+//            } else {
+//                EntityBareJid jid = JidCreate.entityBareFrom(toJid);
+//                xmppMessage.setTo(jid);
+//                EntityBareJid mucJid = (EntityBareJid) JidCreate.bareFrom(Utils.getRoomIdWithDomainName(toJid, mHost));
+//                MultiUserChat muc = multiUserChatManager.getMultiUserChat(mucJid);
+//                muc.sendMessage(xmppMessage);
+//            }
             if (isDm) {
                 xmppMessage.setTo(JidCreate.from(toJid));
                 mConnection.sendStanza(xmppMessage);
@@ -608,7 +624,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                 xmppMessage.setTo(jid);
                 EntityBareJid mucJid = (EntityBareJid) JidCreate.bareFrom(Utils.getRoomIdWithDomainName(toJid, mHost));
                 MultiUserChat muc = multiUserChatManager.getMultiUserChat(mucJid);
-                muc.sendMessage(xmppMessage);
+                muc.sendMessage(body);
             }
 
             Utils.addLogInStorage("Action: sentMessageToServer, Content: " + xmppMessage.toXML().toString());
