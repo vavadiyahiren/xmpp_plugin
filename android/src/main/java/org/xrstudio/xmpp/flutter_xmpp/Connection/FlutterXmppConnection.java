@@ -30,7 +30,8 @@ import org.jivesoftware.smackx.muc.MultiUserChat;
 import org.jivesoftware.smackx.muc.MultiUserChatManager;
 import org.jivesoftware.smackx.receipts.DeliveryReceipt;
 import org.jivesoftware.smackx.receipts.DeliveryReceiptRequest;
-import org.jivesoftware.smackx.xdata.Form;
+import org.jivesoftware.smackx.xdata.form.FillableForm;
+import org.jivesoftware.smackx.xdata.form.Form;
 import org.jxmpp.jid.EntityBareJid;
 import org.jxmpp.jid.Jid;
 import org.jxmpp.jid.impl.JidCreate;
@@ -139,9 +140,9 @@ public class FlutterXmppConnection implements ConnectionListener {
                 muc.sendMessage(xmppMessage);
             }
 
-            Utils.addLogInStorage("Action: sentCustomMessageToServer, Content: " + xmppMessage.toXML(null).toString());
+            Utils.addLogInStorage("Action: sentCustomMessageToServer, Content: " + xmppMessage.toXML().toString());
 
-            Utils.printLog(" Sent custom message from: " + xmppMessage.toXML(null) + "  sent.");
+            Utils.printLog(" Sent custom message from: " + xmppMessage.toXML() + "  sent.");
 
         } catch (SmackException.NotConnectedException e) {
             e.printStackTrace();
@@ -169,7 +170,7 @@ public class FlutterXmppConnection implements ConnectionListener {
 
             mConnection.sendStanza(deliveryMessage);
 
-            Utils.addLogInStorage("Action: sentDeliveryReceiptToServer, Content: " + deliveryMessage.toXML(null).toString());
+            Utils.addLogInStorage("Action: sentDeliveryReceiptToServer, Content: " + deliveryMessage.toXML().toString());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -318,9 +319,16 @@ public class FlutterXmppConnection implements ConnectionListener {
             MultiUserChat multiUserChat = multiUserChatManager.getMultiUserChat((EntityBareJid) JidCreate.from(Utils.getRoomIdWithDomainName(groupName, mHost)));
             multiUserChat.create(Resourcepart.from(mUsername));
 
+//            if (persistent.equals(Constants.TRUE)) {
+//                Form form = multiUserChat.getConfigurationForm();
+//                Form answerForm = form.createAnswerForm();
+//                answerForm.setAnswer(Constants.MUC_PERSISTENT_ROOM, true);
+//                answerForm.setAnswer(Constants.MUC_MEMBER_ONLY, true);
+//                multiUserChat.sendConfigurationForm(answerForm);
+//            }
             if (persistent.equals(Constants.TRUE)) {
                 Form form = multiUserChat.getConfigurationForm();
-                Form answerForm = form.createAnswerForm();
+                FillableForm answerForm = form.getFillableForm();
                 answerForm.setAnswer(Constants.MUC_PERSISTENT_ROOM, true);
                 answerForm.setAnswer(Constants.MUC_MEMBER_ONLY, true);
                 multiUserChat.sendConfigurationForm(answerForm);
@@ -428,7 +436,7 @@ public class FlutterXmppConnection implements ConnectionListener {
             ChatState chatState = ChatState.valueOf(status);
             message.addExtension(new ChatStateExtension(chatState));
 
-            Utils.printLog("Sending Typing status " + message.toXML(null));
+            Utils.printLog("Sending Typing status " + message.toXML());
             mConnection.sendStanza(message);
 
         } catch (Exception e) {
@@ -603,9 +611,9 @@ public class FlutterXmppConnection implements ConnectionListener {
                 muc.sendMessage(xmppMessage);
             }
 
-            Utils.addLogInStorage("Action: sentMessageToServer, Content: " + xmppMessage.toXML(null).toString());
+            Utils.addLogInStorage("Action: sentMessageToServer, Content: " + xmppMessage.toXML().toString());
 
-            Utils.printLog(" Sent message from: " + xmppMessage.toXML(null) + "  sent.");
+            Utils.printLog(" Sent message from: " + xmppMessage.toXML() + "  sent.");
 
         } catch (SmackException.NotConnectedException e) {
             e.printStackTrace();

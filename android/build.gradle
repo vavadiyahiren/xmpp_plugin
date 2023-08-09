@@ -23,19 +23,25 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 33
 
     defaultConfig {
+        compileSdk 33
         minSdkVersion 16
-
         multiDexEnabled true
     }
+}
+
+configurations {
+    all*.exclude group: 'xpp3', module: 'xpp3'
+    all*.exclude group: 'net.sf.kxml', module: 'kxml2'
+    all*.exclude group: 'xmlpull', module: 'xmlpull'
 }
 
 ext {
     // smackVersion = '4.3.4'
     smackVersion = '4.4.6'
 }
+
 
 dependencies {
     implementation "org.igniterealtime.smack:smack-tcp:$smackVersion"
@@ -44,9 +50,9 @@ dependencies {
     implementation "org.igniterealtime.smack:smack-im:$smackVersion"
     implementation "org.igniterealtime.smack:smack-extensions:$smackVersion"
     implementation 'com.android.support:support-annotations:28.0.0'
-    implementation 'com.amazonaws:aws-android-sdk-core:2.9.1'
-    implementation 'com.amazonaws:aws-android-sdk-cognito:2.9.1'
-    implementation 'com.amazonaws:aws-android-sdk-s3:2.9.1'
-    implementation 'com.amazonaws:aws-android-sdk-ddb:2.9.1'
+    implementation 'com.amazonaws:aws-android-sdk-core:2.73.0'
+    implementation 'com.amazonaws:aws-android-sdk-cognito:2.20.1'
+    implementation 'com.amazonaws:aws-android-sdk-s3:2.73.0'
+    implementation 'com.amazonaws:aws-android-sdk-ddb:2.73.0'
     implementation 'com.android.support:multidex:1.0.3'
 }
