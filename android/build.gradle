@@ -33,7 +33,8 @@ android {
 }
 
 ext {
-    smackVersion = '4.3.4'
+    // smackVersion = '4.3.4'
+    smackVersion = '4.4.6'
 }
 
 dependencies {

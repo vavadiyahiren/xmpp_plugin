@@ -32,7 +32,9 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements DataChangeEvents {
+class _MyAppState extends State<MyApp>
+    with WidgetsBindingObserver
+    implements DataChangeEvents {
   static late XmppConnection flutterXmpp;
   List<MessageChat> events = [];
   List<PresentModel> presentMo = [];
@@ -73,13 +75,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
 
   Future<void> connect() async {
     final auth = {
-      "user_jid": "${_userNameController.text}@${_hostController.text}/${Platform.isAndroid ? "Android" : "iOS"}",
+      "user_jid":
+          "${_userNameController.text}@${_hostController.text}/${Platform.isAndroid ? "Android" : "iOS"}",
       "password": "${_passwordController.text}",
       "host": "${_hostController.text}",
       "port": '5222',
       "nativeLogFilePath": NativeLogHelper.logFilePath,
-      "requireSSLConnection": true,
-      "autoDeliveryReceipt": true,
+      "requireSSLConnection": false,
+      "autoDeliveryReceipt": false,
       "useStreamManagement": false,
       "automaticReconnection": true,
     };
@@ -92,7 +95,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
   void checkStoragePermission() async {
     var status = await Permission.storage.status;
     if (!status.isGranted) {
-      final PermissionStatus _permissionStatus = await Permission.storage.request();
+      final PermissionStatus _permissionStatus =
+          await Permission.storage.request();
       if (_permissionStatus.isGranted) {
         String filePath = await NativeLogHelper().getDefaultLogFilePath();
         print('logFilePath: $filePath');
@@ -111,12 +115,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
 
   @override
   void onXmppError(ErrorResponseEvent errorResponseEvent) {
-    print('receiveEvent onXmppError: ${errorResponseEvent.toErrorResponseData().toString()}');
+    print(
+        'receiveEvent onXmppError: ${errorResponseEvent.toErrorResponseData().toString()}');
   }
 
   @override
   void onSuccessEvent(SuccessResponseEvent successResponseEvent) {
-    print('receiveEvent successEventReceive: ${successResponseEvent.toSuccessResponseData().toString()}');
+    print(
+        'receiveEvent successEventReceive: ${successResponseEvent.toSuccessResponseData().toString()}');
   }
 
   @override
@@ -170,7 +176,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
     await flutterXmpp.addMembersInGroup(groupName, members);
   }
 
-  Future<void> addAdminsInGroup(String groupName, List<String> adminMembers) async {
+  Future<void> addAdminsInGroup(
+      String groupName, List<String> adminMembers) async {
     await flutterXmpp.addAdminsInGroup(groupName, adminMembers);
   }
 
@@ -230,9 +237,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
     'dnd',
   ];
 
-  TextEditingController _userNameController = TextEditingController();
-  TextEditingController _passwordController = TextEditingController();
-  TextEditingController _hostController = TextEditingController();
+  TextEditingController _userNameController =
+      TextEditingController(text: "tes1");
+  TextEditingController _passwordController =
+      TextEditingController(text: "tes1");
+  TextEditingController _hostController =
+      TextEditingController(text: "xm.jtisrv.com");
   TextEditingController _createMUCNamecontroller = TextEditingController();
 
   TextEditingController _toReceiptController = TextEditingController();
@@ -249,7 +259,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   List<CustomElement> customElements = [
-    CustomElement(childBody: "test", childElement: "elem", elementName: "Name", elementNameSpace: "space")
+    CustomElement(
+        childBody: "test",
+        childElement: "elem",
+        elementName: "Name",
+        elementNameSpace: "space")
   ];
 
   @override
@@ -273,7 +287,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                   Share.shareXFiles([XFile(NativeLogHelper.logFilePath)]);
                 } else {
                   if (_scaffoldKey.currentState != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("File not found!")));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("File not found!")));
                   }
                 }
               },
@@ -285,7 +300,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                   NativeLogHelper().deleteLogFile();
                 } else {
                   if (_scaffoldKey.currentState != null) {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("File not found!")));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("File not found!")));
                   }
                 }
               },
@@ -337,7 +353,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                           await connect();
                         }
                       },
-                      child: Text(connectionStatus == 'Authenticated' ? "Disconnect" : "Connect"),
+                      child: Text(connectionStatus == 'Authenticated'
+                          ? "Disconnect"
+                          : "Connect"),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                       ),
@@ -362,7 +380,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                           onPressed: () {
                             Navigator.push(
                               context,
-                              MaterialPageRoute(builder: (context) => MamExamples(flutterXmpp)),
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      MamExamples(flutterXmpp)),
                             );
                           },
                           child: Text("MAM Modules"),
@@ -452,7 +472,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                     Flexible(
                       child: ElevatedButton(
                         onPressed: () async {
-                          await createMUC("${_createMUCNamecontroller.text}", true);
+                          await createMUC(
+                              "${_createMUCNamecontroller.text}", true);
                         },
                         child: Text('Create Group'),
                         style: ElevatedButton.styleFrom(
@@ -468,7 +489,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                         return Flexible(
                           child: ElevatedButton(
                             onPressed: () async {
-                              await createMUC("${_createMUCNamecontroller.text}", true);
+                              await createMUC(
+                                  "${_createMUCNamecontroller.text}", true);
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -522,7 +544,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                       children: [
                         ElevatedButton(
                           onPressed: () async {
-                            _joinGroup(context, "${_joinMUCTextController.text}", "${_joinTimeController.text}");
+                            _joinGroup(
+                                context,
+                                "${_joinMUCTextController.text}",
+                                "${_joinTimeController.text}");
                           },
                           child: Text('Join Group'),
                           style: ElevatedButton.styleFrom(
@@ -531,7 +556,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                         ),
                         ElevatedButton(
                           onPressed: () async {
-                            _joinGroup(context, "${_joinMUCTextController.text}", "${_joinTimeController.text}",
+                            _joinGroup(
+                                context,
+                                "${_joinMUCTextController.text}",
+                                "${_joinTimeController.text}",
                                 isManageGroup: true);
                           },
                           child: Text('Join Group & Manage'),
@@ -599,14 +627,22 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                       onPressed: () async {
                         int id = DateTime.now().millisecondsSinceEpoch;
                         (dropDownValue == "Chat")
-                            ? await flutterXmpp.sendMessageWithType("${_toNameController.text}",
-                                "${_messageController.text}", "$id", DateTime.now().millisecondsSinceEpoch)
-                            : await flutterXmpp.sendGroupMessageWithType("${_toNameController.text}",
-                                "${_messageController.text}", "$id", DateTime.now().millisecondsSinceEpoch);
+                            ? await flutterXmpp.sendMessageWithType(
+                                "${_toNameController.text}",
+                                "${_messageController.text}",
+                                "$id",
+                                DateTime.now().millisecondsSinceEpoch)
+                            : await flutterXmpp.sendGroupMessageWithType(
+                                "${_toNameController.text}",
+                                "${_messageController.text}",
+                                "$id",
+                                DateTime.now().millisecondsSinceEpoch);
                       },
                       child: Text(" Send "),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: (dropDownValue == "Chat") ? Colors.black : Colors.deepPurple,
+                        backgroundColor: (dropDownValue == "Chat")
+                            ? Colors.black
+                            : Colors.deepPurple,
                       ),
                     ),
                     ElevatedButton(
@@ -628,7 +664,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                       },
                       child: Text(" Send Custom Message "),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: (dropDownValue == "Chat") ? Colors.black : Colors.deepPurple,
+                        backgroundColor: (dropDownValue == "Chat")
+                            ? Colors.black
+                            : Colors.deepPurple,
                       ),
                     ),
                   ],
@@ -669,7 +707,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                     );
                   },
                   child: Text(" Send Receipt "),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.black),
                 ),
                 SizedBox(
                   height: 10,
@@ -683,7 +722,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                 ),
                 ElevatedButton(
                   onPressed: () async {
-                    String lastSeenTime = await flutterXmpp.getLastSeen(_userJidController.text);
+                    String lastSeenTime =
+                        await flutterXmpp.getLastSeen(_userJidController.text);
                     print('lastSeen lastSeenTime: $lastSeenTime');
                     if (lastSeenTime.isNotEmpty) {
                       int last = int.parse(lastSeenTime);
@@ -701,14 +741,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                     }
                   },
                   child: Text("Get Last activity"),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.black),
                 ),
                 ElevatedButton(
                   onPressed: () async {
                     await flutterXmpp.getMyRosters();
                   },
                   child: Text(" Get MyRosters "),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: Colors.black),
                 ),
                 SizedBox(
                   height: 15,
@@ -725,17 +767,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
                   children: [
                     ElevatedButton(
                       onPressed: () async {
-                        await flutterXmpp.createRoster(_createRostersController.text);
+                        await flutterXmpp
+                            .createRoster(_createRostersController.text);
                       },
                       child: Text("Create MyRosters"),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black),
                     ),
                     ElevatedButton(
                       onPressed: () async {
                         await flutterXmpp.currentState();
                       },
                       child: Text("Current State"),
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.black),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black),
                     ),
                   ],
                 ),
@@ -804,7 +849,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
     print('responseTest groupResponse $groupResponse');
   }
 
-  void _joinGroup(BuildContext context, String grouname, String time, {bool isManageGroup = false}) async {
+  void _joinGroup(BuildContext context, String grouname, String time,
+      {bool isManageGroup = false}) async {
     bool response = await joinMucGroup("$grouname,$time");
     print("responseTest joinResponse $response");
     if (response && isManageGroup) {
@@ -831,7 +877,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver implements Da
 
   void _showConnectionStatus() async {
     try {
-      XmppConnectionState connectionStatus = await flutterXmpp.getConnectionStatus();
+      XmppConnectionState connectionStatus =
+          await flutterXmpp.getConnectionStatus();
       if (_scaffoldKey.currentState != null) {
         ScaffoldMessenger.of(context).showSnackBar(new SnackBar(
           content: new Text('${connectionStatus.toString()}'),
