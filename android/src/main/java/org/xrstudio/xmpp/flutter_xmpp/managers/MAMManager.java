@@ -56,7 +56,7 @@ public class MAMManager {
                 List<Message> messageList = query.getMessages();
 
                 for (Message message : messageList) {
-                    Utils.printLog("Received Message " + message.toXML(null));
+                    Utils.printLog("Received Message " + message.toXML());
                     Utils.broadcastMessageToFlutter(FlutterXmppConnection.getApplicationContext(), message);
                 }
 

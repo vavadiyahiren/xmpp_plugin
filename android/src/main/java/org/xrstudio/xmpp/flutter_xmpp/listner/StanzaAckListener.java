@@ -26,7 +26,7 @@ public class StanzaAckListener implements StanzaListener {
 
             Message ackMessage = (Message) packet;
 
-            Utils.addLogInStorage(" Action: receiveStanzaAckFromServer, Content: " + ackMessage.toXML(null).toString());
+            Utils.addLogInStorage(" Action: receiveStanzaAckFromServer, Content: " + ackMessage.toXML().toString());
 
             String time = Constants.ZERO;
             if (ackMessage.getExtension(Constants.URN_XMPP_TIME) != null) {
