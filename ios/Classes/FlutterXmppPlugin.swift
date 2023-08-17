@@ -316,7 +316,7 @@ public class FlutterXmppPlugin: NSObject, FlutterPlugin {
         let arrRooms = vData["all_groups_ids"] as? [String] ?? []
         for vRoom  in arrRooms {
             let arrRoomCompo : [String] = vRoom.components(separatedBy: ",")
-            if arrRoomCompo.count != 2 { continue }
+         //   if arrRoomCompo.count != 2 { continue }
             
             let vRoomName : String = arrRoomCompo.first ?? ""
             let vRoomTS : String = arrRoomCompo.last ?? "0"
