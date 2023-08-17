@@ -128,3 +128,7 @@
 ## 2.2.7
 
 * Added new chatstat type
+
+## 2.2.8
+
+* Fixed Iphone group joining issue
