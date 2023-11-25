@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Environment;
 import android.util.Log;
 
-import org.jivesoftware.smack.packet.Element;
 import org.jivesoftware.smack.packet.ExtensionElement;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.StandardExtensionElement;
@@ -164,7 +163,7 @@ public class Utils {
 
     public static void broadcastMessageToFlutter(Context mApplicationContext, Message message) {
 
-        Utils.addLogInStorage(" Action: receiveMessageFromServer, Content: " + message.toXML(null).toString());
+        Utils.addLogInStorage(" Action: receiveMessageFromServer, Content: " + message.toXML().toString());
 
         message = parseEventStanzaMessage(message);
 
@@ -247,7 +246,7 @@ public class Utils {
                         PayloadItem<?> it = (PayloadItem<?>) items.get(j);
                         SimplePayload payloadElement = (SimplePayload) it.getPayload();
 
-                        String xmlStanza = payloadElement.toXML(null);
+                        String xmlStanza = (String) payloadElement.toXML();
 
                         message = (Message) PacketParserUtils.parseStanza(xmlStanza);
                     }

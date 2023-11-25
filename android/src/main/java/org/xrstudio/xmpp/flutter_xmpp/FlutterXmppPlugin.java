@@ -412,6 +412,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
 
     @Override
     public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+        logout();
         method_channel.setMethodCallHandler(null);
         Utils.printLog(" onDetachedFromEngine: ");
     }
