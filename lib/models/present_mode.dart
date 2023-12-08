@@ -1,3 +1,5 @@
+import '../ennums/presence_type.dart';
+
 class PresentModel {
   PresentModel({
     this.presenceMode,
@@ -5,8 +7,8 @@ class PresentModel {
     this.from,
   });
 
-  String? presenceMode;
-  String? presenceType;
+  PresenceMode? presenceMode;
+  PresenceType? presenceType;
   String? from;
 
   factory PresentModel.fromJson(dynamic json) => PresentModel(
@@ -16,8 +18,8 @@ class PresentModel {
       );
 
   Map<String, dynamic> toJson() => {
-        "presenceMode": presenceMode,
-        "presenceType": presenceType,
+        "presenceMode": presenceMode?.name ?? '',
+        "presenceType": presenceType?.name ?? '',
         "from": from,
       };
 }

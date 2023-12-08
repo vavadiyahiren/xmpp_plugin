@@ -60,7 +60,8 @@ class _HomePageState extends State<HomePage> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  widget.addMembersInGroup(widget.groupName, ["${_memberController.text}"]);
+                  widget.addMembersInGroup(
+                      widget.groupName, ["${_memberController.text}"]);
                 },
                 child: Text('Add Member'),
                 style: ElevatedButton.styleFrom(
@@ -75,7 +76,8 @@ class _HomePageState extends State<HomePage> {
               ),
               ElevatedButton(
                 onPressed: () async {
-                  widget.addAdminsInGroup(widget.groupName, ["${_memberController.text}"]);
+                  widget.addAdminsInGroup(
+                      widget.groupName, ["${_memberController.text}"]);
                 },
                 child: Text('Add Admin'),
                 style: ElevatedButton.styleFrom(
@@ -116,7 +118,8 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      widget.removeMember(widget.groupName, ["${_memberController.text}"]);
+                      widget.removeMember(
+                          widget.groupName, ["${_memberController.text}"]);
                     },
                     child: Text('Remove Member'),
                     style: ElevatedButton.styleFrom(
@@ -125,7 +128,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      widget.removeAdmin(widget.groupName, ["${_memberController.text}"]);
+                      widget.removeAdmin(
+                          widget.groupName, ["${_memberController.text}"]);
                     },
                     child: Text('Remove admin'),
                     style: ElevatedButton.styleFrom(
@@ -142,7 +146,8 @@ class _HomePageState extends State<HomePage> {
                 children: [
                   ElevatedButton(
                     onPressed: () async {
-                      widget.addOwner(widget.groupName, ["${_memberController.text}"]);
+                      widget.addOwner(
+                          widget.groupName, ["${_memberController.text}"]);
                     },
                     child: Text('Add owner'),
                     style: ElevatedButton.styleFrom(
@@ -151,7 +156,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                   ElevatedButton(
                     onPressed: () async {
-                      widget.removeOwner(widget.groupName, ["${_memberController.text}"]);
+                      widget.removeOwner(
+                          widget.groupName, ["${_memberController.text}"]);
                     },
                     child: Text('Remove owner'),
                     style: ElevatedButton.styleFrom(
