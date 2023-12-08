@@ -1,10 +1,12 @@
+import '../ennums/typing_status.dart';
+
 class ChatState {
   String? from;
   String? senderJid;
   String? id;
   String? type;
   String? msgtype;
-  String? chatStateType;
+  TypingStatus? chatStateType;
 
   ChatState({
     this.from,
@@ -22,7 +24,7 @@ class ChatState {
       'id': id,
       'type': type,
       'msgtype': msgtype,
-      'chatStateType': chatStateType,
+      'chatStateType': chatStateType?.name ?? '',
     };
   }
 
