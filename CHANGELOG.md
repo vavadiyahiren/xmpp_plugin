@@ -132,3 +132,7 @@
 ## 2.2.8
 
 * Fixed Iphone group joining issue
+
+## 2.2.9 
+
+* Added Enums for events.
