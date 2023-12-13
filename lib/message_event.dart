@@ -1,3 +1,4 @@
+import 'ennums/presence_type.dart';
 
 class MessageEvent {
   String? customText;
@@ -10,8 +11,8 @@ class MessageEvent {
   String? msgtype;
   String? bubbleType;
   String? mediaURL;
-  String? presenceType;
-  String? presenceMode;
+  PresenceType? presenceType;
+  PresenceMode? presenceMode;
   String? chatStateType;
   int? isReadSent;
 
@@ -44,11 +45,10 @@ class MessageEvent {
       'msgtype': msgtype,
       'bubbleType': bubbleType,
       'mediaURL': mediaURL,
-      'presenceType': presenceType,
-      'presenceMode': presenceMode,
+      'presenceType': presenceType?.name,
+      'presenceMode': presenceMode?.name,
       'isReadSent': isReadSent,
       'chatStateType': chatStateType,
-
     };
   }
 

@@ -1,7 +1,1 @@
-enum TypingStatus {
-  COMPOSING,
-  PAUSED,
-  ACTIVE,
-  GONE,
-  INACTIVE;
-}
+enum TypingStatus { COMPOSING, PAUSED, ACTIVE, GONE, INACTIVE }
