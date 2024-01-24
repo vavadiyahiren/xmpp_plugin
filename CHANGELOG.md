@@ -136,3 +136,7 @@
 ## 2.2.9 
 
 * Added Enums for events.
+
+## 2.2.10
+
+* Fixed NPE for Enums for presence
