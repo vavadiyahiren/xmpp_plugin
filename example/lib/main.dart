@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
-import 'package:share_plus/share_plus.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_xmpp_example/constants.dart';
@@ -9,6 +8,7 @@ import 'package:flutter_xmpp_example/homepage.dart';
 import 'package:flutter_xmpp_example/native_log_helper.dart';
 import 'package:flutter_xmpp_example/utils.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:xmpp_plugin/custom_element.dart';
 import 'package:xmpp_plugin/ennums/xmpp_connection_state.dart';
 import 'package:xmpp_plugin/error_response_event.dart';
@@ -69,6 +69,8 @@ class _MyAppState extends State<MyApp>
         break;
       case AppLifecycleState.resumed:
         log('resumed detachedCallBack()');
+        break;
+      case AppLifecycleState.hidden:
         break;
     }
   }
@@ -214,7 +216,8 @@ class _MyAppState extends State<MyApp>
     await flutterXmpp.getAdmins(groupName);
   }
 
-  Future<void> changePresenceType(presenceType, presenceMode) async {
+  Future<void> changePresenceType(
+      String presenceType, String presenceMode) async {
     await flutterXmpp.changePresenceType(presenceType, presenceMode);
   }
 
