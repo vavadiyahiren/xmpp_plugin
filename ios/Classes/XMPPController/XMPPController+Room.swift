@@ -278,7 +278,7 @@ extension XMPPController : XMPPRoomDelegate {
             }
             printLog("\(#function) | Not getting MUCRoom")
         }
-        return true
+        return false
     }
 }
 
