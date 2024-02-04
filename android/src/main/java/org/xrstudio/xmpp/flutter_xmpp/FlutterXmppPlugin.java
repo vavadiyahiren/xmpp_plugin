@@ -55,7 +55,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
     private BroadcastReceiver successBroadcastReceiver = null;
     private BroadcastReceiver errorBroadcastReceiver = null;
     private BroadcastReceiver connectionBroadcastReceiver = null;
-    private boolean requireSSLConnection = false, autoDeliveryReceipt = false, automaticReconnection = true, useStreamManagement = true;
+    private boolean requireSSLConnection = false, autoDeliveryReceipt = false, automaticReconnection = true, useStreamManagement = true, registerUser = false;
 
 //    public static void registerWith(Registrar registrar) {
 //
@@ -488,6 +488,10 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                     useStreamManagement = call.argument(Constants.USER_STREAM_MANAGEMENT);
                 }
 
+                if (call.hasArgument(Constants.REGISTER_USER)) {
+                    registerUser = call.argument(Constants.REGISTER_USER);
+                }
+
                 // Start authentication.
                 doLogin();
 
@@ -796,6 +800,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
             i.putExtra(Constants.REQUIRE_SSL_CONNECTION, requireSSLConnection);
             i.putExtra(Constants.USER_STREAM_MANAGEMENT, useStreamManagement);
             i.putExtra(Constants.AUTOMATIC_RECONNECTION, automaticReconnection);
+            i.putExtra(Constants.REGISTER_USER, registerUser);
             activity.startService(i);
         }
     }
