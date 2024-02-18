@@ -533,7 +533,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         }
 
         Utils.printLog(" connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + Constants.PORT
-                + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource + "registerUser: "
+                + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource + " registerUser: "
                 + mRegisterUser);
         // Set up the ui thread broadcast message receiver.
 
