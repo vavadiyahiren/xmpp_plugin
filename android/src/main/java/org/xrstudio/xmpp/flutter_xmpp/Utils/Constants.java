@@ -122,6 +122,7 @@ public class Constants {
     public static final String PASSWORD = "password";
     public static final String SEND_MESSAGE = "send_message";
     public static final String SEND_GROUP_MESSAGE = "send_group_message";
+    public static final String REGISTER_USER = "register_user";
     public static final String LOGIN = "login";
     public static final String TO_JID = "to_jid";
     public static final String TO_JID_1 = "toJid";

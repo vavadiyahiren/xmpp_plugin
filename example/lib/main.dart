@@ -85,6 +85,7 @@ class _MyAppState extends State<MyApp>
       "autoDeliveryReceipt": false,
       "useStreamManagement": false,
       "automaticReconnection": true,
+      "register": true
     };
 
     flutterXmpp = XmppConnection(auth);
