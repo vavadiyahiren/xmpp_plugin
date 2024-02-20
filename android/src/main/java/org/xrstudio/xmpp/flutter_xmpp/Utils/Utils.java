@@ -166,7 +166,6 @@ public class Utils {
         Utils.addLogInStorage(" Action: receiveMessageFromServer, Content: " + message.toXML().toString());
 
         message = parseEventStanzaMessage(message);
-
         String META_TEXT = Constants.MESSAGE;
         String body = message.getBody();
         String from = message.getFrom().toString();

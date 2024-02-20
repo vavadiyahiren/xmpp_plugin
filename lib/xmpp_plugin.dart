@@ -72,18 +72,6 @@ class XmppConnection {
     await _channel.invokeMethod('logout');
   }
 
-  Future<String> sendMessage(String toJid, String body, String id, int time) async {
-    final params = {
-      "to_jid": toJid,
-      "body": body,
-      "id": id,
-      "time": time.toString(),
-    };
-    printLogForMethodCall('send_message', params);
-    final String status = await _channel.invokeMethod('send_message', params);
-    return status;
-  }
-
   Future<String> sendMessageWithType(String toJid,
       String body,
       String id,
@@ -339,11 +327,11 @@ class XmppConnection {
   }
 
   Future<void> changeTypingStatus(String userJid,
-      String typingstatus,) async {
-    print(" Plugin : User Jid : $userJid , Typing Status : $typingstatus ");
+      String typingStatus) async {
+    print(" Plugin : User Jid : $userJid , Typing Status : $typingStatus ");
     final params = {
       "userJid": userJid,
-      "typingStatus": typingstatus,
+      "typingStatus": typingStatus,
     };
     await _channel.invokeMethod('change_typing_status', params);
   }
