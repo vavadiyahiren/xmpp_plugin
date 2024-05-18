@@ -69,7 +69,7 @@ public class FlutterXmppConnectionService extends Service {
             if (mConnection == null) {
                 mConnection = new FlutterXmppConnection(this, this.jid_user, this.password, this.host, this.port,
                         requireSSLConnection, autoDeliveryReceipt, useStreamManagement, automaticReconnection,
-                        registerUser);
+                        registerUser, this);
             }
 
             mConnection.connect();
@@ -87,7 +87,7 @@ public class FlutterXmppConnectionService extends Service {
 
     public void start() {
 
-        Utils.printLog(" Service Start() function called: ");
+        Utils.printLog(" Service Start() function called: " + mActive);
 
         if (!mActive) {
             mActive = true;
@@ -109,13 +109,19 @@ public class FlutterXmppConnectionService extends Service {
         Utils.printLog(" stop() :");
 
         mActive = false;
+        if (mThread.isAlive() && mThread != null) {
+            mThread.interrupt();
+            mThread = null;
+        }
         if (mTHandler != null) {
             mTHandler.post(() -> {
                 if (mConnection != null) {
                     mConnection.disconnect();
+                    mConnection = null;
                 }
             });
         }
+
     }
 
     @Override

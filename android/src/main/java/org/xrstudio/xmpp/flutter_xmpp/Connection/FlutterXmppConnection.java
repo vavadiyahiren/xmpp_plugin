@@ -74,11 +74,12 @@ public class FlutterXmppConnection implements ConnectionListener {
             mUseStreamManagement = true, mRegisterUser = false;
     private static Context mApplicationContext;
     private BroadcastReceiver uiThreadMessageReceiver;// Receives messages from the ui thread.
+    private FlutterXmppConnectionService mService;
 
     public FlutterXmppConnection(Context context, String jid_user, String password, String host, Integer port,
             boolean requireSSLConnection,
             boolean autoDeliveryReceipt, boolean useStreamManagement, boolean automaticReconnection,
-            boolean registerUser) {
+            boolean registerUser, FlutterXmppConnectionService service) {
 
         Utils.printLog(" Connection Constructor called: ");
 
@@ -91,6 +92,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         mUseStreamManagement = useStreamManagement;
         mAutomaticReconnection = automaticReconnection;
         mRegisterUser = registerUser;
+        mService = service;
         if (jid_user != null && jid_user.contains(Constants.SYMBOL_COMPARE_JID)) {
             String[] jid_list = jid_user.split(Constants.SYMBOL_COMPARE_JID);
             mUsername = jid_list[0];
@@ -533,7 +535,8 @@ public class FlutterXmppConnection implements ConnectionListener {
         }
 
         Utils.printLog(" connect 1 mServiceName: " + mServiceName + " mHost: " + mHost + " mPort: " + Constants.PORT
-                + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource + " registerUser: "
+                + " mUsername: " + mUsername + " mPassword: " + mPassword + " mResource:" + mResource
+                + " registerUser: "
                 + mRegisterUser);
         // Set up the ui thread broadcast message receiver.
 
@@ -545,10 +548,30 @@ public class FlutterXmppConnection implements ConnectionListener {
             Utils.printLog(" Calling connect(): ");
             mConnection.connect();
             if (mRegisterUser) {
-                // Registering the user
-                AccountManager accountManager = AccountManager.getInstance(mConnection);
-                accountManager.sensitiveOperationOverInsecureConnection(true);
-                accountManager.createAccount(Localpart.from(mUsername), mPassword);
+                try {
+                    // Registering the user
+                    AccountManager accountManager = AccountManager.getInstance(mConnection);
+                    if (!mRequireSSLConnection) {
+                        accountManager.sensitiveOperationOverInsecureConnection(true);
+                    }
+                    accountManager.createAccount(Localpart.from(mUsername), mPassword);
+                    FlutterXmppConnectionService.sConnectionState = ConnectionState.DISCONNECTED;
+                    Utils.broadcastConnectionMessageToFlutter(mApplicationContext, ConnectionState.DISCONNECTED, "");
+                    mConnection.disconnect();
+                    mService.stop();
+                    Utils.printLog(" User registered successfully.");
+                    return;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Utils.broadcastConnectionMessageToFlutter(mApplicationContext, ConnectionState.FAILED,
+                    e.getLocalizedMessage());
+                    Utils.printLog(" User registration failed.");
+                    mConnection.disconnect();
+                    mService.stop();
+                    FlutterXmppConnectionService.sConnectionState = ConnectionState.FAILED;
+                    return;
+                }
+
             }
 
             rosterConnection = Roster.getInstanceFor(mConnection);

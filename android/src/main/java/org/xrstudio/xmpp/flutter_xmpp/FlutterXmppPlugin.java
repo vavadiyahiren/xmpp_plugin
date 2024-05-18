@@ -463,6 +463,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
 
                 jid_user = call.argument(Constants.USER_JID).toString();
                 password = call.argument(Constants.PASSWORD).toString();
+                Utils.printLog("jid_user: " + jid_user + " password: " + password);
                 host = call.argument(Constants.HOST).toString();
                 if (call.hasArgument(Constants.PORT)) {
                     Constants.PORT_NUMBER = Integer.parseInt(call.argument(Constants.PORT).toString());
@@ -790,6 +791,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
     // login
     private void doLogin() {
         // Check if the user is already connected or not ? if not then start login process.
+        Log.d("TAG", "doLogin: " + FlutterXmppConnectionService.getState());
         if (FlutterXmppConnectionService.getState().equals(ConnectionState.DISCONNECTED) ||
             FlutterXmppConnectionService.getState().equals(ConnectionState.FAILED)) {
             Intent i = new Intent(activity, FlutterXmppConnectionService.class);
