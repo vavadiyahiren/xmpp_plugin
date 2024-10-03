@@ -57,18 +57,6 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
     private BroadcastReceiver connectionBroadcastReceiver = null;
     private boolean requireSSLConnection = false, autoDeliveryReceipt = false, automaticReconnection = true, useStreamManagement = true;
 
-//    public static void registerWith(Registrar registrar) {
-//
-//        //method channel
-//        final MethodChannel method_channel = new MethodChannel(registrar.messenger(), CHANNEL);
-//        method_channel.setMethodCallHandler(new FlutterXmppPlugin(registrar.context()));
-//
-//        //event channel
-//        final EventChannel event_channel = new EventChannel(registrar.messenger(), CHANNEL_STREAM);
-//        event_channel.setStreamHandler(new FlutterXmppPlugin(registrar.context()));
-//
-//    }
-
     private static BroadcastReceiver get_message(final EventChannel.EventSink events) {
         return new BroadcastReceiver() {
             @Override
@@ -305,7 +293,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                     successBroadcastReceiver = getSuccessBroadCast(events);
                     IntentFilter filter = new IntentFilter();
                     filter.addAction(Constants.SUCCESS_MESSAGE);
-                    activity.registerReceiver(successBroadcastReceiver, filter);
+                    activity.registerReceiver(successBroadcastReceiver, filter, Context.RECEIVER_EXPORTED);
                 }
             }
 
@@ -328,7 +316,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                     errorBroadcastReceiver = getErrorBroadCast(errorEvents);
                     IntentFilter filter = new IntentFilter();
                     filter.addAction(Constants.ERROR_MESSAGE);
-                    activity.registerReceiver(errorBroadcastReceiver, filter);
+                    activity.registerReceiver(errorBroadcastReceiver, filter, Context.RECEIVER_EXPORTED);
                 }
             }
 
@@ -351,7 +339,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                     connectionBroadcastReceiver = getConnectionBroadCast(connectionEvents);
                     IntentFilter filter = new IntentFilter();
                     filter.addAction(Constants.CONNECTION_STATE_MESSAGE);
-                    activity.registerReceiver(connectionBroadcastReceiver, filter);
+                    activity.registerReceiver(connectionBroadcastReceiver, filter, Context.RECEIVER_EXPORTED);
                 }
             }
 
@@ -428,7 +416,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
             filter.addAction(Constants.RECEIVE_MESSAGE);
             filter.addAction(Constants.OUTGOING_MESSAGE);
             filter.addAction(Constants.PRESENCE_MESSAGE);
-            activity.registerReceiver(mBroadcastReceiver, filter);
+            activity.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED);
         }
 
     }

@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 
+import androidx.core.content.ContextCompat;
+
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
 import org.jivesoftware.smack.ReconnectionManager;
@@ -584,7 +586,7 @@ public class FlutterXmppConnection implements ConnectionListener {
         filter.addAction(Constants.X_SEND_MESSAGE);
         filter.addAction(Constants.READ_MESSAGE);
         filter.addAction(Constants.GROUP_SEND_MESSAGE);
-        mApplicationContext.registerReceiver(uiThreadMessageReceiver, filter);
+        mApplicationContext.registerReceiver(uiThreadMessageReceiver, filter, Context.RECEIVER_EXPORTED);
 
     }
 
