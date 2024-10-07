@@ -55,7 +55,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
     private BroadcastReceiver successBroadcastReceiver = null;
     private BroadcastReceiver errorBroadcastReceiver = null;
     private BroadcastReceiver connectionBroadcastReceiver = null;
-    private boolean requireSSLConnection = false, autoDeliveryReceipt = false, automaticReconnection = true, useStreamManagement = true;
+    private boolean requireSSLConnection = false, autoDeliveryReceipt = false, automaticReconnection = true, useStreamManagement = true, registerUser = false;
 
     private static BroadcastReceiver get_message(final EventChannel.EventSink events) {
         return new BroadcastReceiver() {
@@ -451,6 +451,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
 
                 jid_user = call.argument(Constants.USER_JID).toString();
                 password = call.argument(Constants.PASSWORD).toString();
+                Utils.printLog("jid_user: " + jid_user + " password: " + password);
                 host = call.argument(Constants.HOST).toString();
                 if (call.hasArgument(Constants.PORT)) {
                     Constants.PORT_NUMBER = Integer.parseInt(call.argument(Constants.PORT).toString());
@@ -474,6 +475,10 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
 
                 if (call.hasArgument(Constants.USER_STREAM_MANAGEMENT)) {
                     useStreamManagement = call.argument(Constants.USER_STREAM_MANAGEMENT);
+                }
+
+                if (call.hasArgument(Constants.REGISTER_USER)) {
+                    registerUser = call.argument(Constants.REGISTER_USER);
                 }
 
                 // Start authentication.
@@ -774,7 +779,9 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
     // login
     private void doLogin() {
         // Check if the user is already connected or not ? if not then start login process.
-        if (FlutterXmppConnectionService.getState().equals(ConnectionState.DISCONNECTED)) {
+        Log.d("TAG", "doLogin: " + FlutterXmppConnectionService.getState());
+        if (FlutterXmppConnectionService.getState().equals(ConnectionState.DISCONNECTED) ||
+            FlutterXmppConnectionService.getState().equals(ConnectionState.FAILED)) {
             Intent i = new Intent(activity, FlutterXmppConnectionService.class);
             i.putExtra(Constants.JID_USER, jid_user);
             i.putExtra(Constants.PASSWORD, password);
@@ -784,6 +791,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
             i.putExtra(Constants.REQUIRE_SSL_CONNECTION, requireSSLConnection);
             i.putExtra(Constants.USER_STREAM_MANAGEMENT, useStreamManagement);
             i.putExtra(Constants.AUTOMATIC_RECONNECTION, automaticReconnection);
+            i.putExtra(Constants.REGISTER_USER, registerUser);
             activity.startService(i);
         }
     }

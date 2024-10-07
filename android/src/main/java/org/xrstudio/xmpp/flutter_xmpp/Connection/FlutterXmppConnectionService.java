@@ -27,7 +27,8 @@ public class FlutterXmppConnectionService extends Service {
     private Handler mTHandler;
     private String jid_user = "";
     private String password = "";
-    private boolean requireSSLConnection = false, autoDeliveryReceipt = false, useStreamManagement = true, automaticReconnection = true;
+    private boolean requireSSLConnection = false, autoDeliveryReceipt = false, useStreamManagement = true,
+            automaticReconnection = true, registerUser = false;
     private FlutterXmppConnection mConnection;
 
     public FlutterXmppConnectionService() {
@@ -66,15 +67,19 @@ public class FlutterXmppConnectionService extends Service {
             Utils.printLog(" initConnection(): ");
 
             if (mConnection == null) {
-                mConnection = new FlutterXmppConnection(this, this.jid_user, this.password, this.host, this.port, requireSSLConnection, autoDeliveryReceipt, useStreamManagement, automaticReconnection);
+                mConnection = new FlutterXmppConnection(this, this.jid_user, this.password, this.host, this.port,
+                        requireSSLConnection, autoDeliveryReceipt, useStreamManagement, automaticReconnection,
+                        registerUser, this);
             }
 
             mConnection.connect();
 
         } catch (IOException | SmackException | XMPPException e) {
             FlutterXmppConnectionService.sConnectionState = ConnectionState.FAILED;
-            Utils.broadcastConnectionMessageToFlutter(this, ConnectionState.FAILED, "Something went wrong while connecting ,make sure the credentials are right and try again.");
-            Utils.printLog(" Something went wrong while connecting ,make sure the credentials are right and try again: ");
+            Utils.broadcastConnectionMessageToFlutter(this, ConnectionState.FAILED,
+                    "Something went wrong while connecting ,make sure the credentials are right and try again.");
+            Utils.printLog(
+                    " Something went wrong while connecting ,make sure the credentials are right and try again: ");
             e.printStackTrace();
             stopSelf();
         }
@@ -82,7 +87,7 @@ public class FlutterXmppConnectionService extends Service {
 
     public void start() {
 
-        Utils.printLog(" Service Start() function called: ");
+        Utils.printLog(" Service Start() function called: " + mActive);
 
         if (!mActive) {
             mActive = true;
@@ -104,15 +109,20 @@ public class FlutterXmppConnectionService extends Service {
         Utils.printLog(" stop() :");
 
         mActive = false;
+        if (mThread.isAlive() && mThread != null) {
+            mThread.interrupt();
+            mThread = null;
+        }
         if (mTHandler != null) {
             mTHandler.post(() -> {
                 if (mConnection != null) {
                     mConnection.disconnect();
+                    mConnection = null;
                 }
             });
         }
-    }
 
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -134,6 +144,7 @@ public class FlutterXmppConnectionService extends Service {
             this.autoDeliveryReceipt = extras.getBoolean(Constants.AUTO_DELIVERY_RECEIPT, false);
             this.useStreamManagement = extras.getBoolean(Constants.USER_STREAM_MANAGEMENT, true);
             this.automaticReconnection = extras.getBoolean(Constants.AUTOMATIC_RECONNECTION, true);
+            this.registerUser = extras.getBoolean(Constants.REGISTER_USER, false);
 
         }
         start();
@@ -148,4 +159,3 @@ public class FlutterXmppConnectionService extends Service {
         stop();
     }
 }
-

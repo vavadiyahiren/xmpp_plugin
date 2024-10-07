@@ -70,6 +70,7 @@ public class Utils {
     }
 
     public static String getJidWithDomainName(String jid, String host) {
+        Log.d(Constants.TAG, "jid: " +  jid + ", host: " + host);
         return jid.contains(host) ? jid : jid + Constants.SYMBOL_COMPARE_JID + host;
     }
 
