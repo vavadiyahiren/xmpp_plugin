@@ -774,7 +774,8 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
     // login
     private void doLogin() {
         // Check if the user is already connected or not ? if not then start login process.
-        if (FlutterXmppConnectionService.getState().equals(ConnectionState.DISCONNECTED)) {
+        final ConnectionState connState = FlutterXmppConnectionService.getState();
+        if (connState.equals(ConnectionState.DISCONNECTED) || connState.equals(ConnectionState.FAILED)) {
             Intent i = new Intent(activity, FlutterXmppConnectionService.class);
             i.putExtra(Constants.JID_USER, jid_user);
             i.putExtra(Constants.PASSWORD, password);
