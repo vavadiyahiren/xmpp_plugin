@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.XMPPException;
+
 import androidx.annotation.NonNull;
 
 import org.xrstudio.xmpp.flutter_xmpp.Connection.FlutterXmppConnection;
@@ -16,6 +19,9 @@ import org.xrstudio.xmpp.flutter_xmpp.Utils.Constants;
 import org.xrstudio.xmpp.flutter_xmpp.Utils.Utils;
 import org.xrstudio.xmpp.flutter_xmpp.managers.MAMManager;
 
+import android.os.Bundle;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +36,16 @@ import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
 
-public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware, EventChannel.StreamHandler {
+import androidx.lifecycle.DefaultLifecycleObserver;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.ProcessLifecycleOwner;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, ActivityAware, EventChannel.StreamHandler, DefaultLifecycleObserver {
 
     public static final Boolean DEBUG = true;
     private static Context activity;
@@ -57,6 +72,8 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
     private BroadcastReceiver connectionBroadcastReceiver = null;
     private boolean requireSSLConnection = false, autoDeliveryReceipt = false, automaticReconnection = true, useStreamManagement = true;
 
+    private Lifecycle lifecycle;
+    
     private static BroadcastReceiver get_message(final EventChannel.EventSink events) {
         return new BroadcastReceiver() {
             @Override
@@ -92,6 +109,8 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                     case Constants.RECEIVE_MESSAGE:
 
                         String from = intent.getStringExtra(Constants.BUNDLE_FROM_JID);
+                        String stanzaId = intent.getStringExtra(Constants.STANZA_ID);
+                        String messageTo = intent.getStringExtra(Constants.BUNDLE_MESSAGE_TO_JID);
                         String body = intent.getStringExtra(Constants.BUNDLE_MESSAGE_BODY);
                         String msgId = intent.getStringExtra(Constants.BUNDLE_MESSAGE_PARAMS);
                         String type = intent.getStringExtra(Constants.BUNDLE_MESSAGE_TYPE);
@@ -106,6 +125,7 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                         build.put(Constants.TYPE, metaInfo);
                         build.put(Constants.ID, msgId);
                         build.put(Constants.FROM, from);
+                        build.put(Constants.TO, messageTo);
                         build.put(Constants.BODY, body);
                         build.put(Constants.MSG_TYPE, type);
                         build.put(Constants.SENDER_JID, senderJid);
@@ -113,9 +133,42 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                         build.put(Constants.time, time);
                         build.put(Constants.CHATSTATE_TYPE, chatStateType);
                         build.put(Constants.DELAY_TIME, delayTime);
+                        build.put(Constants.STANZA_ID,stanzaId);
 
                         Utils.addLogInStorage("Action: sentMessageToFlutter, Content: " + build.toString());
                         Log.d("TAG", " RECEIVE_MESSAGE-->> " + build.toString());
+
+//// Retrieve the extras from the intent
+//    Bundle extras = intent.getExtras();
+//
+//    if (extras != null) {
+//        // Create a map to store the key-value pairs from the extras
+//        Map<String, Object> extrasMap = new HashMap<>();
+//
+//        // Iterate over all the keys in the extras
+//        for (String key : extras.keySet()) {
+//            // Get the value associated with the key
+//            Object value = extras.get(key);
+//
+//            if (value != null) {
+//                // Store the key-value pair in the map
+//                extrasMap.put(key, value);
+//
+//                // Log the key and value (this prints it in Logcat)
+//                // Log.d("IntentExtra", "Key: " + key + ", Value: " + value.toString());
+//            }
+//        }
+//
+//        // Optionally: Print out all values stored in the map
+//        for (Map.Entry<String, Object> entry : extrasMap.entrySet()) {
+//            Log.d("TAG", "RECEIVE_MESSAGE-->> " + entry.getKey() + ", Value: " + entry.getValue().toString());
+//        }
+//
+//    } else {
+//        Log.d("IntentExtra", "No extras found.");
+//    }
+
+
 
                         events.success(build);
 
@@ -361,6 +414,8 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
         // destroyed due to config changes. It will be right back
         // but your plugin must clean up any references to that
         // Activity and associated resources.
+        Lifecycle lifecycle = ProcessLifecycleOwner.get().getLifecycle();
+        lifecycle.removeObserver(this);
     }
 
     @Override
@@ -388,6 +443,8 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
         // You can obtain an Activity reference with
 
         activity = binding.getActivity();
+        Lifecycle lifecycle = ProcessLifecycleOwner.get().getLifecycle();
+        lifecycle.addObserver(this); 
 
         //
         // You can listen for Lifecycle changes with
@@ -405,6 +462,31 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
         Utils.printLog(" onDetachedFromEngine: ");
     }
 
+    @Override
+    public void onResume(@NonNull LifecycleOwner owner)  {
+        Utils.printLog("onresume called");
+       // Create a single-threaded Executor
+    ExecutorService executor = Executors.newSingleThreadExecutor();
+
+    // Run the reconnect operation in a background thread
+    executor.execute(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                FlutterXmppConnection.reconnect();
+            } catch (Exception e) {
+                e.printStackTrace();
+                // Handle any exceptions related to the reconnect
+            }
+        }
+    });
+
+    // Optional: Shut down the executor after the task is done
+    executor.shutdown();
+
+        // checkAndReConnect();
+    }
+
     // stream
     @Override
     public void onListen(Object auth, EventChannel.EventSink eventSink) {
@@ -418,7 +500,6 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
             filter.addAction(Constants.PRESENCE_MESSAGE);
             activity.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_EXPORTED);
         }
-
     }
 
     @Override
@@ -676,8 +757,10 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
                 String requestBefore = call.argument(Constants.requestBefore);
                 String requestSince = call.argument(Constants.requestSince);
                 String limit = call.argument(Constants.limit);
+                String beforeUid = call.argument(Constants.beforeUid);
+                String afterUid = call.argument(Constants.afterUid);
                 Utils.printLog("userJId " + userJid + " Before : " + requestBefore + " since " + requestSince + " limit " + limit);
-                MAMManager.requestMAM(userJid, requestBefore, requestSince, limit);
+                MAMManager.requestMAM(userJid, requestBefore, requestSince, limit,afterUid,beforeUid);
                 result.success("SUCCESS");
 
                 break;
@@ -773,8 +856,11 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
 
     // login
     private void doLogin() {
+         Utils.printLog("doLogin called");
+         Utils.printLog(FlutterXmppConnectionService.getState().toString());
         // Check if the user is already connected or not ? if not then start login process.
-        if (FlutterXmppConnectionService.getState().equals(ConnectionState.DISCONNECTED)) {
+        if (FlutterXmppConnectionService.getState().equals(ConnectionState.DISCONNECTED) || FlutterXmppConnectionService.getState().equals(ConnectionState.FAILED)) {
+            Utils.printLog("doLogin trying login");
             Intent i = new Intent(activity, FlutterXmppConnectionService.class);
             i.putExtra(Constants.JID_USER, jid_user);
             i.putExtra(Constants.PASSWORD, password);
@@ -788,12 +874,48 @@ public class FlutterXmppPlugin implements MethodCallHandler, FlutterPlugin, Acti
         }
     }
 
-    private void logout() {
-        // Check if user is connected to xmpp ? if yes then break connection.
-        if (FlutterXmppConnectionService.getState().equals(ConnectionState.AUTHENTICATED)) {
-            Intent i1 = new Intent(activity, FlutterXmppConnectionService.class);
-            activity.stopService(i1);
+    // login
+    private void checkAndReConnect() {
+         Utils.printLog("checkAndReConnect called");
+         Utils.printLog(FlutterXmppConnectionService.getState().toString());
+        // Check if the user is already connected or not ? if not then start login process.
+        if ( (FlutterXmppConnectionService.getState().equals(ConnectionState.DISCONNECTED)) || FlutterXmppConnectionService.getState().equals(ConnectionState.FAILED) ) {
+            Utils.printLog("checkAndReConnect trying");
+            Utils.printLog(jid_user);
+            Utils.printLog(password);
+            if(jid_user == null || password == null || jid_user == "" || password == ""){
+                return;
+            }
+            stopRunningService();
+            Utils.printLog("checkAndReConnect trying login");
+
+
+            Utils.broadcastConnectionMessageToFlutter(activity,ConnectionState.CONNECTING, "Connecting to chat server");
+            Utils.printLog("checkAndReConnect() : Connecting to chat server ");
+
+
+            Intent i = new Intent(activity, FlutterXmppConnectionService.class);
+            i.putExtra(Constants.JID_USER, jid_user);
+            i.putExtra(Constants.PASSWORD, password);
+            i.putExtra(Constants.HOST, host);
+            i.putExtra(Constants.PORT, Constants.PORT_NUMBER);
+            i.putExtra(Constants.AUTO_DELIVERY_RECEIPT, autoDeliveryReceipt);
+            i.putExtra(Constants.REQUIRE_SSL_CONNECTION, requireSSLConnection);
+            i.putExtra(Constants.USER_STREAM_MANAGEMENT, useStreamManagement);
+            i.putExtra(Constants.AUTOMATIC_RECONNECTION, automaticReconnection);
+            activity.startService(i);
         }
     }
 
+    private void stopRunningService(){
+        Intent i1 = new Intent(activity, FlutterXmppConnectionService.class);
+        activity.stopService(i1);
+    }
+
+    private void logout() {
+        // Check if user is connected to xmpp ? if yes then break connection.
+        if (FlutterXmppConnectionService.getState().equals(ConnectionState.AUTHENTICATED)) {
+           stopRunningService();
+        }
+    }
 }

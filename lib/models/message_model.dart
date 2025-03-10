@@ -1,5 +1,6 @@
 class MessageChat {
   String? customText;
+  String? to;
   String? from;
   String? senderJid;
   String? time;
@@ -16,6 +17,7 @@ class MessageChat {
   MessageChat({
     this.customText,
     this.from,
+    this.to,
     this.senderJid,
     this.time,
     this.id,
@@ -32,6 +34,7 @@ class MessageChat {
   Map<String, dynamic> toEventData() {
     return {
       'customText': customText,
+      'to': to,
       'from': from,
       'senderJid': senderJid,
       'time': time,
@@ -50,6 +53,7 @@ class MessageChat {
   factory MessageChat.fromJson(dynamic eventData) {
     return MessageChat(
       customText: eventData['customText'] ?? '',
+      to: eventData['to'] ?? '',
       from: eventData['from'] ?? '',
       senderJid: eventData['senderJid'] ?? '',
       time: eventData['time'] ?? '0',

@@ -15,6 +15,8 @@ import 'models/present_mode.dart';
 abstract class DataChangeEvents {
   void onChatMessage(MessageChat messageChat);
 
+  void onStanza(Map<Object?, Object?> stanza);
+
   void onGroupMessage(MessageChat messageChat);
 
   void onNormalMessage(MessageChat messageChat);
@@ -127,6 +129,9 @@ class XmppConnection {
         MessageEvent eventModel = MessageEvent.fromJson(dataEvent);
         MessageChat messageChat = MessageChat.fromJson(dataEvent);
         dataChangelist.forEach((element) {
+          if (eventModel.msgtype == 'stanza') {
+            element.onStanza(dataEvent);
+          }
           if (eventModel.msgtype == 'chat') {
             element.onChatMessage(messageChat);
           } else if (eventModel.msgtype == 'groupchat') {
@@ -320,9 +325,22 @@ class XmppConnection {
     return admins;
   }
 
-  Future<void> requestMamMessages(String userJid, String requestSince, String requestBefore, String limit) async {
+  Future<void> requestMamMessages(
+      String userJid,
+      String requestSince,
+      String requestBefore,
+      String limit,
+      String? beforeUid,
+      String? afterUid) async {
     print(" Plugin : User Jid : $userJid , Request since : $requestSince , Request Before : $requestBefore, Limit : $limit ");
-    final params = {"userJid": userJid, "requestBefore": requestBefore, "requestSince": requestSince, "limit": limit};
+    final params = {
+      "userJid": userJid,
+      "requestBefore": requestBefore,
+      "requestSince": requestSince,
+      "limit": limit,
+      "beforeUid": beforeUid,
+      "afterUid": afterUid
+    };
     await _channel.invokeMethod('request_mam', params);
   }
 

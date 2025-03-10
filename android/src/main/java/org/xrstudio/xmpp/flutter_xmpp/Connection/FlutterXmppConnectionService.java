@@ -142,10 +142,9 @@ public class FlutterXmppConnectionService extends Service {
 
     @Override
     public void onDestroy() {
-
         Utils.printLog(" onDestroy(): ");
         super.onDestroy();
-        stop();
+        // stop();
     }
 }
 

@@ -13,7 +13,8 @@ import java.util.List;
 public class MAMManager {
 
 
-    public static void requestMAM(String userJid, String requestBefore, String requestSince, String limit) {
+    public static void requestMAM(String userJid, String requestBefore, String requestSince, String limit,
+    String afterUid, String beforeUid) {
 
         XMPPTCPConnection connection = FlutterXmppConnection.getConnection();
 
@@ -34,6 +35,15 @@ public class MAMManager {
                     if (requestAfterts > 0)
                         queryArgs.limitResultsSince(new Date(requestAfterts));
                 }
+
+                if(beforeUid != null){
+                    queryArgs.beforeUid(beforeUid);
+                }
+
+                if(afterUid != null && !afterUid.isEmpty()){
+                    queryArgs.afterUid(afterUid);
+                }
+                
                 if (limit != null && !limit.isEmpty()) {
 
                     int limitMessage = Integer.parseInt(limit);
@@ -44,8 +54,8 @@ public class MAMManager {
                     }
 
                 }
-                userJid = Utils.getValidJid(userJid);
-
+                // userJid = Utils.getValidJid(userJid);
+                Utils.printLog("MAM User Jid " + userJid.toString());
                 if (userJid != null && !userJid.isEmpty()) {
                     Jid jid = Utils.getFullJid(userJid);
                     queryArgs.limitResultsToJid(jid);

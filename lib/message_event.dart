@@ -2,6 +2,7 @@
 class MessageEvent {
   String? customText;
   String? from;
+  String? to;
   String? senderJid;
   String? time;
   String? id;
@@ -18,6 +19,7 @@ class MessageEvent {
   MessageEvent({
     this.customText,
     this.from,
+    this.to,
     this.senderJid,
     this.time,
     this.id,
@@ -35,6 +37,7 @@ class MessageEvent {
   Map<String, dynamic> toEventData() {
     return {
       'customText': customText,
+      'to': to,
       'from': from,
       'senderJid': senderJid,
       'time': time,
@@ -55,6 +58,7 @@ class MessageEvent {
   factory MessageEvent.fromJson(dynamic eventData) {
     return MessageEvent(
       customText: eventData['customText'] ?? '',
+      to: eventData['to'] ?? '',
       from: eventData['from'] ?? '',
       senderJid: eventData['senderJid'] ?? '',
       time: eventData['time'] ?? '0',

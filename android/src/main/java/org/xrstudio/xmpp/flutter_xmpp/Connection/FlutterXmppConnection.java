@@ -72,6 +72,10 @@ public class FlutterXmppConnection implements ConnectionListener {
     private static MultiUserChatManager multiUserChatManager;
     private static boolean mRequireSSLConnection, mAutoDeliveryReceipt, mAutomaticReconnection = true, mUseStreamManagement = true;
     private static Context mApplicationContext;
+
+
+
+    ReconnectionManager reconnectionManager;
     private BroadcastReceiver uiThreadMessageReceiver;//Receives messages from the ui thread.
 
     public FlutterXmppConnection(Context context, String jid_user, String password, String host, Integer port, boolean requireSSLConnection,
@@ -98,6 +102,7 @@ public class FlutterXmppConnection implements ConnectionListener {
                 mServiceName = jid_list[1];
                 mResource = Constants.ANDROID;
             }
+            // mResource = System.currentTimeMillis() + mResource;
         }
     }
 
@@ -107,6 +112,10 @@ public class FlutterXmppConnection implements ConnectionListener {
 
     public static XMPPTCPConnection getConnection() {
         return mConnection == null ? new XMPPTCPConnection(null) : mConnection;
+    }
+
+    public static XMPPTCPConnection getCurrentConnection(){
+        return mConnection;
     }
 
     public static void sendCustomMessage(String body, String toJid, String msgId, String customText, boolean isDm, String time) {
@@ -536,7 +545,9 @@ public class FlutterXmppConnection implements ConnectionListener {
                 mConnection.setUseStreamManagementResumption(true);
             }
 
+            mConnection.setReplyTimeout(10000); // 10 sec
             mConnection.login();
+
 
             setupUiThreadBroadCastMessageReceiver();
 
@@ -547,8 +558,9 @@ public class FlutterXmppConnection implements ConnectionListener {
             mConnection.addSyncStanzaListener(new MessageListener(mApplicationContext), StanzaTypeFilter.MESSAGE);
 
             if (mAutomaticReconnection) {
-                ReconnectionManager reconnectionManager = ReconnectionManager.getInstanceFor(mConnection);
-                ReconnectionManager.setEnabledPerDefault(true);
+                reconnectionManager = ReconnectionManager.getInstanceFor(mConnection);
+                // ReconnectionManager.setEnabledPerDefault(true);
+                // ReconnectionManager.setDefaultFixedDelay(1);
                 reconnectionManager.enableAutomaticReconnection();
             }
 
@@ -557,7 +569,35 @@ public class FlutterXmppConnection implements ConnectionListener {
             FlutterXmppConnectionService.sConnectionState = ConnectionState.FAILED;
             e.printStackTrace();
         }
+    }
 
+    public static void reconnect(){
+        try{
+        if(mConnection != null){
+            Utils.broadcastConnectionMessageToFlutter(mApplicationContext,ConnectionState.CONNECTING, "Connecting after activity resume");
+            mConnection.connect();
+            mConnection.login();
+        }
+        } catch (IOException e) {
+            FlutterXmppConnectionService.sConnectionState = ConnectionState.FAILED;
+            e.printStackTrace();
+        }
+        catch (XMPPException e) {
+            FlutterXmppConnectionService.sConnectionState = ConnectionState.FAILED;
+            e.printStackTrace();
+        }
+        catch (InterruptedException e) {
+            FlutterXmppConnectionService.sConnectionState = ConnectionState.FAILED;
+            e.printStackTrace();
+        }
+        catch (SmackException e) {
+            FlutterXmppConnectionService.sConnectionState = ConnectionState.FAILED;
+            e.printStackTrace();
+        }
+        finally{
+            Utils.broadcastConnectionMessageToFlutter(mApplicationContext,ConnectionState.AUTHENTICATED, "Connecting after activity resume");
+
+        }
     }
 
     private void setupUiThreadBroadCastMessageReceiver() {
@@ -695,7 +735,6 @@ public class FlutterXmppConnection implements ConnectionListener {
         intent.putExtra(Constants.BUNDLE_MESSAGE_PARAMS, Constants.AUTHENTICATED);
         intent.putExtra(Constants.BUNDLE_MESSAGE_TYPE, Constants.AUTHENTICATED);
         mApplicationContext.sendBroadcast(intent);
-
     }
 
     @Override
@@ -731,6 +770,11 @@ public class FlutterXmppConnection implements ConnectionListener {
         Utils.printLog(" ConnectionClosedOnError, error:  " + e.toString());
 
         FlutterXmppConnectionService.sConnectionState = ConnectionState.FAILED;
+
+        // if (uiThreadMessageReceiver != null) {
+        //     mApplicationContext.unregisterReceiver(uiThreadMessageReceiver);
+        //     uiThreadMessageReceiver = null;
+        // }
 
         Utils.broadcastConnectionMessageToFlutter(mApplicationContext, ConnectionState.FAILED, e.getLocalizedMessage());
 

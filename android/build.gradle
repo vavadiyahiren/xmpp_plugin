@@ -23,7 +23,7 @@ rootProject.allprojects {
 apply plugin: 'com.android.library'
 
 android {
-
+    namespace 'org.xrstudio.xmpp'
     defaultConfig {
         compileSdk 33
         minSdkVersion 16

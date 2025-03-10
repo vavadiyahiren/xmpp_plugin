@@ -17,7 +17,6 @@ public class MessageListener implements StanzaListener {
 
     @Override
     public void processStanza(Stanza packet) {
-
         Message message = (Message) packet;
         Utils.broadcastMessageToFlutter(mApplicationContext, message);
     }
